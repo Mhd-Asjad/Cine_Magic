@@ -1,0 +1,138 @@
+import React from 'react';
+import axios from 'axios';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import toastr from 'toastr';
+import 'toastr/build/toastr.min.css';
+
+function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
+
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right", 
+        "timeOut": "5000", 
+    }
+
+    const formik = useFormik({
+        initialValues: {
+            username: '',
+            email: '',
+            password: '',
+        },
+        validationSchema: Yup.object({
+            username: Yup.string()
+                .required('Username is required')
+                .min(3, 'Username must be at least 3 characters long'),
+            email: Yup.string()
+                .email('Invalid email address')
+                .required('Email is required'),
+            password: Yup.string()
+                .required('Password is required')
+                .min(6, 'Password must be at least 6 characters long'),
+        }),
+        onSubmit: async (values, { setSubmitting }) => {
+            
+            try {
+                const res = await axios.post('http://127.0.0.1:8000/user_api/register/', values);
+                toastr.success('Registration successful! Please check your email for OTP.');
+                setUserEmail(values.email);
+                setIsOtpSent(true);
+                
+            } catch (error) {
+                const errorMessage = error.response.data.errors || 'An unexpected error occurred';
+                console.log(errorMessage)
+                toastr.error(errorMessage)
+            } finally {
+                setSubmitting(false);
+            }
+        },
+    });
+
+    return (
+        <div>
+            <h2 className="text-xl font-semibold mb-4">Register User</h2>
+            <form onSubmit={formik.handleSubmit} className="space-y-4">
+                <div>
+                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                        Username
+                    </label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value={formik.values.username}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        placeholder="Enter username"
+                        className={`mt-1 block w-full px-3 py-2 border ${
+                            formik.touched.username && formik.errors.username
+                                ? 'border-red-500'
+                                : 'border-gray-300'
+                        } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                    />
+                    {formik.touched.username && formik.errors.username && (
+                        <p className="text-red-500 text-sm">{formik.errors.username}</p>
+                    )}
+                    
+                </div>
+
+                <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        Email
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formik.values.email}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        placeholder="Enter email"
+                        className={`mt-1 block w-full px-3 py-2 border ${
+                            formik.touched.email && formik.errors.email
+                                ? 'border-red-500'
+                                : 'border-gray-300'
+                        } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                    />
+                    {formik.touched.email && formik.errors.email && (
+                        <p className="text-red-500 text-sm">{formik.errors.email}</p>
+                    )}
+                </div>
+
+                <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                        Password
+                    </label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        value={formik.values.password}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        placeholder="Enter password"
+                        className={`mt-1 block w-full px-3 py-2 border ${
+                            formik.touched.password && formik.errors.password
+                                ? 'border-red-500'
+                                : 'border-gray-300'
+                        } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                    />
+                    {formik.touched.password && formik.errors.password && (
+                        <p className="text-red-500 text-sm">{formik.errors.password}</p>
+                    )}
+                </div>
+
+                <button
+                    type="submit"
+                    className="flex text-center mx-auto w-[15%] py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
+                    disabled={formik.isSubmitting}
+                >
+                    {formik.isSubmitting ? 'Registering...' : 'Register'}
+                </button>
+            </form>
+        </div>
+    );
+}
+
+export default RegistrationForm;
