@@ -23,11 +23,17 @@ function MovieList({ movie }) {
       </div>
 
       <div className="ml-4 mb-6">
-        <h3 className="font-medium text-lg">{movie.title}</h3>
-        <div className="text-gray-500 text-sm mb-3 flex items-center">
-          <span>{movie.genre}</span>
-          <span className="mx-2"></span>
-          <span>{movie.language}</span>
+        <h3 className="font-medium text-lg text-gray-600 mb-1">{movie.title}</h3>
+        <div className="text-gray-500 text-sm mb-3">
+          <span className='flex items-center' >
+            <span className='ml-1' >
+            🎬 {movie.genre}
+            </span>
+          </span>
+          <span className="flex items-center font-serif ml-1.5">
+
+             <span className='ml-1 capitalize' > Language: {movie.language}</span>
+          </span>
         </div>
 
       </div>
@@ -45,7 +51,7 @@ const MovieGrid = () => {
         Movies in {selectedCity || 'your city'}
       </h2>
       {movies.length === 0 ? (
-        <p className="text-gray-500 text-center">No Movies available</p>
+        <p className="text-gray-500 text-center py-10">No Movies available</p>
       ) : (
         <div className="grid w-[85%] grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {movies.map((movie) => (

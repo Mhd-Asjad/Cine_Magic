@@ -14,12 +14,12 @@ urlpatterns = [
     path('users/', UserListView.as_view(), name='users'),
     path('users/<int:pk>/status/',UserStatusUpdate.as_view() , name='user_update'),
     path('create_city/',CreateCity.as_view(),name='create_city'),
-    path('city/<int:city_id>/delete',DeleteCity.as_view() , name='city_delete'),
-    path('cities/<int:city_id>/theatres'  , CityTheatreView.as_view() , name='city_theatres'),
-    path('theatre/<int:city_id>/add' ,AddTheatre.as_view() , name='theatre_add'),
-    path('theatre/<int:id>/edit' , EditTheatreData.as_view() , name='theatre_edit'),
-    path('theatre/<int:id>/delete',DeleteTheatre.as_view() , name='theatre_delete'),
+    # path('city/<int:city_id>/delete',DeleteCity.as_view() , name='city_delete'),
+    path('cities/<int:city_id>/theatres'  , CityTheatreView.as_view() , name='city_theatres'),  
     path('listmovies/' ,ListMovies.as_view() , name='listmovies'),
     path('movies/', CreateMovieView.as_view() , name="create_movie"),
-    
+    path('movies/<int:movie_id>/update/', update_movie.as_view(), name='update_movie'),
+    path('movies/<int:id>/delete' , DeleteMovies.as_view(), name='delete-movie'),
+    path('theatre_owners/',ShowTheatreRequest.as_view() , name='theatre-owners') ,
+    path('theatre/<int:id>/delete',DeleteTheatre.as_view(),name='delete-theatre')
 ]

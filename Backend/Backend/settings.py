@@ -13,11 +13,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from decouple import config
 import os
+# import environ
 from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -44,6 +43,8 @@ INSTALLED_APPS = [
     'movies',
     'theatres',
     'adminside',
+    'seats',
+    'theatre_owner',
     'rest_framework',
     'rest_framework_simplejwt',
     'allauth',
@@ -51,7 +52,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'django.contrib.sites',
-    'rest_framework.authtoken'
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'rest_framework.authtoken',
 ]
 
 SITE_ID = 1
@@ -67,7 +70,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'allauth.account.middleware.AccountMiddleware' 
-
 ]
 
 REST_FRAMEWORK = {
@@ -82,7 +84,6 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ],
 }
-
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME" : timedelta(minutes=30),
@@ -206,7 +207,12 @@ EMAIL_HOST_USER = "mhdasjad877@gmail.com"
 EMAIL_HOST_PASSWORD = "vllo agwr vqln ewkq"
 
 SOCIALACCOUNT_PROVIDERS = {
-    "google": {"SCOPE": ["profile", "email"], "AUTH_PARAMS": {"access_type": "online"}}
+    "google": {"SCOPE": ["profile", "email"], "AUTH_PARAMS": {"access_type": "online"} , "APP" : {
+
+        'client_id' : config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY'),
+        'secret' : config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET'),
+        'key' : ''
+    }}
 }
 
 SOCCIALACCOUNT_STORE_TOKENS = True

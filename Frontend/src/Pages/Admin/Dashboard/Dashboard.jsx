@@ -22,13 +22,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <div className="w-64 bg-gray-800 text-white">
-        <Sidebar />
-      </div>
-
-      <div className="flex-1">
-        <Navbar />
+    
 
         <div className="p-12">
           <h1 className="mt-10 text-2xl font-bold mb-6">Dashboard</h1>
@@ -38,8 +32,6 @@ function Dashboard() {
           </div>
 
         </div>
-      </div>
-    </div>
   )
 }
 

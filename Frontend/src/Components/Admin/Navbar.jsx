@@ -15,7 +15,7 @@ function Navbar() {
             </div>
 
             <div className="flex justify-center items-center border rounded px-2 py-1">
-                <Logout/>
+                <Logout role='admin' />
                 
             </div>
 

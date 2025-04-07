@@ -23,14 +23,14 @@ function Cityselction({ oncityselect }) {
   return (
     <div  >
         <h2 className='p-4 text-xl font-semibold gap-2'>Add Location</h2>
-        <div className='flex gap-2 p-4 space-y-2'>
-            {cities.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4 z-40">
+        {cities.length > 0 ? (
 
                 cities.map((city) => (
                     <button
                         key={city.id}
                         onClick={()=> oncityselect(city.id)}
-                        className='text-left px-3 py-2 rounded-md border hover:bg-gray-100'
+                        className='text-center px-3 py-2 rounded-md border hover:bg-gray-100'
                     >
                         {city.name}
                     </button>
@@ -38,7 +38,6 @@ function Cityselction({ oncityselect }) {
             ) : (
              <p className='mx-auto mt-5 text-red-500 font-bold'>No Cities Available</p>
             )}
-
         </div>
     </div>
   )

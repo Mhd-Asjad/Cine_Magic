@@ -5,24 +5,13 @@ import Sidebar from '../../../Components/Admin/Sidebar';
 import Navbar from '../../../Components/Admin/Navbar';
 import axios from 'axios';
 import apiAdmin from '../../../Axios/api';
+import { FormatIndentDecreaseSharp } from '@mui/icons-material';
+import { useToast } from '@/hooks/use-toast';
 
 function AddMovies() {
-    const [cities, setCities] = useState([]);
-    // const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        fetchCities();
-    }, []);
-
-    const fetchCities = async () => {
-        try {
-            const response = await axios.get('http://127.0.0.1:8000/movies/list_cities/');
-            setCities(response.data.cities);
-        } catch (error) {
-            console.error('Error fetching cities:', error);
-        }
-    };
-
+    
+    const [loading, setLoading] = useState(false);
+    const {toast} = useToast()
     const initialValues = {
         title: '',
         language: '',
@@ -31,9 +20,7 @@ function AddMovies() {
         description: '',
         genre: '',
         poster: null,
-        cities: [],
     };
-
     const validationSchema = Yup.object({
         title : Yup.string().required('* Field is required'),
         language: Yup.string().required('* Language is required'),
@@ -49,47 +36,48 @@ function AddMovies() {
         poster: Yup.mixed()
             .required('Poster is required')
             .test('fileType', 'Only image files are allowed', (value) => {
-                return value && ['image/jpeg', 'image/png', 'image/jpg'].includes(value.type);
+                return value ? ['image/jpeg', 'image/png', 'image/jpg'].includes(value.type) : true ;
             }),
-        cities: Yup.array()
-            .min(1, 'Please select at least one city')
-            .required('City is required'),
     });
 
     const handleSubmit = async (values, { resetForm }) => {
+        setLoading(true)
         const formData = new FormData();
+        console.log('poster' , values.poster)
         Object.keys(values).forEach((key) => {
-            if (key === 'cities') {
-                values[key].forEach(cityId => {
-                    formData.append(key, cityId);
-                });            } else {
+            if (key == 'poster' && values.poster){
+                formData.append('poster' , values.poster)
+
+            }else{
                 formData.append(key, values[key]);
+
             }
         });
-
+        console.log(formData)
         try {
-            const response = await apiAdmin.post(
-                'movies/',
-                formData,
+            const response = await apiAdmin.post('movies/', formData,
                 {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 }
             );
-            alert('Movie added successfully');
+            console.log(response.data)
+            toast({
+                title : 'movie added successfully',
+                variant : 'success'
+            })
             resetForm();
         } catch (error) {
             console.error('Error adding movie:', error);
+        }finally{
+            setLoading(false);
         }
     };
 
     return (
+        
         <div className="flex min-h-screen bg-gray-100">
-            <div className="w-64 bg-gray-800 text-white">
-                <Sidebar />
-            </div>
-            <div className="flex-1">
-                <Navbar />
-                <div className="p-8 py-10">
+        
+                <div className="p-8 py-4">
                     <h2 className="text-center mb-7 pt-12 px-3 font-semibold text-3xl text-gray-500">
                         Add Movies
                     </h2>
@@ -97,7 +85,7 @@ function AddMovies() {
                         initialValues={initialValues}
                         validationSchema={validationSchema}
                         onSubmit={handleSubmit}
-                    >
+                        >
                         {({ setFieldValue  }) => (
                             <Form className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg space-y-6">
                                 <div>
@@ -203,8 +191,9 @@ function AddMovies() {
                                     <input
                                         type="file"
                                         name="poster"
+                                        accept='image/'
                                         onChange={(event) => {
-                                            setFieldValue('poster', event.currentTarget.files[0]);
+                                            setFieldValue('poster', event.currentTarget.files[0]) || null ;
                                         }}
                                         className="mt-3 w-full border-gray-300 border rounded-lg px-4 py-2 focus:outline-none focus:ring-blue-300"
                                     />
@@ -215,32 +204,9 @@ function AddMovies() {
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="block text-gray-700 font-medium mt-2">
-                                        Choose Cities:
-                                    </label>
-                                    <Field
-                                        as="select"
-                                        name="cities"
-                                        multiple
-                                        className="mt-3 w-full border-gray-300 border rounded-lg px-4 py-2 focus:outline-none focus:ring-blue-300"
-                                    >
-                                        {cities.map((city) => (
-                                            <option key={city.id} value={city.id}>
-                                                {city.name}
-                                            </option>
-                                        ))}
-                                    </Field>
-                                    <ErrorMessage
-                                        name="cities"
-                                        component="div"
-                                        className="text-red-500 text-sm mt-1"
-                                    />
-                                </div>
-
                                 <button
                                     type="submit"
-                                    className="flex mx-auto mt-3 bg-blue-500 text-white px-4 py-2 rounded"
+                                    className="flex mx-auto mt-3 hover:bg-blue-600 bg-blue-500 text-white px-4 py-2 rounded"
                                 >
                                     Submit
                                 </button>
@@ -249,7 +215,6 @@ function AddMovies() {
                     </Formik>
                 </div>
             </div>
-        </div>
     );
 }
 

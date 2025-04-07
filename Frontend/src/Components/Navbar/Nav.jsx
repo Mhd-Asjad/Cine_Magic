@@ -13,7 +13,8 @@ import { HiUser } from "react-icons/hi2";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { resetUser } from '../../Redux/Features/UserSlice';
 import AuthContainer from '../../Pages/userauth/AuthContainer';
-
+import { useNavigate } from 'react-router-dom';
+import { selectCityId } from '../../Redux/Features/Location.slice';
 
 
 function Nav() {
@@ -23,44 +24,50 @@ function Nav() {
   const [userEmail , setUserEmail ] = useState('');
   const dispatch = useDispatch();
   const selectedcity = useSelector((state) => state.location.selectedCity);
+  const cityid = useSelector(selectCityId);
   const username = useSelector((state) => state.user.username);
   const [ isCityModalOpen , setIsCityModalOpen] = useState(false);
   const [dropdownOpen , setDropdownOpen ] = useState(false);
-
+  const  navigate = useNavigate();
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen)
   const openModal = () => setIsModalOpen(true);
-
   const closeModal = () => {
     setIsModalOpen(false);
     setIsOtpSent(false);
     setMessage('');
   }
 
+
   useEffect(() => {
     handleCitySelect()
   },[])
 
-  const handleCitySelect = async (cityId) => {
+  const handleCitySelect = async ( cityId ) => {
     setIsCityModalOpen(false)
+    const id = cityId ? cityId : cityid
+    console.log(id,'id from location')
     try {
-      const response = await axios.get(`http://localhost:8000/movies/fetch_movies/${cityId}/`)
-      dispatch(setMovies(response.data.movies))
-      dispatch(setLocation(response.data.location))
-      dispatch(setSelectedCity(response.data.location))
-
-
+      console.log(cityid , ' fetch city id')
+      const response = await axios.get(`http://localhost:8000/movies/fetch_movies/${id}/`)
+      const { movies , city_id , location } = response.data;
+      dispatch(setMovies(movies))
+      dispatch(setLocation({
+        cityId : city_id,
+        location : location
+      }))
+      dispatch(setSelectedCity(location))
+      
     }catch(error){
-        console.log('failed to fetch movie related city')
+      console.log(error.response)
+      console.log('failed to fetch movie related city'); 
     }
 
   }
-
   const handleLogout = () => {
     dispatch(resetUser())
     toggleDropdown()
+    navigate('/')
   }
-  console.log(isOtpSent)
-
   return (
 
     <nav className="bg-white-800 shadow-md">
@@ -117,13 +124,11 @@ function Nav() {
    
                 <div className="absolute mx-auto mt-1 w-48 bg-white border rounded-md shadow-lg z-10">
 
-                    <a
+                  <a
                     href="/profile"
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
                     profile
-
-                    </a>
-
+                  </a>
                     <a
                       onClick={handleLogout}
                       className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
@@ -134,7 +139,7 @@ function Nav() {
               )}
             </div>
 
-          ): (
+          ):(
 
             <button
             onClick={openModal}
@@ -144,8 +149,6 @@ function Nav() {
           </button>
 
           )}
-
-    
 
           </div>
 
@@ -186,6 +189,7 @@ function Nav() {
           <OtpVerificationForm email={userEmail} setMessage={setMessage} closeModal={closeModal}  />
         )}
       </Modal>
+
     </nav>
   )
 }

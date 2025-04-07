@@ -5,24 +5,25 @@ import Sidebar from '../../../Components/Admin/Sidebar';
 import Navbar from '../../../Components/Admin/Navbar';
 import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom';
+import TheatreApi from '@/Axios/theatreapi';
 
 
 function EditTheatre( ) {
     const navigate = useNavigate();
-    const {theatreId} = useParams()
+    const {id} = useParams()
     const [initialValues, setInitialValues ] = useState([])
     const [ cityId , setCityId ] = useState(0);
 
     useEffect(() => {
         fetchTheatres()
-    },[theatreId]);
+    },[id]);
 
    
-    const fetchTheatres = async () => {
+    const fetchTheatres = async() => {
 
         try {
 
-            const res = await axios.get(`http://localhost:8000/adminside/theatre/${theatreId}/edit`);
+            const res = await TheatreApi.get(`/theatre/${id}/edit`);
             setCityId(res.data[0].cityid)
             setInitialValues({
                 name : res.data[0].name,
@@ -38,7 +39,7 @@ function EditTheatre( ) {
 
 
     const validationSchema = Yup.object({
-        name : Yup.string().required('* value must be required') ,
+        name : Yup.string().required('* name must be required') ,
         details : Yup.string().required('* details is required')
     })
     const handleSubmit = async (values) => {
@@ -47,12 +48,10 @@ function EditTheatre( ) {
         formData.append('name' , values.name)
         formData.append('address' , values.details)
 
-
         try {
-            const res = await axios.put(`http://localhost:8000/adminside/theatre/${theatreId}/edit`, 
-                formData)
-            console.log(res.data.message)
-            navigate(`/cities/${cityId}/theatres`)
+            const res = await TheatreApi.put(`/theatre/${id}/edit`, 
+                formData )
+            navigate(`/theatre-owner/list-theatre`)
         }catch(e){
             console.log('error Theatre editing onsubmit',e.response )
             alert('edit incomplete')
@@ -62,11 +61,7 @@ function EditTheatre( ) {
   return (
 
     <div className="flex min-h-screen bg-gray-100">
-        <div className="w-64 bg-gray-800 text-white">
-            <Sidebar />
-        </div>
-        <div className="flex-1">
-            <Navbar />
+        
             <div className="p-8 py-10">
                 <h2 className="text-center mb-7 pt-12 px-3 font-semibold text-3xl text-gray-500">
                     Edit Theatre
@@ -126,7 +121,6 @@ function EditTheatre( ) {
                 </Formik>
             </div>
         </div>
-    </div>
       
   )
 }

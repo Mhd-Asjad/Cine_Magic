@@ -4,7 +4,6 @@ from .models import Movie , City
 
 admin.site.register(Movie)
 
-
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
     list_display = ('name', 'state','pincode') 

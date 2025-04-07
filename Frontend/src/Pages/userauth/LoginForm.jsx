@@ -12,8 +12,9 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import axios from 'axios';
-import { setEmail, setUsername } from '../../Redux/Features/UserSlice';
+import { setUser_id , setEmail, setUsername } from '../../Redux/Features/UserSlice';
 import { useDispatch } from 'react-redux';
+import Button from '@mui/material/Button';
 
 function LoginForm( { isModalClose }) {
     const [showpassword , setShowPassword ] = useState(false);
@@ -45,7 +46,7 @@ function LoginForm( { isModalClose }) {
 
 
     const onSubmit = async (values, { setSubmitting }) => {
-
+        console.log(values)
         try {
 
             const response = await axios.post('http://127.0.0.1:8000/user_api/userlogin/', values , {
@@ -53,7 +54,10 @@ function LoginForm( { isModalClose }) {
                     "Content-Type" : "application/json"
                 }
             })
+            console.log(response.data.user.id)
             toastr.success(response.data.message)
+            console.log(response.data.user)
+            dispatch(setUser_id(response.data.user.id))
             dispatch(setUsername(response.data.user.username))
             dispatch(setEmail(response.data.user.email))
             isModalClose()
@@ -65,77 +69,84 @@ function LoginForm( { isModalClose }) {
         }
     }
   return (
+
     <Box sx={{  display: 'flex', flexWrap: 'wrap', justifyContent : 'center' }}>
 
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Login</h2>
-    <Formik
-    
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={onSubmit}
-    >
-
-        {({ isSubmitting }) => (
-        <Form className="space-y-4">
-                <div>
-                    <Field
-                        as={TextField}
-                        label='username'
-                        name="username"
-                        id="username"
-                        sx={{ m: 1, width: '45ch' }}
+      <div className='' >
+        <h2 className="text-xl  font-semibold mb-4">Login</h2>
+        <Formik
         
-                    />
-                    <ErrorMessage
-                        name="username"
-                        component="div"
-                        className="text-red-500 text-sm mt-1"
-                    />
-                </div>
-            <div>
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={onSubmit}
+        >
 
-            <FormControl sx={{ m: 1, width: '45ch' }} variant="outlined">
-            <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-            <Field
-                as={FilledInput}
-                id="outlined-adornment-password"
-                name="password"
-                type={ showpassword ? 'text' : 'password' }
-                endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label={
-                          showpassword ? 'hide the password' : 'display the password'
-                        }
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        onMouseUp={handleMouseUpPassword}
-                        edge="end"
+            {({ isSubmitting }) => (
+            <Form className="space-y-4">
 
-                      >
-                        {showpassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
+                    <div>
+                        < Field
+                            as={TextField}
+                            label='username'
+                            name="username"
+                            id="username"
+                            sx={{ m: 1, width: '45ch' }}
             
-            />
-            </FormControl>
-            <ErrorMessage
-                name="password"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-            />
-            </div>
-            <button
-                type="submit"
-                className="flex mx-auto w-[35%] py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
-                disabled={isSubmitting}
-            >
-                {isSubmitting ? 'Logging in...' : 'Login'}
-            </button>
-        </Form>
-        )}
+                        />
+                        <ErrorMessage
+                            name="username"
+                            component="div"
+                            className="text-red-500 text-sm mt-1"
+                        />
+                    </div>
+                <div>
+
+                <FormControl sx={{ m: 1, width: '45ch' }} variant="outlined">
+                <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                <Field
+                    as={FilledInput}
+                    id="outlined-adornment-password"
+                    name="password"
+                    type={ showpassword ? 'text' : 'password' }
+                    endAdornment={
+                        <InputAdornment position="end">
+                        <IconButton
+                            aria-label={
+                            showpassword ? 'hide the password' : 'display the password'
+                            }
+                            onClick={handleClickShowPassword}
+                            onMouseDown={handleMouseDownPassword}
+                            onMouseUp={handleMouseUpPassword}
+                            edge="end"
+
+                        >
+                            {showpassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                        </InputAdornment>
+                    }
+                
+                />
+                </FormControl>
+                <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                />
+                
+                </div>
+
+                <div className="flex mx-auto w-[15%]">
+                <Button 
+                    variant="contained" disableElevation
+                    type="submit"
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? 'Logging in...' : 'Login'}
+                </Button>
+
+                </div>
+            </Form>
+            )}
 
         </Formik>
         </div>

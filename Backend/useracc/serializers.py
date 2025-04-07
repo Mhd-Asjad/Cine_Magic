@@ -19,7 +19,7 @@ class RegisterSerializers(serializers.ModelSerializer):
         if User.objects.filter(email=attrs['email']).exists():
             raise serializers.ValidationError({"email": "This email is already registered."})
         return attrs
-        
+    
 
     def create(self , validated_data ):
         otp = str(random.randint(100000 , 999999))
@@ -66,7 +66,7 @@ class OtpVerificationSerializer(serializers.Serializer):
             raise serializers.ValidationError({"error": "OTP expired or invalid."})
 
         if cached_data['otp'] != data['otp'] :
-            raise serializers.ValidationError({'error' : 'Invalid otp'})
+            raise serializers.ValidationError({'error' : '*Invalid otp'})
         
         return data
     

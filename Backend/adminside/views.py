@@ -7,9 +7,12 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from useracc.models import User
 from django.http import JsonResponse
-from .serilizers import CitySerializer ,TheatreSerializer , MovieSerializers
+from .serilizers import CitySerializers ,TheatreSerializer , MovieSerializers
 from movies.models import City , Movie
 from theatres.models import Theatre
+from theatre_owner.models import *
+import json
+
 
 # Create your views here.
 
@@ -21,6 +24,7 @@ class AdminLoginView(APIView) :
 
         user = authenticate(request , username = username , password = password)
         if user is not None and user.is_staff :
+            print('user authenticated')
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
 
@@ -37,14 +41,12 @@ class AdminLoginView(APIView) :
                 'detail' : 'invalid credentials or user is not an admin'
             },status=status.HTTP_400_BAD_REQUEST)
 
-
 class UserListView(APIView):
     def get(self , request):
         users = User.objects.all().values().order_by('id')
         user_list = list(users)
         return JsonResponse(user_list, safe=False)
     
-
 class UserStatusUpdate(APIView) :
     def post(self , request , pk) :
         try :
@@ -54,31 +56,28 @@ class UserStatusUpdate(APIView) :
             return Response({'message': 'user status updated successfully'},status=status.HTTP_200_OK)
         except user.DoesNotExist:
             return Response({ 'error' : 'user not found'},status=status.HTTP_404_NOT_FOUND)
-        
-
-# cities
 
 class CreateCity(APIView) :
     def post(self , request) :
-        serializer = CitySerializer(data = request.data)
+        serializer = CitySerializers(data = request.data)
         if serializer.is_valid() :
             serializer.save()
             
             return Response({"message":'city was created successfully' , "data" : serializer.data},status=status.HTTP_201_CREATED)
         return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-class DeleteCity(APIView) :
-    def delete( self , request, city_id ):
+# class DeleteCity(APIView) :
+#     def delete( self , request, city_id ):
 
-        try :
-            item = City.objects.get(id = city_id)
+#         try :
+#             item = City.objects.get(id = city_id)
 
-        except City.DoesNotExist :
-            return Response({'error' : 'Item is not found'},status=status.HTTP_404_NOT_FOUND )
+#         except City.DoesNotExist :
+#             return Response({'error' : 'Item is not found'},status=status.HTTP_404_NOT_FOUND )
 
-        item.delete()
-        remaining_cities = list(City.objects.values('id' , 'name','state' , 'pincode'))
-        return Response({"message":'City deleted successfully','remaining_cities':remaining_cities})
+#         item.delete()
+#         remaining_cities = list(City.objects.values('id' , 'name','state' , 'pincode'))
+#         return Response({"message":'City deleted successfully','remaining_cities':remaining_cities})
             
 
 class CityTheatreView(APIView) :
@@ -100,12 +99,12 @@ class CityTheatreView(APIView) :
         
 
 class AddTheatre(APIView) :
-    def post(self , request , city_id ) :
+    def post(self , request , owner_id ) :
 
         try :
-            city = City.objects.get(id = city_id)
+            city = TheaterOwnerProfile.objects.get(id = owner_id)
 
-        except City.DoesNotExist :
+        except TheaterOwnerProfile.DoesNotExist :
             return Response({ "detail" : "city not found" },status=status.HTTP_404_NOT_FOUND)
 
         name = request.data.get('name')
@@ -127,51 +126,17 @@ class AddTheatre(APIView) :
                 {'detail' : f"theatre {theatre.name} created successfully"},
                 status=status.HTTP_201_CREATED
             )
-        
+
         except Exception as e :
             return Response(
                 {"detail" : f"An erorr occurred : {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
-
-class EditTheatreData(APIView):
-    def get(self , request , id) :
-        try :
-            theatre = Theatre.objects.get(id = id)
-            print(theatre.city.id)
-        except Theatre.DoesNotExist:
-            return Response({'message':'theatre is not found'},status=status.HTTP_404_NOT_FOUND)
-        data = []
-        theatre_data = {
-            "name" : theatre.name , 
-            "address" : theatre.address,
-            "cityid" : theatre.city.id
-
-        }
-        data.append(theatre_data)
-        return Response(data,status=status.HTTP_200_OK)
-    
-    def put(self , request , id) :
-        try :
-            theatre = Theatre.objects.get(id = id)
-
-        except Theatre.DoesNotExist:
-            return Response({'message':'theatre is not found'},status=status.HTTP_404_NOT_FOUND)
-        
-        name = request.data.get('name')
-        address = request.data.get('address')
-
-        if not name or not address :
-            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
-
-        theatre.name = name
-        theatre.address = address
-        theatre.save()
-        return Response({'message' : 'theatre updated successfully'}, status=status.HTTP_200_OK)
-
 class DeleteTheatre(APIView) :
-    def delete(self , request , id) :
+    def delete(self , request , id):
+        print(id)
+        print('reaches the view')
         try :
             theatre = Theatre.objects.get(id = id)
         except Theatre.DoesNotExist :
@@ -180,14 +145,12 @@ class DeleteTheatre(APIView) :
         theatre.delete()
         return Response({"message": "Theatre deleted successfully"}, status=status.HTTP_200_OK)
 
-
 # Movies View ( CRUD )
 class ListMovies(APIView) :
     def get(self , reqeust) :
         queryset = Movie.objects.all()
 
         movie_list = []
-
         for movie in queryset :
 
             movie_dict = {
@@ -209,15 +172,9 @@ class ListMovies(APIView) :
 
 class CreateMovieView(APIView) :
     def post(self , request) :
-
-        data = request.data.copy()
-        temp = [ ]
-        if 'cities' in data :
-            for i in data['cities']: 
-                temp.append(int(i))
-        data['cities'] = temp
-
-        serializer = MovieSerializers(data= request.data)
+        data = request.data
+        print(data)
+        serializer = MovieSerializers(data= data)
         if serializer.is_valid() :
             serializer.save()
             return Response(
@@ -228,4 +185,65 @@ class CreateMovieView(APIView) :
         return Response(
             serializer.errors ,status=status.HTTP_400_BAD_REQUEST
         )
+class update_movie(APIView):        
+    def get(self ,request , movie_id):   
+        movie = Movie.objects.get(id=movie_id)
     
+        serializer = MovieSerializers(movie)
+        return Response(serializer.data)
+    
+    def put(self , request , movie_id):
+        movie = Movie.objects.get(id=movie_id)
+        print(request.data)
+        serializer = MovieSerializers(movie, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Movie updated successfully", "movie": serializer.data})
+        print(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    
+class DeleteMovies(APIView) :
+    def delete(self , requst , id):
+        try :
+            movie = Movie.objects.get(id=id)
+            
+        except Movie.DoesNotExist:
+            return Response({'error' : 'movie not found'} , status=status.HTTP_404_NOT_FOUND)
+        movie.delete()
+        return Response({'message' : f'{movie.title} deleted successfully'} , status=status.HTTP_200_OK)
+class ShowTheatreRequest(APIView):
+    
+    def get(self , request) :
+        print('hello')
+        theatres = Theatre.objects.all()
+        serializer = TheatreSerializer(theatres , many=True)
+        print(serializer.data )
+        return Response(serializer.data , status=status.HTTP_200_OK)
+    
+    def post(self , request ):
+        try :   
+            theatre_id = request.data.get('theatre_id')
+            theatre_det = Theatre.objects.get(id = theatre_id)
+            action = request.data.get('action')
+            if action == 'confirmed':
+                if not theatre_det.has_screen():
+                    return Response(
+                        {'error':'Theatre not have at least one screen details'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                theatre_det.is_confirmed = True
+                theatre_det.save()
+                
+                return Response(
+                    {'message' : 'theatre verified successfully'},
+                    status=status.HTTP_200_OK
+                )
+            else :
+                pass
+        except Theatre.DoesNotExist:
+            return Response(
+                {'error':'theatre not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )

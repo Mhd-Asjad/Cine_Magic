@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 import { Formik, Field, Form } from 'formik';
-import { setUsername , setEmail } from '../../Redux/Features/UserSlice';
+import { setUsername , setEmail, setUser_id } from '../../Redux/Features/UserSlice';
 import { useDispatch  } from 'react-redux';
 function OtpVerificationForm({ email, setMessage , closeModal }) {
 
@@ -32,8 +32,7 @@ function OtpVerificationForm({ email, setMessage , closeModal }) {
       });
 
       setMessage(response.data.message);
-      console.log(response.data.user.username)
-      console.log(response.data.user.email)
+      dispatch(setUser_id(response.data.user.id))
       dispatch(setUsername(response.data.user.username))
       dispatch(setEmail(response.data.user.email))
       toastr.success(response.data.message);
@@ -41,9 +40,9 @@ function OtpVerificationForm({ email, setMessage , closeModal }) {
       navigate('/');
       
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Unexpected error occurred';
-      toastr.error(errorMessage);
-      setErrors({ otp: errorMessage });
+      const errorMessage = error.response?.data?.errors.error 
+      console.log(errorMessage);
+      setErrors({ otp : errorMessage });
     }
 
     setSubmitting(false);

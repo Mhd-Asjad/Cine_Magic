@@ -1,17 +1,16 @@
 from rest_framework import serializers
 from useracc.models import User 
 from movies.models import City , Movie
-from theatres.models import Theatre
-
-
-
+from theatres.models import *
+from theatre_owner.models import *
+from useracc.models import User
 class Userserialzer(serializers.ModelSerializer):
     class Meta :
         model = User
         fileds = '__all__'
 
 
-class CitySerializer(serializers.ModelSerializer) :
+class CitySerializers(serializers.ModelSerializer) :
     class Meta :
         model = City
         fields = ['name' , 'state' , 'pincode']
@@ -29,16 +28,40 @@ class CitySerializer(serializers.ModelSerializer) :
         print(f'created Cities are : {city.name} - {city.state}')
         return city
     
+class CitySerializer(serializers.ModelSerializer) :
+    class Meta :
+        model = City
+        fields = ['name' , 'state' , 'pincode']
+        
+        
+class TheatreOwnerSerialzers(serializers.ModelSerializer) :
+    user_name = serializers.CharField(source='user.username')
+    class Meta :
+        model = TheaterOwnerProfile
+        fields = ['id' , 'user_name' , 'theatre_name' , 'location' , 'state' , 'pincode' , 'ownership_status']
+        
+        
+class ShowTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShowTime
+        fields = [ 'movie', 'start_time', 'end_time']
 
+class ScreenSerializer(serializers.ModelSerializer):
+    showtimes = ShowTimeSerializer(many=True)
+
+    class Meta:
+        model = Screen
+        fields = ['id','screen_number', 'capacity', 'screen_type', 'showtimes']
+        
 class TheatreSerializer(serializers.ModelSerializer) :
+    owner = TheatreOwnerSerialzers(read_only=True)
+    screens = ScreenSerializer(many=True)
+    city = CitySerializer(read_only=True)
     class Meta :
         model = Theatre
-        fields = ['id' , 'name' , 'city' , 'address']
+        fields = ['id' , 'name' , 'city', 'address' , 'is_confirmed', 'has_screen' , 'owner' , 'screens']
     
 class MovieSerializers(serializers.ModelSerializer) :
-    cities = serializers.PrimaryKeyRelatedField(
-        many=True , queryset=City.objects.all()
-    )
 
     class Meta :
         model = Movie
@@ -51,12 +74,9 @@ class MovieSerializers(serializers.ModelSerializer) :
             "description",
             "genre",
             "poster",
-            "cities",
         ]
-
+        
     def create(self, validated_data ):
-
-        cities = validated_data.pop('cities' , [])
         movie = Movie.objects.create(**validated_data)
-        movie.cities.set(cities)
         return movie
+    

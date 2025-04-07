@@ -1,4 +1,4 @@
-import React from 'react';
+import React , {useEffect, useState} from 'react';
 import axios from 'axios';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -6,14 +6,23 @@ import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 
 function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
-
+    
+    const [ errors , setErrors ] = useState('')
     toastr.options = {
         "closeButton": true,
         "progressBar": true,
         "positionClass": "toast-top-right", 
         "timeOut": "5000", 
     }
+    useEffect(() => {
+        if (errors.username) {
+            toastr.error(errors.username) 
+        }
+        if (errors.email){
+        toastr.warning(errors.email)
+        }
 
+    },[errors])
     const formik = useFormik({
         initialValues: {
             username: '',
@@ -29,7 +38,7 @@ function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
                 .required('Email is required'),
             password: Yup.string()
                 .required('Password is required')
-                .min(6, 'Password must be at least 6 characters long'),
+                .min(6, 'Password must be at least 6 characters long')
         }),
         onSubmit: async (values, { setSubmitting }) => {
             
@@ -40,9 +49,12 @@ function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
                 setIsOtpSent(true);
                 
             } catch (error) {
-                const errorMessage = error.response.data.errors || 'An unexpected error occurred';
-                console.log(errorMessage)
-                toastr.error(errorMessage)
+                if (error.response && error.response.data) {
+                    setErrors(error.response.data);
+                } else {
+                    toastr.error("Something went wrong. Please try again.");
+                }
+                
             } finally {
                 setSubmitting(false);
             }
@@ -121,11 +133,11 @@ function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
                     {formik.touched.password && formik.errors.password && (
                         <p className="text-red-500 text-sm">{formik.errors.password}</p>
                     )}
-                </div>
+            </div>
 
                 <button
                     type="submit"
-                    className="flex text-center mx-auto w-[15%] py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
+                    className="mx-auto flex justify-center w-[17%] py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
                     disabled={formik.isSubmitting}
                 >
                     {formik.isSubmitting ? 'Registering...' : 'Register'}
