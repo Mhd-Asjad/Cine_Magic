@@ -40,15 +40,16 @@ class CreateOwnershipProfile(APIView) :
     
 class Update_theatreowner(APIView):
     def put(self , request , pk):
+        print('inputdata' , request.data)
         try :
             owner = TheaterOwnerProfile.objects.get(pk=pk)
         except TheaterOwnerProfile.DoesNotExist:
             return Response({'error':'owner not found'},status=status.HTTP_404_NOT_FOUND)
         
         serializer = UpdateTheatreOwnerSeriailizer(instance=owner , data=request.data , partial=True)
-        
         if serializer.is_valid():
             serializer.save()
+            print(serializer.data)
             return Response(serializer.data , status=status.HTTP_200_OK) 
         
         print(serializer.errors)
@@ -173,6 +174,7 @@ class TheatreLogin(APIView) :
             theatre_owner = TheaterOwnerProfile.objects.get(user=user , ownership_status='confirmed')
             
         except TheaterOwnerProfile.DoesNotExist:
+        
             return Response({"error": "Not confirmed as theatre owner"}, status=status.HTTP_404_NOT_FOUND)
 
         print(theatre_owner.ownership_status)
@@ -446,6 +448,7 @@ class EditTheatreData(APIView):
         
         name = request.data.get('name')
         address = request.data.get('address')
+        print(address,'adress')
 
         if not name or not address :
             return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
@@ -467,3 +470,5 @@ class DeleteTheatre(APIView) :
         
         theatre.delete()
         return Response({"message": "Theatre deleted successfully"}, status=status.HTTP_200_OK)
+    
+    

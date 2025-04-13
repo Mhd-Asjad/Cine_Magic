@@ -42,9 +42,10 @@ class TheatreOwnerSerialzers(serializers.ModelSerializer) :
         
         
 class ShowTimeSerializer(serializers.ModelSerializer):
+    start_time = serializers.CharField(source='slot.start_time')
     class Meta:
         model = ShowTime
-        fields = [ 'movie', 'start_time', 'end_time']
+        fields = [ 'movie', 'start_time' , 'end_time']
 
 class ScreenSerializer(serializers.ModelSerializer):
     showtimes = ShowTimeSerializer(many=True)

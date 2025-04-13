@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 function MovieList({ movie }) {
   const navigate = useNavigate();
+
   const handleMovieSelect = (movieId) => {
     navigate(`/movie/${movieId}/details`)
 
@@ -17,9 +18,22 @@ function MovieList({ movie }) {
           className="w-[89%] h-[89%] object-cover rounded cursor-pointer"
           onClick={() => handleMovieSelect(movie.id)}
         />
-        <span className="absolute top-4 left-4 bg-emerald-500 text-white px-3 py-1 rounded-md text-sm font-medium">
-          New Release
-        </span>
+        {(() => {
+          const releaseDate = new Date(movie.release_date)
+          const today = new Date();
+          const diffTime = today - releaseDate
+          const diffDays = diffTime / (1000 * 60 * 60 * 24);
+          console.log(diffDays , 'diffrence')
+          if (diffDays < 0 || diffDays <= 7) {
+            return (
+              <span className="absolute top-4 left-3 bg-green-500 text-white px-3 py-1 rounded-md text-sm font-medium">
+                new release
+              </span>
+            );
+          }
+          return null;
+        })()}
+        
       </div>
 
       <div className="ml-4 mb-6">
@@ -44,7 +58,7 @@ function MovieList({ movie }) {
 const MovieGrid = () => {
   const movies = useSelector((state) => state.movie.movies || []);
   const selectedCity = useSelector((state) => state.location.selectedCity);
-
+  console.log(movies)
   return (
     <div className="w-auto container ml-[25%] px-4 py-6">
       <h2 className="text-2xl font-medium mb-6">
@@ -56,7 +70,9 @@ const MovieGrid = () => {
         <div className="grid w-[85%] grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {movies.map((movie) => (
             <MovieList key={movie.id} movie={movie} />
+
           ))}
+          
         </div>
       )}
     </div>

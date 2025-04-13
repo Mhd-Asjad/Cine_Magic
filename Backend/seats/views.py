@@ -14,6 +14,31 @@ class GetScreenLayout(APIView):
         layouts = SeatScreenLayout.objects.all()
         serializer = LayoutSerializers(layouts , many=True)   
         return Response(serializer.data )
-
-
     
+    
+class get_theatre_screenlayout(APIView):
+    def get(self , request , owner_id ):
+        
+        try :
+            theatres = Theatre.objects.filter(owner=owner_id)
+            
+        except Theatre.DoesNotExist:
+            return Response({'error' : 'theatre not found'} , status=400)
+        data = []
+        
+        for theatre in theatres :
+            screens = Screen.objects.filter(theatre=theatre) 
+            
+            serializers = Screens_seatsSerializers(screens,many=True)
+            
+            
+            data.append({
+                'theatre_id' : theatre.id,
+                'theatre_name' : theatre.name,
+                'screens' :serializers.data
+            })    
+        return Response(data, status=200)
+
+        
+        
+        

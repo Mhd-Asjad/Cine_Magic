@@ -26,7 +26,7 @@ function EditProfile() {
 
     const [ open , setOpen ] = React.useState(false);
     const [ formData , setFormData ] = useState({
-        theatreName : theatreOwner.theatreName||'' ,
+        theatre_name : theatreOwner.theatreName || '' ,
         location : theatreOwner.location ||  '' ,
         state : theatreOwner.state || '' ,
         pincode : theatreOwner.pincode|| ''
@@ -47,7 +47,7 @@ function EditProfile() {
             const res = await TheatreApi.put(`/update-profile/${theatreOwner.theatreId}/`,formData)
             console.log(res.data,'new_data')
             const {id , location , pincode , state , theatre_name} = res.data
-
+            console.log(theatre_name)
             dispatch(setTheatreOwner({
                theatreId : id ,
                theatreName : theatre_name ,
@@ -90,7 +90,7 @@ function EditProfile() {
                         <Label className='text-right' >
                             username
                         </Label>
-                        <Input className='col-span-3' name='theatreName' value={formData.theatreName} onChange={handleChange} />
+                        <Input className='col-span-3' name='theatre_name' value={formData.theatre_name} onChange={handleChange} />
                     </div>
                     <div className='grid grid-cols-4 items-center gap-4' >
                         <Label className='text-right'>

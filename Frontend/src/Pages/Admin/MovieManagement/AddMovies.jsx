@@ -36,7 +36,7 @@ function AddMovies() {
         poster: Yup.mixed()
             .required('Poster is required')
             .test('fileType', 'Only image files are allowed', (value) => {
-                return value ? ['image/jpeg', 'image/png', 'image/jpg'].includes(value.type) : true ;
+                return value ? ['image/jpeg', 'image/png', 'image/jpg' , 'image/webp'].includes(value.type) : true ;
             }),
     });
 

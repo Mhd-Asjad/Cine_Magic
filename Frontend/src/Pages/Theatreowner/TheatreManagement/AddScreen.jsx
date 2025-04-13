@@ -17,7 +17,6 @@ function AddScreen() {
     const [screenCount, setScreenCount] = useState(0);
     const [selectedLayout, setSelectedLayout] = useState(null);
     const [ timeSlots, setTimeSlot ]  = useState([{ start_time : "" }])
-    const [ startTime , setStartTime] = useState("")
     const initialValue = {
         screen_number: '',
         capacity: '',

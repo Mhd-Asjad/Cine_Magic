@@ -81,3 +81,9 @@ class OtpVerificationSerializer(serializers.Serializer):
         cache.delete(f"otp_{validated_data['email']}")
         user.save()
         return user
+    
+    
+class UserEditSerializers(serializers.ModelSerializer):
+    class Meta :
+        model = User
+        fields =  ['username' , 'email']

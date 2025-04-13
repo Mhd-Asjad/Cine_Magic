@@ -3,7 +3,7 @@ from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import UserSerializer , OtpVerificationSerializer , RegisterSerializers
+from .serializers import UserSerializer , OtpVerificationSerializer , RegisterSerializers , UserEditSerializers
 from .models import User
 from django.contrib.auth import authenticate
 import json
@@ -102,3 +102,19 @@ class GoogleAuthView(View):
             })
         except Exception as e:
                 return JsonResponse({'success': False, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+            
+class editUser(APIView):
+    def put(self , request , userId):
+        try :
+            
+            user = User.objects.get(id=userId)
+            
+        except User.DoesNotExist:
+            return Response({'error' : 'user not found'} , status=status.HTTP_404_NOT_FOUND)
+        
+        serializers = UserEditSerializers(instance=user , data=request.data , partial = True)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data , status=status.HTTP_200_OK)
+        return Response(serializers.errors , status=status.HTTP_400_BAD_REQUEST)

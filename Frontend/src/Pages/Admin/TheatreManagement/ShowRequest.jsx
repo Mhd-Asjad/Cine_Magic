@@ -109,7 +109,7 @@ function ShowRequest() {
   return (
     <div className='p-10 mt-10' >
 
-
+    
     <Card className='w-full py-10 max-w-4xl mx-auto'>
         <CardHeader >
             <CardTitle className="flex justify-center text-xl font-semibold text-gray-500" >Theatre Owner Register Request</CardTitle>

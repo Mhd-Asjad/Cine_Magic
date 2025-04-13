@@ -6,10 +6,13 @@ import probg from '../../assets/profilebg1.jpg'
 import { TbLogout2 } from "react-icons/tb";
 import { FaAngellist } from "react-icons/fa6";
 import { FaPhone } from "react-icons/fa6";
+import { FaUserEdit } from "react-icons/fa";
 import axios from "axios";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
-
+import { useDispatch } from "react-redux";
+import { setUsername , setEmail } from "@/Redux/Features/UserSlice";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
 
@@ -30,21 +33,29 @@ const Profile = () => {
   };
   
   const [showContactForm, setShowContactForm] = useState(false);
+  const [ showEditForm , setShowEditForm ] = useState(false);
   const [ theatreName , setTheatreName ] = useState('');
   const [ location , setLocation ] = useState('');
-  console.log(location)
   const [ state , setState ] = useState('');
   const [pincode , setPincode ] = useState('');
   const [ text , setText ] = useState('');
   const userId = useSelector((state) => state.user.id)
-  console.log(userId)
   const [ errors , setErrorMessage ] = useState({});
   const username = useSelector((state) => state.user.username)
   const email = useSelector((state) => state.user.email)
+  const [newUsername , setNewUsername ] = useState('');
+  const [newEmail , setNewEmail ] = useState('');
+  const {toast} = useToast();
+  const dispatch = useDispatch();
   const handleToggleForm = () => {
     setShowContactForm(!showContactForm);
   };
-
+  const handleToggleForm1 = () => {
+    setShowEditForm(!showEditForm)
+    setNewUsername(username)
+    setNewEmail(email)
+  }
+  
   const validateFields = () => {
     const newErrors = {};
 
@@ -105,6 +116,27 @@ const Profile = () => {
 
     }
   };
+
+  const handleUserEdit = async(e) => {
+    e.preventDefault()
+    try {
+      const res = await axios.put(`http://127.0.0.1:8000/user_api/edit-user/${userId}/`,{
+        'username' : newUsername,
+        'email' : newEmail
+      })
+      const {username , email } = res.data
+      dispatch(setUsername(username))
+      dispatch(setEmail(email))
+      toast({
+        title : 'user updated successfully'
+      })
+      handleToggleForm1()
+      
+    }catch(e){
+      console.log(e)
+
+    }
+  }
 
   return (
     <div>
@@ -203,9 +235,59 @@ const Profile = () => {
             </form>
           </div>
         )}
-        <div className="flex gap-1 py-3 px-4 bg-gray-50 rounded shadow-sm hover:bg-gray-100 cursor-pointer">
+        <div 
+          className="flex gap-1 py-3 px-4 bg-gray-50 rounded shadow-sm hover:bg-gray-100 cursor-pointer"
+        >
           <FaAngellist className="text-2xl text-gray-500" /> Blogs
         </div>
+        <div className="flex gap-1 py-3 px-4 bg-gray-50 rounded shadow-sm hover:bg-gray-100 cursor-pointer"
+          onClick={handleToggleForm1}
+        >
+          <FaUserEdit className="text-2xl text-gray-500" /> Edit Profile
+        </div>
+          { showEditForm &&
+          <div className="mt-7 py-7 shadow-md p-4 rounded">
+            <form onSubmit={handleUserEdit} >
+
+            <label className="block text-sm font-medium text-gray-700">username</label>
+              <div className="mt-2">
+                <input type="text" 
+                className="mt-1 block w-full p-2 border rounded"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value) }
+                />
+              </div>
+            <label className="block text-sm font-medium text-gray-700">email</label>
+              <div className="mt-2">
+
+                <input type="text" 
+                className="mt-1 block w-full p-2 border rounded"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value) }
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end" >
+                <button 
+                  type="submit"
+                  className="mt-4 bg-black py-2 px-1 rounded text-white"
+                
+                >
+                  Submit
+                </button>
+                <button 
+                  className="mt-4 bg-white py-2 px-1 rounded text-black"
+                  onClick={handleToggleForm1}
+                >
+                  cancel
+                </button>
+
+              </div>
+
+            </form>
+          </div>
+
+          }
         <div className="flex gap-1 py-3 px-4 bg-gray-50 rounded shadow-sm hover:bg-gray-100 cursor-pointer">
          <TbLogout2 className="text-2xl text-gray-500" /> Logout 
         </div>

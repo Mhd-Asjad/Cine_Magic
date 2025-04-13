@@ -15,6 +15,7 @@ class SeatScreenLayout(models.Model):
     def total_capacity(self) :
         return self.rows * self.cols
     
+    
 class SeatCategory(models.Model):
     name = models.CharField(max_length=50)
     price_factor = models.DecimalField(max_digits=3 , decimal_places=1 , default=1.0)

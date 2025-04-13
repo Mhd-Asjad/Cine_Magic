@@ -3,6 +3,7 @@ import Nav from '../../Components/Navbar/Nav'
 import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import Footer from '../../Components/Footer/footer'
+import CastCards from './CastCards'
 
 function MovieSpecification() {
   const {id} = useParams()
@@ -15,8 +16,8 @@ function MovieSpecification() {
       try {
         const response = await axios.get(`http://127.0.0.1:8000/movies/movie_details/${id}/`);
         setMovies(response.data)
-  
-      }catch(error) {
+
+      }catch(error) { 
         console.log('error fetching movie spec',error)
       }
     }
@@ -34,8 +35,8 @@ function MovieSpecification() {
       <div className="text-center text-red-600 font-bold mt-5">{error}</div>
     )}
     {movie && (
-      <div className="max-w-7xl mx-auto mb-5 bg-white shadow-lg rounded-lg overflow-hidden mt-10">
-        <div className="flex flex-col w-[80%] md:flex-row">
+      <div className="max-w-7xl mx-auto mb-5 shadow-lg rounded-lg overflow-hidden mt-10">
+        <div className="flex flex-col w-[60%] h-[60%] md:flex-row">
           <img
             src={movie.poster}
             alt={movie.title}
@@ -48,10 +49,10 @@ function MovieSpecification() {
             <p className="mt-4">
               <span className="font-semibold">Release Date:</span> {movie.release_date}
             </p>
-            <p className="mt-2">
+            <p className="font-mono">
               <span className="font-semibold">Duration:</span> {movie.duration} minutes
             </p>
-            <p className="mt-2">
+            <p className="">
               <span className="font-semibold">Language:</span> {movie.language}
             </p>
             <button onClick={handleChange} className="mt-6 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-lg">
@@ -64,6 +65,8 @@ function MovieSpecification() {
           <h2 className="text-2xl font-semibold mb-4">About the Movie</h2>
           <p className="text-gray-700 leading-relaxed">{movie.description}</p>
         </div>
+
+        <CastCards movie_id={movie.movie_id} />
 {/* 
         {movie.cities ? (
           <div className="p-7 mb-9">
