@@ -72,7 +72,9 @@ class GoogleAuthView(View):
         try :
             data = json.loads(request.body) 
             email = data.get('email')
-            username = data.get('name') or email.split('@')[0]           
+            print(data.get('username'))
+            
+            username = data.get('username') or email.split('@')[0]           
             user , created = User.objects.get_or_create(email=email,defaults={
                 
                 'username' : username,
@@ -81,6 +83,7 @@ class GoogleAuthView(View):
                 }
             )
             if created :
+                print('already exist')
                 SocialAccount.objects.create(
                     user=user,
                     provider='google',
@@ -96,18 +99,18 @@ class GoogleAuthView(View):
                 'success' : True,
                 'user' :{
                     'id' : user.id,
-                    'email' : user.email,
+                    'userEmail' : user.email,
                     'username' : user.username
                 }
             })
         except Exception as e:
+                print(str(e))
                 return JsonResponse({'success': False, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
             
             
 class editUser(APIView):
     def put(self , request , userId):
         try :
-            
             user = User.objects.get(id=userId)
             
         except User.DoesNotExist:

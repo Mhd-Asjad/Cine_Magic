@@ -5,7 +5,7 @@ import TheatreApi from '@/Axios/theatreapi';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { updateOwnershipStatus } from '@/Redux/Features/Theatreownerslice';
-import seatsApi from '@/Axios/seatsapi';
+import seatsApi from '@/Axios/seatsaApi';
 import { useToast } from '@/hooks/use-toast';
 // import remove
 function AddScreen() {
@@ -140,7 +140,7 @@ function AddScreen() {
         <div className="flex border shadow-md mt-7 py-4 bg-gray-100">
             <div className="p-10 py-8">
                 <h2 className="text-center mb-7 pt-12 px-3 font-semibold text-3xl text-gray-500">
-                    Add Screen Details
+                    Add Screen Details  
                 </h2>
                 <Formik
                     initialValues={initialValue}

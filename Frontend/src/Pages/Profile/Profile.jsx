@@ -13,7 +13,9 @@ import "toastr/build/toastr.min.css";
 import { useDispatch } from "react-redux";
 import { setUsername , setEmail } from "@/Redux/Features/UserSlice";
 import { useToast } from "@/hooks/use-toast";
-
+import { use } from "react";
+import LocationPicker from "@/Components/Map/LocationPicker";
+import 'leaflet/dist/leaflet.css';
 const Profile = () => {
 
   toastr.options = {
@@ -35,10 +37,14 @@ const Profile = () => {
   const [showContactForm, setShowContactForm] = useState(false);
   const [ showEditForm , setShowEditForm ] = useState(false);
   const [ theatreName , setTheatreName ] = useState('');
+  const [ ownerImage , setOwnerImage ] = useState('')
   const [ location , setLocation ] = useState('');
   const [ state , setState ] = useState('');
   const [pincode , setPincode ] = useState('');
+  const [latitude , setLatitude ] = useState('')
+  const [ longitude , setLongitude ] = useState('') 
   const [ text , setText ] = useState('');
+
   const userId = useSelector((state) => state.user.id)
   const [ errors , setErrorMessage ] = useState({});
   const username = useSelector((state) => state.user.username)
@@ -97,12 +103,18 @@ const Profile = () => {
 
       const response = await axios.post('http://127.0.0.1:8000/theatre_owner/create_profile/', {
         'user' : userId ,
+        'owner_photo' : ownerImage,
         'theatre_name' : theatreName ,
-        'location' : location , 
+        'latitude' : latitude,
+        'longitude' : longitude,
+        'location' : location ,
         'state' : state , 
-        'pincode' : pincode , 
+        'pincode' : pincode,
         'user_message' : text
-      });
+     },
+     {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
       
 
       handleSuccess(response.data.message)
@@ -110,8 +122,8 @@ const Profile = () => {
       
     }catch(e) {
 
-      const error = e.response.data.error;
-      
+      const error = e.response?.data?.user || e.response.data.error;
+      console.log(error)
       toastr.warning(error)
 
     }
@@ -138,7 +150,24 @@ const Profile = () => {
     }
   }
 
-  return (
+  const handleLocationSelect = async(location) => {
+    setLatitude(location[0] )
+    setLongitude(location[1])
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+        const data = await res.json();
+        console.log(data)
+        setLocation( data.address.city || data.address.town || data.address.village || '');
+        setState(data.address.state)
+        setPincode(data.address.postcode)
+    }catch(e) {
+      console.log('reserve geo coding failed' , e);
+      
+    }
+
+  };
+  console.log(ownerImage)
+  return (  
     <div>
 
       <Nav/>
@@ -166,26 +195,51 @@ const Profile = () => {
         {showContactForm && (
           <div className="mt-4 bg-gray-50  p-4 rounded shadow-sm">
             <h3 className="font-semibold text-center " >Theatre registration </h3>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} encType="multipart/form-data    " >
+
+            <div className="grid grid-flow-rows grid-cols-2 gap-1" >
+              <div classname="" >
+
+
               <label className="block text-sm font-medium text-gray-700">
                 Theatre Name
               </label>
               <input
                 type="text"
-                className="mt-1 block w-full p-2 border rounded"
+                className="mt-1 block w-[80%] p-2 border rounded"
                 placeholder="Enter your name"
                 onChange={(e) => setTheatreName(e.target.value)}
               />
               {errors.theatreName && (
                 <p className="text-red-500 text-sm font-semibold">{errors.theatreName}</p>
               )}
+              </div>
+              <div>
+              <label className="block text-sm font-medium  text-gray-700">your image</label>
+              <input
+                type="file" 
+                className="mt-1 block w-[80%] p-2 border rounded bg-white"
+                accept="image/"
+                placeholder="your image"
+                onChange={(event) => setOwnerImage(event.currentTarget.files[0] || null)}
+              />
+              </div>
+
+ 
+            </div>
+
+            <div className="mt-3" >
+              <span className="font-semibold flex justify-center pb-2" >Select location here </span>
+              <LocationPicker onLocationSelect={handleLocationSelect} />
+            </div>
               <label className="block mt-4 text-sm font-medium text-gray-700">
                 Location
               </label>
               <input
                 type="text"
+                value={location}
                 className="mt-1 block w-full p-2 border rounded"
-                placeholder="Enter your email"
+                placeholder="Enter your Location "
                 onChange={(e) => setLocation(e.target.value)}
               />
               {errors.location && (
@@ -196,6 +250,7 @@ const Profile = () => {
               </label>
               <input 
                 type="text"
+                value={state}
                 className="mt-1 block w-full p-2 border rounded"
                 placeholder="enter your state"
                 onChange={(e) => setState(e.target.value)}
@@ -208,6 +263,7 @@ const Profile = () => {
               </label>
               <input 
                 type="number"
+                value={pincode}
                 className="mt-1 block w-full p-2 border rounded"
                 placeholder="enter your pincode"
                 onChange={(e) => setPincode(e.target.value)}

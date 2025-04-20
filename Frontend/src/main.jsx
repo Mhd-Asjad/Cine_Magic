@@ -6,6 +6,7 @@ import { Provider } from 'react-redux'
 import {store , persistor } from './Redux/store.js'
 import { PersistGate } from 'redux-persist/integration/react';
 import { Toaster } from "@/components/ui/toaster"
+import 'leaflet/dist/leaflet.css'
 
 createRoot(document.getElementById('root')).render(
 

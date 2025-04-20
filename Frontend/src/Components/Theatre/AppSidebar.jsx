@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import {items} from './constants'
+import { Link } from "react-router-dom";
 
 
 export function AppSidebar() {
@@ -21,12 +22,12 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url} className="flex gap-2 items-center">
+                    <Link to={`/theatre-owner/${item.url}`} className="flex gap-2 items-center">
                       <item.icon size={23} />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

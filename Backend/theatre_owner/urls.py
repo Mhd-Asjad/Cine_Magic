@@ -3,7 +3,7 @@ from .views import *
 from rest_framework_simplejwt.views import (
     TokenObtainPairView ,
     TokenRefreshView
-)
+)   
 urlpatterns = [ 
     path('token/',TokenObtainPairView.as_view(),name="token_obtain_pair"),
     path('token/refresh/', TokenRefreshView.as_view(),name='token_refresh'),
@@ -19,6 +19,7 @@ urlpatterns = [
     path('show-screens/', get_theatre_screens.as_view() , name='show-screens'),
     path('showtime/<int:theatre_id>/', fetch_showtime.as_view() , name='showtime'),
     path('get_time-slots/', get_timeslots.as_view(),name='time-slot'),
+    path('add-timeslot/' ,create_timeslot.as_view() , name='add-timeslot'),
     path('add_show_time/',Add_Show_Time.as_view(), name='add_show_time'),
     path('theatre/<int:city_id>/add' ,AddTheatre.as_view() , name='theatre_add'),
     path('theatre/<int:id>/edit' , EditTheatreData.as_view() , name='theatre_edit'),

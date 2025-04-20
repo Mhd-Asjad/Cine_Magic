@@ -29,7 +29,7 @@ function Enquery() {
             console.log(e.response?.message || 'error occurss')
         }
     }
-
+    console.log(enquery)
     const handleAccept = async (userId) => {
         setIsLoading(true)
         try {
@@ -63,18 +63,18 @@ function Enquery() {
     
     <div className='flex min-h-screen bg-gray-100' >
             
-            <div className='p-8 mt-7' >
+            <div className='p-3 mt-7' >
                 <h2 className='flex justify-center mt-8 font-semibold text-2xl' >Theatre Owners</h2>
 
             {isLoading ? (
-                <div className="flex justify-center items-center h-40 text-xl font-bold text-blue-600">
-                    Loading...
+                <div className="flex justify-center items-center text-xl font-bold text-blue-600">
+                    Loading...  
                 </div>
             ) : enquery.length === 0 ? (
                 <div className="flex justify-center text-gray-500 mt-5">No Enquiries Found</div>
             ) : (
                 enquery.map((value) => (
-                    <div key={value.id} style={{ display: "inline-grid", margin: "5%" }}>
+                    <div key={value.id} style={{ display: "inline-grid", margin: "10%", width : '250px' }}>
                         <Card sx={{ maxWidth: 600 }}>
                             <CardContent>
                                 <Typography variant="h4" component="div">
@@ -82,7 +82,13 @@ function Enquery() {
                                 </Typography>
                                 <Typography variant="body1">
                                     <p className="font-bold text-1xl">More details:</p>
+                                    <div className='flex justify-center ' >
+
+                                    <img src={value.owner_photo} alt="owner_pic" className='w-full h-[40%] ' />
+
+                                    </div>
                                     <br />
+
                                     <span className="text-gray-500 font-semibold">Location</span>: {value.location}
                                     <br />
                                     <span className="text-gray-500 font-semibold">State</span>: {value.state}

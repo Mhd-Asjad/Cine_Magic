@@ -19,7 +19,7 @@ function Cityselction({ oncityselect }) {
         }
     }
 
-
+    
   return (
     <div  >
         <h2 className='p-4 text-xl font-semibold gap-2'>Add Location</h2>
@@ -36,7 +36,7 @@ function Cityselction({ oncityselect }) {
                     </button>
                 ))
             ) : (
-             <p className='mx-auto mt-5 text-red-500 font-bold'>No Cities Available</p>
+                <p className='mx-auto mt-5 text-red-500 font-bold'>No Cities Available</p>
             )}
         </div>
     </div>

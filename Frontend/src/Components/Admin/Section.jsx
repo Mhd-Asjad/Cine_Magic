@@ -19,7 +19,7 @@ function Section() {
             <Route path="enquery" element={<PrivateRoute> <Enquery /> </PrivateRoute>} />
             <Route path="movies" element={<PrivateRoute><ListMovies /></PrivateRoute>} />
             <Route path="movies/:movie_id/edit" element={<PrivateRoute><EditMovie/></PrivateRoute>} />
-            <Route path='addmovies' element={<PrivateRoute><AddMovies /></PrivateRoute>} />
+            <Route path='add-movies' element={<PrivateRoute><AddMovies /></PrivateRoute>} />
             <Route path="theatres/:theatreId/edit" element={<PrivateRoute><EditTheatre /></PrivateRoute>} />
             <Route path='showtheatres' element={<PrivateRoute><ShowRequest/></PrivateRoute>} />
             

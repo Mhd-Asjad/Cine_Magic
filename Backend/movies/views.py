@@ -7,20 +7,23 @@ from rest_framework import status
 import requests
 from django.conf import settings
 from theatres.models import *
+from django.db.models import Count
 # Create your views here.
 
 class Fetchcities(APIView):
     def get(self , request) :
         print(request.user)
-        cities = City.objects.all()
-        print(cities)
+        now = datetime.now()
+        theatres = Theatre.objects.annotate(movie_count = Count('screens__showtimes__movie')).filter(movie_count__gte=1 , screens__showtimes__show_date__gte = now)
         city_data = [{
-            "id" : city.id,
-            "name" : city.name,
-            "state" : city.state,
-            "pincode" : city.pincode
+            
+            "id" : theatre.city.id,
+            "name" : theatre.city.name, 
+            "state" : theatre.city.state ,
+            "pincode" : theatre.city.pincode ,
         }
-        for city in cities
+        for theatre in theatres
+      
         ]
         return JsonResponse({ "cities" : city_data},safe=False)
 
@@ -28,16 +31,15 @@ class CityBasedMovies(APIView) :
     def get(self , request , city_id ): 
         try :   
             print(city_id)
-
+            today = datetime.now()
             city = City.objects.get(id = city_id)
-            showtimes = ShowTime.objects.filter(screen__theatre__city = city_id).select_related('movie').distinct()
-            print(showtimes)
-            movies = { showtime.movie for showtime in showtimes }       
+            showtimes = ShowTime.objects.filter(screen__theatre__city = city_id ,show_date__gte = today).select_related('movie').distinct()
+                        
+            movies = {showtime.movie for showtime in showtimes}
             
         except City.DoesNotExist:
             return Response({'detail' : 'city is not found'} , status=status.HTTP_404_NOT_FOUND)
         
-        print(city.id , 'city')
         movie_data = [
             
             {
@@ -52,6 +54,7 @@ class CityBasedMovies(APIView) :
                 'poster' : request.build_absolute_uri(movie.poster.url) if movie.poster else None ,
             }
             for movie in movies
+            
         ]
  
         return Response({ 'movies' :movie_data , 'city_id' : city.id , 'location' : city.name} , status=status.HTTP_200_OK)
@@ -107,8 +110,13 @@ class movie_showtime(APIView):
         cityid = request.GET.get('city_id')
         
         movie = Movie.objects.get(id = id)
+
+            
         try :
-            showtimes = ShowTime.objects.filter(movie = movie).select_related(
+            showtimes = ShowTime.objects.filter(
+                movie = movie,
+                screen__theatre__city_id = cityid
+            ).select_related(
                 'screen__theatre',
                 'slot'
             )
@@ -129,10 +137,12 @@ class movie_showtime(APIView):
                     'shows' : []
                 }
             theatre_data[theatre_name]['shows'].append({
-                'show_date': show.show_date,
+                    'show_id' : show.id,
+                    'show_date': show.show_date,
                     'start_time' : show.slot.start_time.strftime('%H:%M') if show.slot else None ,
                     'end_time' : show.end_time.strftime('%H:%M') if show.end_time else None ,
                     'screen' : {
+                        'screen_id' : show.screen.id,
                         'screen_number' : show.screen.screen_number,
                         'screen_type' : show.screen.screen_type
                     },
@@ -140,7 +150,7 @@ class movie_showtime(APIView):
             
         shows = ShowTime.objects.filter(screen__theatre__city = cityid)
         movies = set(show.movie for show in shows)
-        movie_data = [] 
+        movie_data = []
         for movie in movies :
             movie_data.append({
                 'id' : movie.id,

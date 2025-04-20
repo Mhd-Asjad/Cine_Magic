@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'theatres',
     'adminside',
     'seats',
+    'booking',
     'theatre_owner',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -86,7 +87,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME" : timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME" : timedelta(minutes=120),
     "REFRESH_TOKEN_LIFETIME" : timedelta(days=1),
 
     "ROTATE_REFRESH_TOKENS" :True , 

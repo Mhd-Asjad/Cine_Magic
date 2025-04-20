@@ -16,7 +16,10 @@ function ListTheatre() {
     const navigate = useNavigate()
     const theatre_owner_id = useSelector((state) => state.theatreOwner.theatreId)
     useEffect(()=> {
+      if (theatre_owner_id){
         VerifiedTheatre()
+        
+      }
     },[])
     console.log(theatres)
     const VerifiedTheatre = async () => {

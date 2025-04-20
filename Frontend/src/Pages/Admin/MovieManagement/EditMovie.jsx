@@ -7,7 +7,8 @@ import apiAdmin from '../../../Axios/api';
 function EditMovie() {
     const { movie_id } = useParams(); 
     const [loading, setLoading] = useState(false);
-    const [initialValues, setInitialValues] = useState(null);
+    const [initialValues, setInitialValues] = useState({});
+    const [ imageSrc , setImageSrc ] = useState(null)  
     const navigate = useNavigate()
     useEffect(() => {
         const fetchMovie = async () => {
@@ -20,8 +21,9 @@ function EditMovie() {
             }
         };
         fetchMovie();
-    }, [movie_id]);
-
+    }, []);
+    console.log(initialValues , 'initial values')
+    
     const validationSchema = Yup.object({
         title: Yup.string().required('* Field is required'),
         language: Yup.string().required('* Language is required'),
@@ -61,7 +63,7 @@ function EditMovie() {
             setLoading(false);
         }
     };
-    console.log(initialValues)
+    console.log(initialValues['poster'])
     if (!initialValues) return <p>Loading movie data...</p>;
 
     return (
@@ -116,17 +118,12 @@ function EditMovie() {
 
                             <div>
                                 <label className="block text-gray-700 font-medium mt-2">Poster</label>
-                                {initialValues?.poster && typeof(initialValues.poster) === 'string' && (
-                                    <img src={initialValues.poster} alt="Current Poster" className="h-32 w-32 object-cover mb-2 rounded-md" />
-                                )}
+                            
                                 <input
                                     type="file"
                                     name="poster"
                                     accept="image/*"
-                                    onChange={(event) => {
-                                        const file = event.currentTarget.files[0];
-                                        setFieldValue('poster', file || null)
-                                    }}
+                                    onChange={(e) => setFieldValue('poster' , e.currentTarget.files[0])}
                                     className="w-full border-gray-300 border rounded-lg px-4 py-2"
                                 />
                                 <ErrorMessage name="poster" component="div" className="text-red-500 text-sm mt-1" />

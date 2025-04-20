@@ -29,15 +29,15 @@ class Screen(models.Model) :
     layout = models.ForeignKey('seats.SeatScreenLayout',on_delete=models.SET_NULL,null=True ,blank=True , related_name='screens')
     def __str__(self) :
         return f"Screen {self.screen_number} - {self.theatre.name}"
-    
+   
 class TimeSlot(models.Model):
-    screen = models.ForeignKey(Screen , on_delete=models.CASCADE , related_name='time_slot' )
+    screen = models.ForeignKey(Screen , on_delete=models.CASCADE , related_name='time_slot')
     start_time = models.TimeField()
     
     def __str__(self ) :
-        return f"screen {self.screen.screen_number} - {self.start_time}"
+        return f"screen  {self.screen.screen_number} - {self.start_time}"
     
-    
+        
 class ShowTime(models.Model) :
     screen = models.ForeignKey(Screen , on_delete=models.CASCADE , related_name='showtimes' )
     movie = models.ForeignKey('movies.Movie' , on_delete=models.CASCADE , related_name='showtimes')
@@ -48,8 +48,11 @@ class ShowTime(models.Model) :
     modified_at = models.DateTimeField(auto_now=True)
     
     class Meta :
-       unique_together = ('screen' , 'slot' , 'show_date')
+       unique_together = ('screen' , 'slot' ,'show_date')
     
+    @property
+    def get_seats(self):
+        return self.screen.seats.filter(is_active=True)
     def save(self , *args , **kwargs):
         if not self.end_time :
             start_datetime = datetime.combine(datetime.today(),self.slot.start_time)

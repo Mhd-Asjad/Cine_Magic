@@ -10,5 +10,5 @@ export const sidebarItems = [
 ]; 
 export const subMenus  = {
     customers : [ 'customers' ,"enquery" ],
-    Movies : ["AddMovies" ] ,
+    movies : [ "movies" , "add-movies"   ] ,
 }

@@ -15,23 +15,23 @@ class SeatScreenLayout(models.Model):
     def total_capacity(self) :
         return self.rows * self.cols
     
-    
 class SeatCategory(models.Model):
     name = models.CharField(max_length=50)
-    price_factor = models.DecimalField(max_digits=3 , decimal_places=1 , default=1.0)
+    price = models.DecimalField(max_digits= 6 , decimal_places=2 , default=90.00)
     
     def __str__(self) :
         return self.name
+        
     
 class seats(models.Model):
     screen = models.ForeignKey('theatres.Screen', on_delete=models.CASCADE , related_name='seats')
     row = models.CharField(max_length=3)
     number = models.PositiveIntegerField()
-    category = models.ForeignKey(SeatCategory , on_delete=models.CASCADE)
+    category = models.ForeignKey(SeatCategory , on_delete=models.CASCADE , null=True , blank=True)
     is_active = models.BooleanField(default=True)
     
     class Meta :
-        unique_together = ('screen' , 'row' , 'number')
+        unique_together = ('screen' , 'row' , 'number')        
     
     def __str__(self):
         return f"{self.row}{self.number} - {self.screen}"

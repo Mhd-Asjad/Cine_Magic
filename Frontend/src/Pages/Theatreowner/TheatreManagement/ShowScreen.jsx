@@ -29,7 +29,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@radix-ui/react-toast';
-import { Eye , X } from 'lucide-react';
+import { Eye , X ,  } from 'lucide-react';
+import { TbClockPlus } from "react-icons/tb";
 function ShowScreen() {
     const { id } = useParams();
     const [screens, setScreens] = useState([]);
@@ -42,7 +43,6 @@ function ShowScreen() {
     const [selectedShowTime , setSelectedShowTime] = useState(null);
     const [ showDetails , setShowDetails ] = useState([]);
     const [ isShowDialogOpen , setIsDialogOpen] = useState(false)
-    const [ selectScreenView , setSelectedScreenView ] = useState(null)
     const {toast} = useToast();
     const navigate = useNavigate();
     useEffect(() => {
@@ -70,7 +70,7 @@ function ShowScreen() {
 
                 const res = await TheatreApi.get(`/get_time-slots/?screen_id=${selectedScreen.id}`);
                 setShowTime(res.data);
-                
+                    
             }catch(e) {
                 console.log(e.response , 'error while fetching show time')
             }
@@ -78,7 +78,7 @@ function ShowScreen() {
         }
         fetchTimeSlot()
     },[selectedScreen])
-    console.log(showTimes)
+    console.log(showTimes,'rajabma')
 
     const formatTime = (timeString) => {
         const [hours , minutes] = timeString.split(':');
@@ -116,8 +116,9 @@ function ShowScreen() {
             setShowDate("")
             setDialogOpen(false);
         }catch(e){
-    
-            console.log(e.response.data.Error)
+            
+            console.log(e.response.data.Error || 'something went wrong')
+            console.log('went to the catch session')
             toast({title : e.response.data?.Error ,
                 variant : "destructive",
                 action: <ToastAction className='flex border border-light font-semibold rounded py-1 pl-1 pr-1' altText="Try again">Try again</ToastAction>,
@@ -125,7 +126,13 @@ function ShowScreen() {
 
             }
     }
-
+    console.log(showTimes)
+    const sortedShows = showTimes.sort((a , b) => {
+        return a.start_time.localeCompare(b.start_time) 
+    })
+    
+    console.log(sortedShows)
+    console.log(selectedShowTime , 'new')
     const fetchShowtime = async() => {
         try{
             const res = await TheatreApi.get(`/showtime/${id}/`);
@@ -139,7 +146,8 @@ function ShowScreen() {
     const handleAddScreen = () => {
         navigate(`/theatre-owner/${id}/add-screen`)
     }
-
+    console.log(showTimes)
+   
     return (
         <div className='p-10 m-10'>
             <Card className="w-full py-10 max-w-4xl mx-auto">
@@ -207,25 +215,38 @@ function ShowScreen() {
                                                             </Button>
 
                                                         </DialogTrigger>
+                                                        
                                                             <DialogContent className="sm:max-w-xl max-h-screen overflow-y-auto bg-white" >
                                                             <div className="p-4">
-                                                                <h2 className="text-xl font-bold mb-4 text-center">showtime of Movie</h2>
+                                                                <DialogTitle className="text-xl font-bold mb-4 text-center">
+
+                                                                showtime of Movie (Screen {screen.screen_number})
+                                                                </DialogTitle>
 
                                                   
                                                                     { showDetails.length > 0 ? (
+                                                                        
                                                                         <ul className="list-disc pl-5">
-                                                                            {showDetails.map((show) => (
-                                                                                <li key={show.id} className="mb-2">
-                                                                                    <p>Movie name: {show.movie_name}</p>
-                                                                                    <p>Screen No: {show.screen_number}</p>
-                                                                                    <p>Start Time: {formatTime(show.start_time)}</p>
-                                                                                    <p>End Time: {formatTime(show.end_time)}</p>
-                                                                                </li>
-                                                                            ))}
+                                                                        {showDetails.map((show) => {
+                                                        
+                                                                            if (show.screen_number == screen.screen_number ) { 
+
+                                                                                return (
+                                                                                    <li key={show.id} className="mb-2">
+                                                                                        <p>Movie name: {show.movie_name}</p>
+                                                                                        <p>Show Date : {show.show_date}</p>
+                                                                                        <p>Start Time: {formatTime(show.start_time)}</p>
+                                                                                        <p>End Time: {formatTime(show.end_time)}</p>
+                                                                                    </li>
+                                                                                );
+                                                                            }
+                                                                            return null  
+                                                                            
+                                                                        })}
                                                                         </ul>   
                                                                         ) : (
                                                                             <p className="text-center text-gray-500">No showtimes available</p>
-                                                                        )
+                                                                        ) 
                                                                     }
                                                             </div>
                                                         
@@ -304,7 +325,7 @@ function ShowScreen() {
                                                                     <div className='flex flex-wrap gap-3 mt-2 justify-center' >
                                                                         {showTimes.length > 0 ? (
 
-                                                                            showTimes.map((showtime) => (
+                                                                            sortedShows.map((showtime) => (
                                                                             <div
                                                                                 key={showtime.id}
                                                                                 onClick={() => setSelectedShowTime(showtime)}
@@ -341,6 +362,13 @@ function ShowScreen() {
                                                     </DialogContent>
                                                     </Dialog>
                                                 </div> 
+                                            </td>
+                                            <td>
+                                                <button className='outline outline-1 py-2 px-2 rounded outline-gray-300'
+                                                    onClick={() => navigate(`/theatre-owner/add-showtime/${id}/${screen.id}`)}
+                                                >
+                                                    <TbClockPlus size={20}  />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))

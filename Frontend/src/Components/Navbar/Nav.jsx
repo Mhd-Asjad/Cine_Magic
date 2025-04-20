@@ -43,6 +43,8 @@ function Nav() {
   },[])
 
   const handleCitySelect = async ( cityId ) => {
+    // here fetching the city id to show city based movie
+    // cityId comes cityselection component
     setIsCityModalOpen(false)
     const id = cityId ? cityId : cityid
     console.log(id,'id from location')
@@ -50,6 +52,7 @@ function Nav() {
       console.log(cityid , ' fetch city id')
       const response = await axios.get(`http://localhost:8000/movies/fetch_movies/${id}/`)
       const { movies , city_id , location } = response.data;
+      console.log(movies)
       dispatch(setMovies(movies))
       dispatch(setLocation({
         cityId : city_id,

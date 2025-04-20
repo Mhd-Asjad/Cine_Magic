@@ -16,31 +16,37 @@ from django.db import IntegrityError
 from datetime import datetime , timedelta
 from django.utils import timezone
 from django.db.models import Count
+from seats.models import *
+import string
 
 # Create your views here.
 class CreateOwnershipProfile(APIView) :
     permission_classes = [AllowAny]
     def post(self , request ) :
-
-        data = request.data
-        user_id = data['user']
-        print(data)
-        user =  User.objects.get(id = user_id)
-        if user.is_staff :
-            return Response({'error' : 'admin cant register as a theatre owner'},status=status.HTTP_400_BAD_REQUEST)
-        if TheaterOwnerProfile.objects.filter(user=user.id).exists():
-            return Response({'error' : 'you have already once registered for theatre ownership'},status=status.HTTP_400_BAD_REQUEST)
-            
-        serializer = TheatreOwnerSerialzers(data = data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message' : 'request has been made soon update via mail'},status=status.HTTP_200_OK)
-        print(serializer.errors)
-        return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = request.data
+            user_id = data['user']
+            print(data)
+            user =  User.objects.get(id = user_id)
+            if user.is_staff :
+                return Response({'error' : 'admin cant register as a theatre owner'},status=status.HTTP_400_BAD_REQUEST)
+            if TheaterOwnerProfile.objects.filter(user=user.id ,theatres__is_confirmed=False).exists():
+                return Response({'error' : 'you have already registered for ownership verfy it for another one'},status=status.HTTP_400_BAD_REQUEST)
+                 
+            serializer = TheatreOwnerSerialzers(data = data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'message' : 'request has been made soon update via mail'},status=status.HTTP_200_OK)
+            print(serializer.errors)
+            return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e :
+            print(str(e))
+            return Response({'error' : str(e)} , status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class Update_theatreowner(APIView):
     def put(self , request , pk):
         print('inputdata' , request.data)
+        theatre_name = request.data.get('theatre_name')
         try :
             owner = TheaterOwnerProfile.objects.get(pk=pk)
         except TheaterOwnerProfile.DoesNotExist:
@@ -64,6 +70,7 @@ class ConfirmTheatreOwner(APIView) :
             for theatre in unverified_theatre :
                 enqueiry_data = {
                     'id' : theatre.id ,
+                    'owner_photo' : request.build_absolute_uri(theatre.owner_photo.url) if  theatre.owner_photo else None,
                     "theatre_name" : theatre.theatre_name , 
                     "location" : theatre.location ,
                     "state"  : theatre.state ,
@@ -172,7 +179,7 @@ class TheatreLogin(APIView) :
         try :
             
             theatre_owner = TheaterOwnerProfile.objects.get(user=user , ownership_status='confirmed')
-            
+                
         except TheaterOwnerProfile.DoesNotExist:
         
             return Response({"error": "Not confirmed as theatre owner"}, status=status.HTTP_404_NOT_FOUND)
@@ -261,11 +268,12 @@ class pending_theatres(APIView):
 class CreateScreen(APIView):
     def post(self , request):
         data = request.data
+        print(data)
         theatre_id = data['theatre']
         screen_no = data['screen_number']
         Screen_type = list(data['screen_type'])
         time_slots = data['time_slots']
-        
+    
         Screen_Occurs = Screen.objects.filter(theatre=theatre_id ,screen_number =  screen_no)
         if Screen_Occurs.exists():
             return Response({'error' : f'Screen {screen_no} already exist'} , status=status.HTTP_400_BAD_REQUEST)
@@ -280,13 +288,15 @@ class CreateScreen(APIView):
                 return Response({'error' : 'not a valid screen type'}, status=status.HTTP_400_BAD_REQUEST)
             else :
                 return Response({'error' : 'add more about screen type'},status=status.HTTP_400_BAD_REQUEST)
+            
+        print('hello validatedd daata')
         serializers = CreateScreenSerializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
             return Response({'message':'screen for theatre is created'},status=status.HTTP_201_CREATED)
+        
         print(serializers.errors)
         return Response(serializers.errors , status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class ShowVerifiedTheatre(APIView):
@@ -338,8 +348,42 @@ class get_timeslots(APIView) :
             
         serilizer = TimeSlotSerializer(time_slots , many=True)
         return Response(serilizer.data , status=status.HTTP_200_OK)
+
+class create_timeslot(APIView):
+    def post(self , request) :
         
+        data = request.data
+        print(data,'adjfsajdljal')
+        
+        try :
+            show_time = data.pop("start_time")
+            screen_id = data.pop("screen_id")
+            show_time_obj = datetime.strptime(show_time, "%H:%M:%S").time()
+            formatted_time = show_time_obj.strftime('%I:%M %p')
+            new_start_dt = datetime.combine(datetime.today(), show_time_obj)
+            new_end_dt = new_start_dt + timedelta(hours=3)
+
+            
+            
+            screen_times = TimeSlot.objects.filter(screen = screen_id)
     
+            for time in screen_times :
+                existing_start_dt = datetime.combine(datetime.today() , time.start_time)
+                existing_end_dt = existing_start_dt + timedelta(hours=3)
+                print(time.start_time , existing_end_dt)
+                if new_start_dt < existing_end_dt and existing_start_dt < new_end_dt :
+                    return Response({'Error' : 'during this time already show time added'},status=status.HTTP_400_BAD_REQUEST)
+                
+            screen = Screen.objects.get(id=screen_id)
+        
+            TimeSlot.objects.create(
+                screen=screen ,
+                start_time = show_time
+            )
+            return Response({'message' : f'show time {formatted_time} created on screen {screen.screen_number}' } , status=status.HTTP_201_CREATED)
+        except Exception as e :
+            return Response({'error' : str(e)} , status=status.HTTP_400_BAD_REQUEST)
+            
 class Add_Show_Time(APIView):
     def post(self , request):
         data = request.data
@@ -353,7 +397,7 @@ class Add_Show_Time(APIView):
             start_time = timezone.make_aware(start_time)
             
             if start_time <= timezone.now():
-                return Response({'Error':'start time must be in the future'},status=status.HTTP_400_BAD_REQUEST)
+                return Response({'Error':'show date must be in the future'},status=status.HTTP_400_BAD_REQUEST)
             
             try:
                 screen = Screen.objects.get(id=screen_id)
@@ -365,11 +409,13 @@ class Add_Show_Time(APIView):
                 slot = timeslot_id,
                 show_date = show_date,
             )
-            print(overlapping_shows)
+            if overlapping_shows:
+                print('exists')
+            print('not existing')
             if overlapping_shows.exists():
                 print('there is overlapping showww')    
                 return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
-            print(data)
+            print(data) 
             serializers = Createshowtimeserializers(data=data)
             if serializers.is_valid():
                 serializers.save()
@@ -392,11 +438,12 @@ class AddTheatre(APIView) :
         name = request.data.get('name')
         address = request.data.get('address')
         owner_id = request.data.get('owner_id')
-    
 
+        theatre = Theatre.objects.filter(name__icontains=name , city=city)
+        if theatre.exists():
+            return Response({'error' : 'theatre is already exists'} , status=status.HTTP_400_BAD_REQUEST)
         try:
             owner = TheaterOwnerProfile.objects.get(id = owner_id)
-
             theatre, created = Theatre.objects.get_or_create(
                 owner = owner,
                 name=name,

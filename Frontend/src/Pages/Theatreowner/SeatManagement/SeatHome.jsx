@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import { Separator } from '@/Components/ui/separator'
 import { Link } from 'react-router-dom'
 import ShowSeats from './ShowSeats'
-import LayoutCards from '../Routes/LayoutCards'
+import LayoutCards from './LayoutCards'
+import SeatCategory from './SeatCategory'
 function SeatHome() {
     const [ activeComponent , setActiveComponent ] = useState('Details')
 
@@ -13,6 +14,9 @@ function SeatHome() {
 
             case "Layout":
                 return <LayoutCards/>
+
+            case "Category":
+                return <SeatCategory/>
 
             default :
             return <ShowSeats/>

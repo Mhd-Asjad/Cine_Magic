@@ -27,7 +27,7 @@ function Sidebar() {
                 {hasSubMenu ? (
                   <>
                     <div
-                      className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-700 hover:scale-105`}
+                      className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-all hover:bg-gray-700 hover:scale-90`}
                       onClick={() => toggleDropdown(item.id)}
                     > 
                       <span className="bg-white/20 p-2 rounded-lg text-center transition-all hover:bg-white/30">
