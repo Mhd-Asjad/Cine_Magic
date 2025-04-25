@@ -11,6 +11,7 @@ import EditTheatre from '@/Pages/Theatreowner/TheatreManagement/EditTheatre';
 import SeatHome from '@/Pages/Theatreowner/SeatManagement/SeatHome';
 import LayoutCards from '@/Pages/Theatreowner/SeatManagement/LayoutCards';
 import Addshowtime from '@/Pages/Theatreowner/ShowManagement/Addshowtime';
+import EditShow from '@/Pages/Theatreowner/ShowManagement/EditShow';
 function Sections() {
     return (
         <div>
@@ -22,6 +23,7 @@ function Sections() {
                 <Route path='list-theatre' element={<PrivateRoute><ListTheatre/></PrivateRoute>} />
                 <Route path=':id/screens' element={<PrivateRoute><ShowScreen/></PrivateRoute>} />
                 <Route path='add-showtime/:theatreId/:screenId' element={<PrivateRoute><Addshowtime/></PrivateRoute>} />
+                <Route path='edit-show/:id' element={<PrivateRoute><EditShow/></PrivateRoute>} />
                 <Route path='list-theatre/add-theatre' element={<PrivateRoute><AddTheatre/></PrivateRoute>}  />
                 <Route path=':id/edit-theatre' element={<PrivateRoute><EditTheatre/></PrivateRoute>} />
                 <Route path="seats-layout" element={<privateRoute><SeatHome/></privateRoute>} />

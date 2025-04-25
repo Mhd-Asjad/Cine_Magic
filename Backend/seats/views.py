@@ -4,12 +4,11 @@ from .models import *
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
-import string
 from django.utils import timezone
 from django.db.models import Count
 from booking.models import SeatLock
 # import rest_framework.permissions import isAuth
-
+from booking.models import BookingSeat
 class create_layout(APIView):
     def post(self, request  ) :
         data = request.data
@@ -68,8 +67,10 @@ class get_theatre_screenlayout(APIView):
 class get_screen_seats(APIView):
     def get(self , request , screen_id):
         try :
-            seatss = seats.objects.filter(screen = screen_id , is_active = True)
-            print(seatss)
+            show_id = request.query_params.get('show_id')
+            print(show_id)
+            seatss = seats.objects.filter(screen = screen_id , is_active = True).order_by('row' , 'number')
+            
       
             
             seat_data = [
@@ -79,11 +80,12 @@ class get_screen_seats(APIView):
                 'number' : seat.number,
                 'category_id' : seat.category.id,
                 'category_name' : seat.category.name,
-                'price' : seat.category.price
+                'price' : seat.category.price,
+                'is_booked' : BookingSeat.objects.filter(seat=seat.id , booking__show_id = show_id ).exists()
                 }
                 for seat in seatss
             ]
-                
+            # print(seat_data)
             return Response(seat_data , status=status.HTTP_200_OK)
         except Exception as e :
             return Response({'error' : str(e)} , status=status.HTTP_400_BAD_REQUEST)
@@ -124,6 +126,7 @@ class update_seats_category(APIView):
     # permission_classes = [isAuthenticated]
     
     def post(self , request ):
+        print(request.data)
         seats_ids = request.data.get('seats_ids',[])
         category_id = request.data.get('category_id')
         
@@ -134,35 +137,55 @@ class update_seats_category(APIView):
         seats.objects.filter(id__in = seats_ids).update(category_id=category_id)
         return Response({'message' : 'seats category updated successfully'})
     
-    
-    class Lock_seats(APIView):
-        def post(self , request):
-            data = request.data
-            seats_ids = data.get('seats_id')
-            show_id = data.get('show_id')
-            session_id = request.session.session_key or request.session.save()
-            
-            expires_at = timezone.now() + timezone.timedelta(minutes=10)
-            locked_seats = SeatLock.objects.filter(
-                seat_id__in = seats_ids ,
-                show_id = show_id,
-                expires_at__gt=timezone.now()
-                 
-            )
-            if locked_seats.exists():
-                return Response({'error' : 'some seats are not available'} , status=status.HTTP_400_BAD_REQUEST)
-                     
-            for seat_id in seats_ids:
-                SeatLock.objects.get_or_create(
-                    seat_id = seat_id,
-                    show_id = show_id , 
-                    user = session_id,
-                    defaults={
-                        'expires_at' : expires_at
-                    }
-                )
+
+class Lock_seats(APIView):
+    def post(self , request):
+        data = request.data
+        seats_ids = data.get('seats_ids')
+        show_id = data.get('show_id')
+        session_id = request.session.session_key or request.session.create()
+        if not session_id:
+            session_id = request.session.session_key
+
+        print(session_id , 'this session id')
+        expires_at = timezone.now() + timezone.timedelta(minutes=10)
+        locked_seats = SeatLock.objects.filter(
+            seat_id__in = seats_ids ,
+            show_id = show_id,
+            expires_at__gt=timezone.now()
                 
+        )
+        if locked_seats.exists():
+            return Response({'error' : 'some seats are not available'} , status=status.HTTP_400_BAD_REQUEST)
+                    
+        for seat_id in seats_ids:
+            SeatLock.objects.get_or_create(
+                seat_id = seat_id,
+                show_id = show_id , 
+                user = session_id,
+                defaults={
+                    'expires_at' : expires_at
+                }
+            )
+
+        
+        return Response({'message' : 'seats locked successfully' , 'expires_at' : expires_at.isoformat() } , status=status.HTTP_200_OK)
+    
+class Unlock_Seats(APIView):
+    def post(self , request):
+        try :
+            data = request.data
+            seat_ids = data['selected_seats']
+            show_id = data['show_id']
             
-            request.session['locked_seats'] = seats_ids
-            request.session['show_id'] = show_id
-            return Response({'message' : 'seats locked successfully'} , status=status.HTTP_200_OK)  
+            now = datetime.now()
+            SeatLock.objects.filter(
+                seat_id__in= seat_ids,
+                show_id = show_id,
+                expires_at__lt = now
+            ).delete()
+            
+            return Response({'message' : 'seats unloacked'} , status=status.HTTP_200_OK)
+        
+        except Exception as e :
+            return Response({'error' : 'not found'},status=status.HTTP_404_NOT_FOUND)

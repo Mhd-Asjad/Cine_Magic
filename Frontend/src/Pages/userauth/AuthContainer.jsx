@@ -16,6 +16,7 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose }) {
     const dispatch = useDispatch();
     const {toast} = useToast();
     const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
+    console.log(GOOGLE_CLIENT_ID)
     const toggleForm = () => {
         setIsRegister((prev) => !prev);
     };
@@ -41,7 +42,7 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose }) {
                 isModalClose()
             }
             toast({
-                title : 'google logineed successfully',
+                title : 'google authenticatin verified',
                 
             })
         }catch(e) {

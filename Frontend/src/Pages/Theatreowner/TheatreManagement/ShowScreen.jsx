@@ -39,6 +39,7 @@ function ShowScreen() {
     const [selectedMovie, setSelectedMovie] = useState(null);
     const [selectedScreen, setSelectedScreen] = useState(null);
     const [ showDate, setShowDate] = useState("");
+    const [ endDate , setEndDate ] = useState("")
     const [ showTimes , setShowTime] = useState([])
     const [selectedShowTime , setSelectedShowTime] = useState(null);
     const [ showDetails , setShowDetails ] = useState([]);
@@ -101,7 +102,8 @@ function ShowScreen() {
                 "movie" : selectedMovie.id,
                 'screen' : selectedScreen.id,
                 'slot' : selectedShowTime.id,
-                'show_date' : showDate 
+                'show_date' : showDate,
+                'end_date' : endDate
                 
             })
             console.log(res.data)
@@ -236,7 +238,7 @@ function ShowScreen() {
                                                                                         <p>Movie name: {show.movie_name}</p>
                                                                                         <p>Show Date : {show.show_date}</p>
                                                                                         <p>Start Time: {formatTime(show.start_time)}</p>
-                                                                                        <p>End Time: {formatTime(show.end_time)}</p>
+                                                                                        {/* <p>End Time: {formatTime(show?.end_time)}</p> */}
                                                                                     </li>
                                                                                 );
                                                                             }
@@ -308,8 +310,7 @@ function ShowScreen() {
                                                                     Add Showtime for {selectedMovie.title}
                                                                 </h2>
                                                                     <label className='font-bold pl-3 flex justify-center ' >show Date</label>
-                                                                <div className='flex justify-center pl-4' >
-
+                                                                <div className='flex justify-center pl-4 gap-3' >
 
                                                                 <Input
                                                                     type="date"
@@ -317,8 +318,21 @@ function ShowScreen() {
                                                                     onChange={(e) => setShowDate(e.target.value)}
                                                                     className="w-[23%] border-gray-300 rounded-lg px-4 py-2"
                                                                     placeholder="Start Time"
-                                                                />
+                                                                    />
 
+    
+                                                                    <div className='mt-1' >
+                                                                        <p className='font-semibold' >to</p>
+                                                                    </div>
+
+                                                                    <Input
+                                                                        type="date"
+                                                                        value={endDate}
+                                                                        onChange={(e) => setEndDate(e.target.value)}
+                                                                        className="w-[23%] border-gray-300 rounded-lg px-4 py-2"
+                                                                        placeholder="End Date"
+                                                                    />
+                                                              
                                                                 </div>
                                                                 <div className='pl-4 mt-4' >
                                                                     <label className='flex justify-center' > select showtime </label>

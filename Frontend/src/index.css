@@ -85,4 +85,25 @@
     @apply bg-background text-foreground;
     }
 }
-  
+
+/* body {
+  font-family: var(--font-ibm_plex_sans), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-arimo), sans-serif;
+} */
+
+.loader {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #00b894;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

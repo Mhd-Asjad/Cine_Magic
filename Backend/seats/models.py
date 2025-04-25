@@ -29,9 +29,10 @@ class seats(models.Model):
     number = models.PositiveIntegerField()
     category = models.ForeignKey(SeatCategory , on_delete=models.CASCADE , null=True , blank=True)
     is_active = models.BooleanField(default=True)
+    is_seat = models.BooleanField(default=True)
     
     class Meta :
         unique_together = ('screen' , 'row' , 'number')        
-    
+        
     def __str__(self):
         return f"{self.row}{self.number} - {self.screen}"

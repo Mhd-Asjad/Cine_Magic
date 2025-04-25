@@ -67,9 +67,9 @@ function SeatCategory() {
 
   const getSeatClass = (seat) => {
     if (selectedSeats.some((s) => s.id === seat.id)) {
-      return 'bg-blue-500 outline-blue text-white cursor-pointer'
+      return 'bg-blue-500 outline-blue text-white cursor-not-allowed'
     }
-    return 'bg-white text-blue cursor-pointer outline outline-1 outline-blue-600'
+    return 'bg-white text-blue cursor-not-allowed outline outline-1 outline-blue-600'
   }
   
   const toggleSeatSelection = (seat) => {
@@ -100,7 +100,7 @@ function SeatCategory() {
       })
       return
     }
-
+    
     const allSelected = rowSeats.every((seat) =>
       selectedSeats.some((s) => s.id === seat.id)
     )
@@ -149,7 +149,8 @@ function SeatCategory() {
       setSelectedCategory(null)
 
       const updated = await seatsApi.get(`screens/${selectedScreen}/seats/`)
-      setSeats(organizeByRow(updated,data))
+      setSeats(organizeByRow(updated.data))
+      setSelectedScreen(null)
     } catch (e) {
       console.log(JSON.stringify(e , null , 2))
       toast({
@@ -238,7 +239,7 @@ function SeatCategory() {
                                   category_name: selectedCategory?.name,
                                 })
                               }
-                              className={`w-6 h-6 rounded-sm flex items-center justify-center text-xs ${getSeatClass(
+                              className={`w-6 h-6 rounded-sm  flex items-center justify-center text-xs ${getSeatClass(
                                 seat
                               )}`}
                             >

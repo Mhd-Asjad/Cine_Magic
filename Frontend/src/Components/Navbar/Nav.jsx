@@ -90,7 +90,7 @@ function Nav() {
             <a href="#" className="text-black-300">
               Blogs
             </a>
-            <a href="#" className="text-black-300">
+            <a href="/movies/my-orders" className="text-black-300">
               Order
             </a>
           </div>

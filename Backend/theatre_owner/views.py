@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
 from .models import TheaterOwnerProfile
-from .serializers import TheatreOwnerSerialzers , FetchMovieSerializer , CreateScreenSerializer , Createshowtimeserializers , TimeSlotSerializer , UpdateTheatreOwnerSeriailizer
+from .serializers import TheatreOwnerSerialzers , FetchMovieSerializer , CreateScreenSerializer , Createshowtimeserializers , TimeSlotSerializer , UpdateTheatreOwnerSeriailizer , EditShowTimeSerializer
 from rest_framework.permissions import IsAuthenticated , AllowAny
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -13,7 +13,7 @@ from theatres.models import Theatre , Screen , ShowTime , TimeSlot
 from useracc.models import User
 from django.http import JsonResponse
 from django.db import IntegrityError
-from datetime import datetime , timedelta
+from datetime import datetime , timedelta ,date
 from django.utils import timezone
 from django.db.models import Count
 from seats.models import *
@@ -359,11 +359,10 @@ class create_timeslot(APIView):
             show_time = data.pop("start_time")
             screen_id = data.pop("screen_id")
             show_time_obj = datetime.strptime(show_time, "%H:%M:%S").time()
-            formatted_time = show_time_obj.strftime('%I:%M %p')
             new_start_dt = datetime.combine(datetime.today(), show_time_obj)
+            print(new_start_dt)
             new_end_dt = new_start_dt + timedelta(hours=3)
-
-            
+            formatted_time = show_time_obj.strftime('%I:%M %p')
             
             screen_times = TimeSlot.objects.filter(screen = screen_id)
     
@@ -387,17 +386,35 @@ class create_timeslot(APIView):
 class Add_Show_Time(APIView):
     def post(self , request):
         data = request.data
+        print(data)
         timeslot_id = data.get('slot')
         screen_id = data.get('screen')
         show_date = data.get('show_date')
+        end_date = data.get('end_date')
         timeslot = TimeSlot.objects.get(id = timeslot_id)
         date_time = show_date + ' ' + str(timeslot.start_time)
+        print(type(show_date) , end_date)
         try:
             start_time = datetime.strptime(date_time , "%Y-%m-%d %H:%M:%S")
             start_time = timezone.make_aware(start_time)
             
+            from_date = datetime.strptime(show_date, "%Y-%m-%d").date()
+            to_date = datetime.strptime(end_date , '%Y-%m-%d').date()
+            
+            today = date.today()
+            if not to_date :
+                return Response({'Erorr' : 'to date is required'} , status=status.HTTP_400_BAD_REQUEST)
+            
+            if to_date <= from_date :
+                return Response({'Error' : 'to date must be greater that start date'})
+            
+            if from_date < today : 
+                return Response({'Error':'from date canot be in the past'},status=status.HTTP_400_BAD_REQUEST)
+            
             if start_time <= timezone.now():
-                return Response({'Error':'show date must be in the future'},status=status.HTTP_400_BAD_REQUEST)
+                
+                return Response({'Error':'show time must be in the future'},status=status.HTTP_400_BAD_REQUEST)
+            
             
             try:
                 screen = Screen.objects.get(id=screen_id)
@@ -415,7 +432,9 @@ class Add_Show_Time(APIView):
             if overlapping_shows.exists():
                 print('there is overlapping showww')    
                 return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
-            print(data) 
+
+            print("Comparison result:", to_date <= from_date)      
+            print(data)
             serializers = Createshowtimeserializers(data=data)
             if serializers.is_valid():
                 serializers.save()
@@ -517,5 +536,124 @@ class DeleteTheatre(APIView) :
         
         theatre.delete()
         return Response({"message": "Theatre deleted successfully"}, status=status.HTTP_200_OK)
+
+def get_date_range(start_date, end_date):
+    start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+    return [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+class Edit_show_det(APIView):
+    def get( self , request , slot_id ) :
+        try:
+            
+            show_det = ShowTime.objects.filter(slot = slot_id)
+            print(show_det)
+            latest_show = show_det.order_by('-modified_at').first()
+            
     
-    
+            details = {
+                
+                'start_date' : latest_show.show_date,
+                'end_date' : latest_show.end_date if latest_show.end_date else None,
+                'show_time' : latest_show.slot.start_time ,
+                'end_time' : latest_show.end_time,
+                'screen': latest_show.screen.id,
+                'movie': latest_show.movie.id,
+                'slot': latest_show.slot.id
+            }
+            
+            return JsonResponse(details, status=status.HTTP_202_ACCEPTED )
+        except ShowTime.DoesNotExist:
+            return Response({'error' : 'show not found'},status=status.HTTP_404_NOT_FOUND)
+        
+    def put(self, request, slot_id):
+        data = request.data
+
+        try:
+
+            start_time_str = data.pop('start_time')
+            end_time_str = data.pop('end_time', None)
+
+            start_time_obj = datetime.strptime(start_time_str, "%H:%M:%S").time()
+            start_dt = datetime.combine(datetime.today(), start_time_obj)
+            end_dt = start_dt + timedelta(hours=3)
+            
+            print('starttime :' ,start_dt ,'endtime :' , end_dt)
+
+            end_time_obj = datetime.strptime(end_time_str, "%H:%M:%S").time()
+            custom_end_dt = datetime.combine(datetime.today(), end_time_obj)
+            if end_time_str:
+                print(custom_end_dt , 'custom enddate')
+                if custom_end_dt < end_dt:
+                    return Response({'Error': 'Time gap must be at least 3 hours'}, status=status.HTTP_400_BAD_REQUEST)
+
+            screen_id = data['screen']
+            movie_id = data['movie']
+            show_date = data['show_date']
+            end_date = data['end_date']
+
+            screen = Screen.objects.get(id=screen_id)
+            movie = Movie.objects.get(id=movie_id)
+
+            existing_slots = TimeSlot.objects.filter(screen=screen_id).exclude(id=slot_id)
+            for slot in existing_slots:
+                existing_start = datetime.combine(datetime.today(), slot.start_time)
+                existing_end = existing_start + timedelta(hours=3)
+
+                if start_dt < existing_end and existing_start < end_dt:
+                    return Response({'Error': 'Another show already scheduled in this slot'}, status=status.HTTP_400_BAD_REQUEST)
+
+            slot = TimeSlot.objects.get(id=slot_id)
+            shows = ShowTime.objects.filter(slot=slot)
+            shows.update(end_time=end_time_obj)
+            old_start_time = slot.start_time
+            if old_start_time != start_time_obj:
+                print('Time changed')
+            slot.start_time = start_time_obj
+            slot.save()
+
+            ShowTime.objects.filter(
+                screen=screen,
+                movie=movie,
+                slot=slot,
+                show_date__gt=end_date
+            ).delete()
+            today = datetime.now()
+            outdated_shows = ShowTime.objects.filter(
+                slot=slot,
+                show_date__lt=show_date,
+            ).filter(show_date__lt=today)
+            outdated_shows.delete()
+
+            existing_dates = set(
+                ShowTime.objects.filter(
+                    screen=screen,
+                    slot=slot,
+                    movie=movie,
+                    show_date__range=(show_date, end_date)
+                ).values_list('show_date', flat=True)
+            )
+
+            def get_date_range(start, end):
+                start_date = datetime.strptime(start, "%Y-%m-%d").date()
+                end_date = datetime.strptime(end, "%Y-%m-%d").date()
+                return [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+            showtimes_to_create = [
+                ShowTime(
+                    movie=movie,
+                    screen=screen,
+                    slot=slot,
+                    show_date=day,
+                    end_date=end_date,
+                    end_time = custom_end_dt
+                    
+                )
+                for day in get_date_range(show_date, end_date) if day not in existing_dates
+            ]
+            ShowTime.objects.bulk_create(showtimes_to_create)
+
+            return Response({'message': 'Successfully updated and created showtimes'}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'Error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

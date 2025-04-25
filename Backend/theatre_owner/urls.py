@@ -20,6 +20,7 @@ urlpatterns = [
     path('showtime/<int:theatre_id>/', fetch_showtime.as_view() , name='showtime'),
     path('get_time-slots/', get_timeslots.as_view(),name='time-slot'),
     path('add-timeslot/' ,create_timeslot.as_view() , name='add-timeslot'),
+    path('edit-show/<int:slot_id>/' , Edit_show_det.as_view() , name='edit-show'),
     path('add_show_time/',Add_Show_Time.as_view(), name='add_show_time'),
     path('theatre/<int:city_id>/add' ,AddTheatre.as_view() , name='theatre_add'),
     path('theatre/<int:id>/edit' , EditTheatreData.as_view() , name='theatre_edit'),

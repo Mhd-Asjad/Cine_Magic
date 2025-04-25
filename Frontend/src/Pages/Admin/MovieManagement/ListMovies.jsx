@@ -49,7 +49,7 @@ function ListMovies() {
       }
       }
     }
-
+    
     const handleEdit = (movie_id) => {
       navigate(`/admin/movies/${movie_id}/edit`)
     }

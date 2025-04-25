@@ -75,7 +75,84 @@ class CreateScreenSerializer(serializers.ModelSerializer):
                 )
         return screen
 
+class EditShowTimeSerializer(serializers.ModelSerializer) :
+    # start_time = serializers.TimeField()
+    class Meta :
+        model = ShowTime
+        fields = ['id' ,'screen' ,'movie' ,'slot' ,'show_date' , 'end_date']
+        
+        
+    # def validate(self, data):
+    #     screen_id = data.get('screen')
+    #     new_start_time = data.get('start_time')
+    #     duration = timedelta(hours=3)
 
+    #     new_start_dt = datetime.combine(datetime.today(), new_start_time)
+    #     new_end_dt = new_start_dt + duration
+
+    #     existing_slots = TimeSlot.objects.filter(screen=screen_id)
+
+    #     for slot in existing_slots:
+    #         existing_start_dt = datetime.combine(datetime.today(), slot.start_time)
+    #         existing_end_dt = existing_start_dt + duration
+
+    #         if new_start_dt < existing_end_dt and existing_start_dt < new_end_dt:
+    #             raise serializers.ValidationError("This time slot overlaps with an existing one.")
+
+    #     return data
+        
+    def update(self , instance , validated_data):
+        screen = validated_data.get('screen' , instance.screen)
+        movie = validated_data.get('movie' , instance.movie)
+        slot = validated_data.get('slot' , instance.slot)
+        new_start_date = validated_data.get('show_date' , instance.show_date)
+        new_end_date = validated_data.get('end_date' , instance.end_date)
+        print(new_start_date)
+        print(new_end_date)
+
+            
+        ShowTime.objects.filter(
+            screen = screen,
+            movie = movie,
+            slot = slot,
+            show_date__gt = new_end_date
+        ).delete()
+        
+        existing_dates = set(
+            ShowTime.objects.filter(
+                screen=screen,
+                slot=slot,
+                movie=movie,
+                show_date__range=(new_start_date, new_end_date)
+            ).values_list('show_date', flat=True)
+        )
+        print(existing_dates)
+        
+        date_list = [new_start_date + timedelta(days=i) for i in range((new_end_date - new_start_date).days + 1)]
+        start_time = slot.start_time
+        end_time = (datetime.combine(datetime.today(), start_time) + timedelta(minutes=movie.duration)).time()
+        print('reachers hereee')
+        new_showtimes = []
+        
+        for show_date in date_list : 
+            if show_date not in existing_dates :
+                new_showtimes.append(ShowTime(
+                    screen=screen,
+                    movie=movie,
+                    slot=slot,
+                    show_date=show_date,
+                    end_time=end_time
+                ))
+                
+        ShowTime.objects.bulk_create(new_showtimes)
+        
+        # updating new showdate for instancess
+        instance.show_date = new_start_date
+        instance.end_date = new_end_date
+        instance.save()
+
+        return instance
+        
 class Createshowtimeserializers(serializers.ModelSerializer):
     movie_name = serializers.CharField(source='movie.title',read_only = True)
     screen_number = serializers.CharField(source='screen.screen_number')
@@ -83,12 +160,44 @@ class Createshowtimeserializers(serializers.ModelSerializer):
     
     class Meta :
         model = ShowTime
-        fields = ['id' ,'movie_name' ,'screen_number' ,'screen' ,'movie' ,'slot' ,'show_date' ,'start_time' ,'end_time']
+        fields = ['id' ,'movie_name' ,'screen_number' ,'screen' ,'movie' ,'slot' ,'show_date' , 'end_date' , 'start_time' ,'end_time']
         
     
-    def create(self , validated_data):
-        showtime = ShowTime.objects.create(**validated_data)
-        return showtime
+    def create(self , validated_data):  
+        screen = validated_data['screen']
+        movie = validated_data['movie']
+        slot = validated_data['slot']
+        show_date = validated_data['show_date']
+        end_date = validated_data.get('end_date') 
+
+
+        if not end_date:
+            end_date = show_date
+
+        date_list = [show_date + timedelta(days=i) for i in range((end_date - show_date).days + 1)]
+        
+        start_time = slot.start_time
+        start_dt = datetime.combine(datetime.today(), start_time)
+
+        end_time = (start_dt + timedelta(minutes=movie.duration)).time()
+
+        showtime_list = [
+            
+            ShowTime(
+                screen=screen,
+                movie=movie,
+                slot=slot,
+                show_date=date,
+                end_time=end_time,
+                end_date = end_date
+            )
+            
+            for date in date_list
+        ]
+
+        ShowTime.objects.bulk_create(showtime_list)
+        return showtime_list[0]
+        
     
 class UpdateTheatreOwnerSeriailizer(serializers.ModelSerializer):
     class Meta :

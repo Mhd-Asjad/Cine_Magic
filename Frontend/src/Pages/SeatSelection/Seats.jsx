@@ -1,23 +1,29 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios';
 import Nav from '@/Components/Navbar/Nav';
 import screenimg from '../../assets/screen.png'
 import seatsApi from '@/Axios/seatsaApi';
-
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { lockseats } from '@/Redux/Features/selectedseats';
 function Seats() {
-  const {id} = useParams();
+  const {screenId , showId } = useParams();
   const [seats , setSeats] = useState([])
   const [ selectedSeats , setSelectedSeats] = useState([]);
   const [loading , setLoading ] = useState(true);
   const [error , setError ] = useState(null)
   const [totalPrice , setTotalPrice] = useState(0);
+  const dispatch = useDispatch();
+  const selectedCity = useSelector((state) => state.location.location)
+  const navigate = useNavigate();
   useEffect(() =>{
     const fetchSeats = async() => {
       try{
-        const res = await axios.get(`http://127.0.0.1:8000/seats/screens/${id}/seats/`)
+        const res = await axios.get(`http://127.0.0.1:8000/seats/screens/${screenId}/seats/?show_id=${showId}`)
         console.log(res.data ,'values')
-        const organizedData = organizeByRow(res.data)
+
+        const organizedData = organizeByRow(res.data) 
         setSeats(organizedData)
         setError(null)
         setLoading(false)
@@ -29,7 +35,7 @@ function Seats() {
       }
     }
     fetchSeats()
-  },[id])
+  },[screenId])
 
   const toggleSeatSelection = (seat) => {
     setSelectedSeats(prev => {
@@ -43,10 +49,11 @@ function Seats() {
   }
 
   const getSeatClass = (seat) => {
+    if (seat.is_booked) return 'bg-gray-400 text-white cursor-not-allowed'
     if (selectedSeats.some(s => s.id === seat.id)) return "bg-blue-500 outline-blue text-white cursor-pointer";
     return "bg-white text-blue cursor-pointer outline outline-1 outline-blue-600"
   }
-
+  
   const organizeByRow = (seats) => {
     console.log(seats , 'inside orgainer')
     const rowMap = {};
@@ -56,9 +63,7 @@ function Seats() {
       }
       rowMap[seat.row].push(seat)
     });
-    Object.values(rowMap).map(rowSeats => {
-      rowSeats.sort((a , b) => a.number - b.number)
-    })
+
     return rowMap;
   }
 
@@ -68,6 +73,37 @@ function Seats() {
     setTotalPrice(price);
 
   },[selectedSeats])
+
+  const proceedToCheckout = async() => {
+    const selectedSeatsIds = selectedSeats.map(seat => seat.id , [])
+    console.log(selectedSeatsIds , 'selected seats ids')
+    const payload = {
+      'show_id': showId,
+      'seats_ids': selectedSeatsIds
+    }
+    try {
+      const res = await seatsApi.post('lock-seats/', payload )
+      console.log(res.data , 'response from checkout')
+      console.log(res.data.expires_at)
+      if (res.status === 200) {
+        console.log(selectedSeatsIds , showId , 'inside the success block')
+        
+        console.log('beforedispatch')
+        dispatch(lockseats({
+          seatIds : selectedSeatsIds ,
+          showId : showId ,
+          expiresAt : res.data.expires_at
+
+        }));
+        console.log('after dispatch');
+        navigate(`/seat-layout/${selectedCity}`)
+      }
+    }catch(e) {
+      console.log(e.response , 'error from checkout')
+    }
+
+  }
+
   console.log(selectedSeats , 'selected seats')
   if (loading) {
     return (
@@ -80,8 +116,7 @@ function Seats() {
   }
   
   return (
-    <div className='min-h-screen w-full bg-gray-50' >
-
+    <div className='min-h-screen w-full bg-gray-50'>
       <div className='bg-blue-50 w-full shadow-md p-8 ' >
       <div className="flex justify-end px-10  space-x-8 pt-5 ">
         <div className="flex items-center">
@@ -89,7 +124,7 @@ function Seats() {
           <span>Available</span>
         </div>
         <div className="flex items-center">
-          <div className="w-4 h-4 bg-blue-400 rounded-sm mr-2"></div>
+          <div className="w-4 h-4 bg-blue-500 rounded-sm mr-2"></div>
           <span>Selected</span>
         </div>
         <div className="flex items-center">
@@ -102,16 +137,24 @@ function Seats() {
       
      
       <div className="flex flex-col items-center mb-2">
+            <div>
+              {/* <p >price - 30</p>a */}
+            </div>
           {Object.entries(seats).map(([row , rowSeats]) => (
             <div key={row} className="flex justify-center w-full mb-4">
               <div className="w-6 font-bold mr-2">{row}</div>
-              <div className="flex space-x-2 gap-1">
+
+              <div className="flex space-x-2 gap-2">
+
+
                 {rowSeats.map(seat => (
+
                   <button
                     key={seat.id}
                     className={`w-6 h-6 rounded-sm flex items-center justify-center text-xs ${getSeatClass(seat)}`}
+
                     onClick={() => toggleSeatSelection(seat)}
-                    // disabled={seat.is_booked}
+                    disabled={seat.is_booked}
                   >
                     {seat.number}
                   </button>

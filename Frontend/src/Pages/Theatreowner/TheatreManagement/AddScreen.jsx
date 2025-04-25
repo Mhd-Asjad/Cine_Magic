@@ -17,6 +17,8 @@ function AddScreen() {
     const [screenCount, setScreenCount] = useState(0);
     const [selectedLayout, setSelectedLayout] = useState(null);
     const [ timeSlots, setTimeSlot ]  = useState([{ start_time : "" }])
+    const [gaps , setGaps] = useState([])
+    const [gapPositions, setGapPositions] = useState([]);
     const initialValue = {
         screen_number: '',
         capacity: '',
@@ -78,6 +80,16 @@ function AddScreen() {
         setTimeSlot([...timeSlots , {start_time : ""}]);
     };
 
+    const toggleGap = (row, col) => {
+        const exists = gapPositions.some(pos => pos.row === row && pos.col === col);
+        if (exists) {
+          setGapPositions(prev => prev.filter(pos => !(pos.row === row && pos.col === col)));
+        } else {
+          setGapPositions(prev => [...prev, { row, col }]);
+        }
+    };
+
+
     const removeTimeSlot = (index) => {
         const updatedSlots = timeSlots.filter((_, i) => i !== index)
         setTimeSlot(updatedSlots)
@@ -135,7 +147,7 @@ function AddScreen() {
             })
         }
     };
-    console.log(timeSlots)
+    console.log(gapPositions)
     return (
         <div className="flex border shadow-md mt-7 py-4 bg-gray-100">
             <div className="p-10 py-8">
@@ -261,23 +273,32 @@ function AddScreen() {
                 <div className="p-10 py-8">
                     <h3 className="text-xl text-gray-600 mb-7">Layout Preview</h3>
                     <div className="border p-4 rounded bg-white">
-                        <div className="mb-4 text-center p-2 bg-gray-200 rounded">Screen</div>
                         <div className="grid gap-1" style={{ 
                             gridTemplateColumns: `repeat(${selectedLayout.cols}, 1fr)`
                         }}>
                             {Array.from({ length: selectedLayout.rows * selectedLayout.cols }).map((_, index) => {
                                 const row = Math.floor(index / selectedLayout.cols);
                                 const col = index % selectedLayout.cols;
-                                return (
+                                // const key = `${row}-${col}`
+                                const isGap = gapPositions.some(pos => pos.row === row && pos.col === col );
 
-                                    <div key={index} className="w-8 h-8 flex items-center justify-center bg-blue-100 text-xs rounded">
+                                return (
+                                    <div 
+                                     key={index}
+                                     onClick={() => toggleGap(row , col)}
+                                     className={`w-8 h-8 cursor-pointer flex items-center justify-center bg-blue-100 text-xs rounded
+                                        ${isGap ? "bg-white border border-dashed text-white" : "bg-blue-100"}`}
+                                        style={ isGap ? { marginLeftm : '12px' }:{}}
+                                        
+                                        >
                 
-                                        {String.fromCharCode(65 + row)}{col + 1}
-                                    </div>
+                                    {!isGap && `${String.fromCharCode(65 + row)}${col + 1}`}
+                                </div>
                                 );
                             })}
                         </div>
                     </div>
+                            <div className="mb-4 text-center p-2 bg-gray-200 rounded">Screen this way</div>
                     
                     
                 </div>

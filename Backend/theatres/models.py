@@ -6,7 +6,7 @@ class Theatre(models.Model):
     owner = models.ForeignKey('theatre_owner.TheaterOwnerProfile' , on_delete=models.CASCADE , related_name='theatres' ,  null=True, blank=True)
     name = models.CharField(max_length=100)
     city =  models.ForeignKey('movies.City' , on_delete=models.CASCADE , related_name='theatres')
-    address = models.TextField()
+    address = models.TextField()    
     is_confirmed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -44,21 +44,13 @@ class ShowTime(models.Model) :
     slot = models.ForeignKey(TimeSlot , on_delete=models.CASCADE ,blank=True , null=True, related_name='showtimes')
     end_time = models.TimeField(blank=True , null=True)
     show_date = models.DateField(blank=True , null=True)
+    end_date = models.DateField(blank=True,null=True)
+    # status = models.CharField(max_length=10, choices=(('active', 'Active'), ('expired', 'Expired')), default='active')
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     
     class Meta :
        unique_together = ('screen' , 'slot' ,'show_date')
-    
-    @property
-    def get_seats(self):
-        return self.screen.seats.filter(is_active=True)
-    def save(self , *args , **kwargs):
-        if not self.end_time :
-            start_datetime = datetime.combine(datetime.today(),self.slot.start_time)
-            end_datetime = start_datetime + timedelta(minutes=self.movie.duration)
-            self.end_time = end_datetime.time()
-        super().save(*args , **kwargs)
     
     def __str__(self) :
         return f"{self.movie.title} at {self.screen.theatre.name} , Screeen {self.screen.screen_number} at {self.slot.start_time.strftime('%Y-%m-%d %H:%M')}"

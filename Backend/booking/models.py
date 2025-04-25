@@ -13,7 +13,6 @@ class Booking(models.Model):
     booking_id = models.CharField(max_length=20 , unique=True )
     user = models.ForeignKey('useracc.User' , on_delete=models.CASCADE , null=True , blank=True)
     show = models.ForeignKey(ShowTime , on_delete=models.CASCADE)
-    seats = models.ManyToManyField('seats.seats', related_name='bookingseats')
     customer_name = models.CharField(max_length=100)
     customer_email = models.EmailField()
     booking_time = models.DateTimeField(auto_now_add=True)
@@ -31,7 +30,7 @@ class Booking(models.Model):
             from datetime import datetime
             
             date_str = datetime.now().strftime('%Y%m%d')
-            random_str = ''.join(random.choice(string.ascii_uppercase + string.digits , k=4))
+            random_str = ''.join(random.choices(string.ascii_uppercase + string.digits , k=4))
             self.booking_id = f'MOV-{date_str}-{random_str}'
             
         super().save(*args , **kwargs)
@@ -45,10 +44,20 @@ class BookingSeat(models.Model) :
     class Meta : 
         unique_together = ('booking' , 'seat')
         
+        
+class Payment(models.Model):
+    booking  =  models.OneToOneField(Booking , on_delete=models.CASCADE,related_name='payment')
+    order_id = models.CharField(max_length=100)
+    payer_id = models.CharField(max_length=100)
+    payment_method = models.CharField(default='paypal' , max_length=50)
+    amount = models.DecimalField(max_digits=10 , decimal_places=2)
+    currency = models.CharField(max_length=4 , default='USD')
+    payment_date = models.DateTimeField(auto_now_add=True)
+
 class SeatLock(models.Model) :
     seat = models.ForeignKey('seats.seats' , on_delete=models.CASCADE)
     show = models.ForeignKey('theatres.ShowTime' , on_delete=models.CASCADE)
-    user = models.CharField(max_length=100)
+    user = models.CharField(max_length=100) 
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     

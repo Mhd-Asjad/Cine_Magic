@@ -18,11 +18,13 @@ function Addshowtime() {
   const [time , setTime ] = useState('12:00:00');
   const navigate = useNavigate();
   const {toast} = useToast();
+  const [showId , setShowId] = useState(null)
   console.log(time)
   useEffect(() => {
     const fetchCurrentShowTime = async() => {
       try {
         const res = await TheatreApi.get(`/get_time-slots/?screen_id=${screenId}`)
+        console.log(res.data)
         setShowTimes(res.data)
      
       }catch(e) {
@@ -59,8 +61,6 @@ function Addshowtime() {
       
 
   }
-  console.log(time.length)
-  console.log(showTimes)
   const formatTime = (timeString) => {
     if (!timeString) {
       return 'not defined'
@@ -71,6 +71,18 @@ function Addshowtime() {
     return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
   }
 
+  const handleSeatEdit = (timeslot_id , showend) => {
+    if (!showend){
+      toast({title : 'no show created yet' ,
+        variant : 'destructive'
+      })
+      return
+
+    }
+    navigate(`/theatre-owner/edit-show/${timeslot_id}`)
+
+  }
+  console.log(showId)
   return (
     <div className="min-h-screen bg-gradient-to-br to-indigo-100 p-8 mt-10 font-sans">
           <h1 className=" flex justify-center text-2xl md:text-3xl font-bold mb-4">Movie Showtimes</h1>
@@ -91,8 +103,9 @@ function Addshowtime() {
                   <button
                     key={show.id}
                     className="group relative bg-gradient-to-br from-blue-500 to-blue-400 text-white p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden"
+                    onClick={() =>handleSeatEdit(show.id , show.end_time)}
                   >
-                    <div className="relative z-10">
+                    <div className="relative z-10" >
                       <div className="text-lg font-bold">{formatTime(show.start_time)}</div>
                       <div className="text-xs text-blue-100 font-medium">to</div>
                       <div className="text-base font-semibold">{formatTime(show.end_time)}</div>

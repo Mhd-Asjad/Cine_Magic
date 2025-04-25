@@ -14,5 +14,7 @@ urlpatterns = [
     path('screens/<int:screen_id>/seats/' , get_screen_seats.as_view() , name='screeen-seats'),
     path('get-theatre-screen/<int:id>/' , get_theatre_screens.as_view(),name='theatre-screen'),
     path('get-seats-category/' , get_seats_category.as_view() , name='seats-category'),
-    path('update-seats-category/' , update_seats_category.as_view() , name="update-seats-category")
+    path('update-seats-category/' , update_seats_category.as_view() , name="update-seats-category"),
+    path('lock-seats/', Lock_seats.as_view() , name='lock-seats'),
+    path('unlock-seats/',Unlock_Seats.as_view() , name='unlock-seats'),
 ]

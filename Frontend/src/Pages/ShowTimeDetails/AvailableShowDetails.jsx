@@ -77,14 +77,14 @@ const AvailableShowDetails = () => {
     return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
   }
   const formattedSelectedDate = selectedDate.toISOString().split('T')[0];
-  const handleClick = (id) => {
-    navigate(`/available-show-details/${id}/seats`)
+  const handleClick = (screen_id , show_id) => {
+    navigate(`/available-show-details/${screen_id}/${show_id}/seats`)
   }
 
+  console.log(showDetails)
   const sortedShowTime = showDetails.sort((a , b) => {
-    return a.show.start_time.localeCompare(b.show.start_time)
+    return a.show?.start_time.localeCompare(b.show?.start_time)
 
-    console.log(sortedShowTime)
   })
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
@@ -146,8 +146,8 @@ const AvailableShowDetails = () => {
                   <button 
                     key={idx} 
                     className="border border-gray-200 rounded px-4 py-2 text-green-600 hover:bg-gray-50"
-                    onClick={() => handleClick(show.screen.screen_id)}
-                  >
+                    onClick={() => handleClick(show.screen.screen_id, show.show_id)}
+                    >
                     <div className="text-center font-semibold">{formatTime(show.start_time)}</div>
                     <div className="text-xs text-gray-500">{show.screen.screen_type}</div>
                   </button>

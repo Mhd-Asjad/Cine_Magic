@@ -11,6 +11,17 @@ import TheatreOwner from "./Components/Theatre/TheatreOwner";
 import AvailableShowDetails from "./Pages/ShowTimeDetails/AvailableShowDetails";
 import Seats from "./Pages/SeatSelection/seats";
 import Checkout from "./Pages/userbooking/Checkout";
+const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { Payment } from "@mui/icons-material";
+import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
+import MyBookings from "./Pages/Bookings/MyBookings";
+
+// const initalOptions = {
+//     "clientId" : PAYPAL_CLIENT_ID,
+//     currency : 
+// }
+
 function App() {
 
     return (
@@ -21,9 +32,19 @@ function App() {
                     <Route path="/movie/:id/details" element={<MovieSpecification />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path={`/available-show-details/:id`} element={<AvailableShowDetails/>} />
-                    <Route path={'/available-show-details/:id/seats'} element={<Seats/>} />
-                    <Route path="/checkout" element={<Checkout/>} />
-                    
+                    <Route path={'/available-show-details/:screenId/:showId/seats'} element={<Seats/>} />
+                    <Route path="seat-layout/:location" element={
+                        <PayPalScriptProvider options={{
+                            "clientId" : PAYPAL_CLIENT_ID,
+                            currency : 'USD'
+                        }}>
+                            <Checkout/>
+                        </PayPalScriptProvider>
+                        } />
+
+                    <Route path="payment/:booking_id/success" element={<PaymentSuccess/>} />
+                    <Route path='movies/my-orders' element={<MyBookings/>} />
+
                     {/* adminpages */}
                     <Route path="/admin/login" element={<AdminLogin />} />
                     <Route path="/admin/*" element={<Admin_Pages/>}/>

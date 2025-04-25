@@ -88,11 +88,13 @@ class DetailedMovieView(APIView) :
             
             if results :
                 movie_id = results[0]['id']
+                backdrop_url = results[0]['backdrop_path'] or results[0]['poster_path']
                 
-        print('except block')
+        
 
         movie_data = {
             'movie_id' : movie_id,
+            'bg_image' : backdrop_url,
             "title": movie.title,
             "language": movie.language,
             "duration": movie.duration,
@@ -110,7 +112,7 @@ class movie_showtime(APIView):
         cityid = request.GET.get('city_id')
         
         movie = Movie.objects.get(id = id)
-
+        
             
         try :
             showtimes = ShowTime.objects.filter(
@@ -123,27 +125,28 @@ class movie_showtime(APIView):
             
         except ShowTime :
             return Response({'error' : 'show not available'} , status=status.HTTP_404_NOT_FOUND)
-        # avilable_movies = 
+        
         theatre_data = {}
         for show in showtimes :
             theatre_name = show.screen.theatre.name
             if theatre_name not in theatre_data : 
-            
                     
-                theatre_data[theatre_name] ={
+                theatre_data[theatre_name] = {
                     'name' : show.screen.theatre.name,
                     'city' : show.screen.theatre.city.name,
                     'address' : show.screen.theatre.address,
                     'shows' : []
                 }
+                
             theatre_data[theatre_name]['shows'].append({
                     'show_id' : show.id,
                     'show_date': show.show_date,
+                    'end_date' : show.end_date,
                     'start_time' : show.slot.start_time.strftime('%H:%M') if show.slot else None ,
                     'end_time' : show.end_time.strftime('%H:%M') if show.end_time else None ,
                     'screen' : {
-                        'screen_id' : show.screen.id,
-                        'screen_number' : show.screen.screen_number,
+                        'screen_id' : show.screen.id ,
+                        'screen_number' : show.screen.screen_number ,
                         'screen_type' : show.screen.screen_type
                     },
             })
