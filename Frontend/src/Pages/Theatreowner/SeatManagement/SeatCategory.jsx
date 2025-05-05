@@ -159,7 +159,7 @@ function SeatCategory() {
       })
     }
   }
-
+  console.log(seats)
   return (
     <div className='p-8 border shadow-md mt-7 py-4 bg-gray-100'>
       <h2 className='text-1xl font-semibold'>Seats Category</h2>
@@ -226,25 +226,33 @@ function SeatCategory() {
 
                         <div className='flex space-x-1'>
                           {rowSeats.map((seat) => (
-                            <button
-                              type='button'
-                              key={seat.id}
-                              disabled={true }
-                              title={`${seat.category_name || 'No Category'} - ₹${seat.price}`}
-                              onClick={() =>
-                                toggleSeatSelection({
-                                  ...seat,
-                                  category_id: selectedCategory?.id,
-                                  price: selectedCategory?.price,
-                                  category_name: selectedCategory?.name,
-                                })
-                              }
-                              className={`w-6 h-6 rounded-sm  flex items-center justify-center text-xs ${getSeatClass(
-                                seat
-                              )}`}
-                            >
-                              {seat.number}
-                            </button>
+                            seat?.label ? (
+
+
+                              <button
+                                type='button'
+                                key={seat.id}
+                                disabled={true }
+                                title={`${seat.category_name || 'No Category'} - ₹${seat.price}`}
+                                onClick={() =>
+                                  toggleSeatSelection({
+                                    ...seat,
+                                    category_id: selectedCategory?.id,
+                                    price: selectedCategory?.price,
+                                    category_name: selectedCategory?.name,
+                                  })
+                                }
+                                className={`w-6 h-6 rounded-sm  flex items-center justify-center text-xs ${getSeatClass(
+                                  seat
+                                )}`}
+                              >
+                                {seat.number}
+                              </button>
+
+                            ):(
+
+                              <div key={seat.id} className="w-6 h-6"/>
+                            )
                           ))}
                         </div>
                       </div>

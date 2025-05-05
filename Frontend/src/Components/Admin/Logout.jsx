@@ -1,22 +1,20 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CiLogout } from "react-icons/ci";
-
-
+import { logout } from '@/Pages/userauth/AuthService';
+import { useDispatch  } from 'react-redux';
+import { resetUser } from '@/Redux/Features/UserSlice';
 function Logout({ role }) {
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleLogout = () => {
 
-      if (role === 'admin'){
-        localStorage.removeItem('access')
-        navigate('/admin/login')
-
-      } else if (role === 'theatre'){
-        localStorage.removeItem('theatre_token')
-        navigate('/theatre/login')
-      }
+      const userType = localStorage.getItem('current_user_type')
+      logout()
+      dispatch(resetUser())
+      navigate(`/${userType}/login`)
     }
 
   return (

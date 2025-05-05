@@ -2,8 +2,8 @@ import React from 'react'
 import { Outlet , Navigate } from 'react-router-dom';
 
 const PrivateRoute = ({ children }) => {
-    const isAuthenticated = localStorage.getItem('theatre_token')
-    console.log(isAuthenticated , 'check Authenticity')
+    const userType = localStorage.getItem('current_user_type')
+    const isAuthenticated = localStorage.getItem(`${userType}_token`)
     return isAuthenticated ? children : <Navigate to="/theatre/login" />
 }
 

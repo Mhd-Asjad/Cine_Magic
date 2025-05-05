@@ -4,6 +4,7 @@ import LocationReducer from '../Redux/Features/Location.slice'
 import userReducer from '../Redux/Features/UserSlice'
 import theatreOwnerReducer from '../Redux/Features/Theatreownerslice'
 import selectedSeatsReducer from '../Redux/Features/selectedseats'
+import BlogPostsReducer from '../Redux/Features/BlogSlice'
 import {persistStore , persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage';
 
@@ -19,8 +20,8 @@ const rootReducer = combineReducers({
     location : LocationReducer,
     user : userReducer,
     theatreOwner : theatreOwnerReducer ,
-    selectedSeats : selectedSeatsReducer
-
+    selectedSeats : selectedSeatsReducer,
+    blogPosts : BlogPostsReducer
 
 })
 const persistedReducer = persistReducer(persistCofig , rootReducer)

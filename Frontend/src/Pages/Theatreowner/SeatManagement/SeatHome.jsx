@@ -14,7 +14,6 @@ function SeatHome() {
 
             case "Layout":
                 return <LayoutCards/>
-
             case "Category":
                 return <SeatCategory/>
 
@@ -22,6 +21,7 @@ function SeatHome() {
             return <ShowSeats/>
         }
     }
+    
   return (
     <div>
         <div className='space-y-1' >

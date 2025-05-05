@@ -9,6 +9,7 @@ export const sidebarItems = [
 
 ]; 
 export const subMenus  = {
+    theatres : ['showtheatres' , 'pending-theatres' ],
     customers : [ 'customers' ,"enquery" ],
     movies : [ "movies" , "add-movies"   ] ,
 }

@@ -63,7 +63,7 @@ class OtpVerificationSerializer(serializers.Serializer):
         cached_data = cache.get(f'otp_{data['email']}')
         
         if not cached_data :
-            raise serializers.ValidationError({"error": "OTP expired or invalid."})
+            raise serializers.ValidationError({"error": "OTP is expired.....! "})
 
         if cached_data['otp'] != data['otp'] :
             raise serializers.ValidationError({'error' : '*Invalid otp'})
@@ -87,3 +87,7 @@ class UserEditSerializers(serializers.ModelSerializer):
     class Meta :
         model = User
         fields =  ['username' , 'email']
+        
+
+class TheatreOwnerSerializer(serializers.ModelSerializer):
+    pass

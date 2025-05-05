@@ -8,6 +8,9 @@ import requests
 from django.conf import settings
 from theatres.models import *
 from django.db.models import Count
+from datetime import time
+from theatre_owner.serializers import FechShowSerializer
+from seats.models import *
 # Create your views here.
 
 class Fetchcities(APIView):
@@ -107,6 +110,19 @@ class DetailedMovieView(APIView) :
 
 
 
+def get_showtime_label(start_time):
+    if not start_time:
+        return ''
+    if time(6, 0) <= start_time < time(12, 0):
+        return 'Morning'
+    elif time(12, 0) <= start_time < time(16, 0):
+        return 'Afternoon'
+    elif time(16, 0) <= start_time < time(21, 0):
+        return 'Evening'
+    else:
+        return 'Night'
+
+
 class movie_showtime(APIView):
     def get(self , request  , id):
         cityid = request.GET.get('city_id')
@@ -137,13 +153,29 @@ class movie_showtime(APIView):
                     'address' : show.screen.theatre.address,
                     'shows' : []
                 }
-                
+            prices = []   
+            unique_prices = seats.objects.filter(
+                screen_id = show.screen.id,
+                is_seat = True
+            ).values('category_id').distinct()
+            
+            for cat in unique_prices :
+                price_range = SeatCategory.objects.get(id=cat['category_id'])
+                prices.append(price_range.price)
+            label = get_showtime_label(show.slot.start_time)
             theatre_data[theatre_name]['shows'].append({
                     'show_id' : show.id,
                     'show_date': show.show_date,
                     'end_date' : show.end_date,
                     'start_time' : show.slot.start_time.strftime('%H:%M') if show.slot else None ,
                     'end_time' : show.end_time.strftime('%H:%M') if show.end_time else None ,
+                    'label' : label ,
+                    'price' : prices,
+                    
+                    'movies_data' : {
+                        'language' : show.movie.language ,
+                        'relese_date' : show.movie.release_date
+                    },
                     'screen' : {
                         'screen_id' : show.screen.id ,
                         'screen_number' : show.screen.screen_number ,
@@ -157,7 +189,14 @@ class movie_showtime(APIView):
         for movie in movies :
             movie_data.append({
                 'id' : movie.id,
-                'movie_name' : movie.title
+                'movie_name' : movie.title,                
             })
         
         return JsonResponse({'movie_title' : movie.title , 'theatres' : list(theatre_data.values()),  'movies' : movie_data},safe=True)     
+
+class Show_Details(APIView):
+    def get(self , request , show_id ):
+        show = ShowTime.objects.get(id = show_id)
+        serializer = FechShowSerializer(show)
+        return Response(serializer.data , status=status.HTTP_200_OK)
+        

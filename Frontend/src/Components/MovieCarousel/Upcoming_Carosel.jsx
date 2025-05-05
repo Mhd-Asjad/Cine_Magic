@@ -4,8 +4,7 @@ import axios from 'axios';
 function Upcoming_Carousel() {
   const [movies, setMovies] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
+    useEffect(() => {
     fetchUpcomingMovies();
   }, []);
 
@@ -35,7 +34,6 @@ function Upcoming_Carousel() {
   const goToSlide = (index) => {
     setCurrentIndex(index);
   };
-
   return (
     
     <div className="w-full flex justify-center py-10 bg-gray-100">
@@ -55,7 +53,6 @@ function Upcoming_Carousel() {
           </div>
         )}
 
-        {/* Main Movie */}
         {movies.length > 0 && (
           <div className="flex-grow px-2 md:px-4">
             <img

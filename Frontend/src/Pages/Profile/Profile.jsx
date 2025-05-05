@@ -13,9 +13,12 @@ import "toastr/build/toastr.min.css";
 import { useDispatch } from "react-redux";
 import { setUsername , setEmail } from "@/Redux/Features/UserSlice";
 import { useToast } from "@/hooks/use-toast";
-import { use } from "react";
+import { Plus, Edit, CheckCircle, Trash, X } from 'lucide-react';
 import LocationPicker from "@/Components/Map/LocationPicker";
 import 'leaflet/dist/leaflet.css';
+import { postAdded } from "@/Redux/Features/BlogSlice";
+import { useNavigate } from "react-router-dom";
+
 const Profile = () => {
 
   toastr.options = {
@@ -33,9 +36,9 @@ const Profile = () => {
     showMethod: "fadeIn",
     hideMethod: "fadeOut",
   };
-  
   const [showContactForm, setShowContactForm] = useState(false);
   const [ showEditForm , setShowEditForm ] = useState(false);
+  const [ showPostForm , setShowPostForm ] = useState(false);
   const [ theatreName , setTheatreName ] = useState('');
   const [ ownerImage , setOwnerImage ] = useState('')
   const [ location , setLocation ] = useState('');
@@ -44,15 +47,20 @@ const Profile = () => {
   const [latitude , setLatitude ] = useState('')
   const [ longitude , setLongitude ] = useState('') 
   const [ text , setText ] = useState('');
+  const user = useSelector((state) => state.user)
+  const owner = useSelector((state) => state.theatreOwner)
+  console.log(user)
+  console.log(owner , 'owner valeus')
 
-  const userId = useSelector((state) => state.user.id)
   const [ errors , setErrorMessage ] = useState({});
   const username = useSelector((state) => state.user.username)
   const email = useSelector((state) => state.user.email)
   const [newUsername , setNewUsername ] = useState('');
   const [newEmail , setNewEmail ] = useState('');
+  const [ isEditing , setIsEditing] = useState(false);
   const {toast} = useToast();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const handleToggleForm = () => {
     setShowContactForm(!showContactForm);
   };
@@ -61,6 +69,10 @@ const Profile = () => {
     setNewUsername(username)
     setNewEmail(email)
   }
+
+  const handlePostForm = () => {
+    setShowPostForm(!showPostForm)
+  } 
   
   const validateFields = () => {
     const newErrors = {};
@@ -93,7 +105,6 @@ const Profile = () => {
     setShowContactForm(false)
 
   }
-
   const handleSubmit = async (event) => {
     event.preventDefault(); 
 
@@ -102,7 +113,7 @@ const Profile = () => {
     try {
 
       const response = await axios.post('http://127.0.0.1:8000/theatre_owner/create_profile/', {
-        'user' : userId ,
+        'user' : user.id ,
         'owner_photo' : ownerImage,
         'theatre_name' : theatreName ,
         'latitude' : latitude,
@@ -132,7 +143,7 @@ const Profile = () => {
   const handleUserEdit = async(e) => {
     e.preventDefault()
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/user_api/edit-user/${userId}/`,{
+      const res = await axios.put(`http://127.0.0.1:8000/user_api/edit-user/${user.id}/`,{
         'username' : newUsername,
         'email' : newEmail
       })
@@ -150,11 +161,37 @@ const Profile = () => {
     }
   }
 
+  
+    const handleCrud = ( ) => {
+      setIsAdding(false);
+      setIsEditing(false);
+    }
+
+    const handleAddPost = async(e) => {
+      e.preventDefault()
+      if (!image) return;
+      try {
+
+        console.log('passed image check')
+        const imageURL = await getDownloadURL(imageRef);
+        dispatch(postAdded({
+          title , 
+          description , 
+          image : imageURL ,
+          user
+        }))
+        alert('post is added successfully')
+      }catch(e) {
+        console.log('error while updating fb image' , e)
+      }
+
+    }
+
   const handleLocationSelect = async(location) => {
     setLatitude(location[0] )
     setLongitude(location[1])
     try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
         const data = await res.json();
         console.log(data)
         setLocation( data.address.city || data.address.town || data.address.village || '');
@@ -164,9 +201,8 @@ const Profile = () => {
       console.log('reserve geo coding failed' , e);
       
     }
-
+    
   };
-  console.log(ownerImage)
   return (  
     <div>
 
@@ -193,7 +229,7 @@ const Profile = () => {
         </div>
 
         {showContactForm && (
-          <div className="mt-4 bg-gray-50  p-4 rounded shadow-sm">
+          <div className="mt-4   p-4 rounded shadow-sm">
             <h3 className="font-semibold text-center " >Theatre registration </h3>
             <form onSubmit={handleSubmit} encType="multipart/form-data    " >
 
@@ -293,9 +329,103 @@ const Profile = () => {
         )}
         <div 
           className="flex gap-1 py-3 px-4 bg-gray-50 rounded shadow-sm hover:bg-gray-100 cursor-pointer"
+          onClick={handlePostForm}
         >
           <FaAngellist className="text-2xl text-gray-500" /> Blogs
         </div>
+          { showPostForm && 
+            <div className="mt-4 shodow-md rounded-md bg-gray-100 mb-8" >
+                <div className="max-w-6xl max-auto" >
+                  <div className="flex justify-between ml-2 items-center mb-5">
+                    <h1 className="text-2xl font-bold text-gray-800">My Blog🎬</h1>
+
+
+                        <button
+                          onClick={() => navigate('/blogs/add')}
+                          className="flex items-center gap-2 outline outline-1 outline-gray-100 mr-2 mt-3 bg-gray-300 px-2 py-1 rounded-lg transition-all duration-300 transform hover:scale-105"
+
+                        >
+                          <Plus size={23} />
+                          <span>Create</span>
+                        </button>
+                      </div>
+
+
+                        {isEditing && (
+
+                          <div className="bg-white mx-auto rounded-lg p-6 mb-8 border border-gray-200" >
+
+                            <div className="flex justify-between items-center" >
+                                <h2 
+                                  className="text-lg text-gray-800 font-semibold"
+                                >
+
+                          
+                                </h2>
+                                <button
+                                  onClick={() => handleCrud()}
+                                  className="text-gray-500 hover:text-gray-700"
+
+                                >
+                                  <X size={20} />
+
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                              <input
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter blog title"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                              <textarea
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
+                                placeholder="Enter blog content"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">image</label>
+                              <input
+                                type="file"
+                                // value={image}
+                                onChange={(e) => setImage(e.target.files[0] || null)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter author name"
+                              />
+                            </div>
+                            <div className="flex justify-center mb-4" >
+
+                              <button
+                                onClick={handleAddPost}
+                              >
+                                edit Post
+                              </button>
+                            </div>
+
+                          </div>
+                          
+                          </div>
+
+                        )}  
+
+
+                </div>
+
+
+            </div>
+          }
+
         <div className="flex gap-1 py-3 px-4 bg-gray-50 rounded shadow-sm hover:bg-gray-100 cursor-pointer"
           onClick={handleToggleForm1}
         >

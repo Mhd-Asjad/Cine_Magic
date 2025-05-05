@@ -172,7 +172,6 @@ function Checkout() {
           </div>
         </div>
         
-        {/* Booking Summary Section */}
         <div className="w-80 ml-[9%] bg-gray-50 p-4 rounded-lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-medium">Booking Summary</h3>

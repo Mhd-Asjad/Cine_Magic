@@ -15,6 +15,7 @@ import axios from 'axios';
 import { setUser_id , setEmail, setUsername } from '../../Redux/Features/UserSlice';
 import { useDispatch } from 'react-redux';
 import Button from '@mui/material/Button';
+import login from './AuthService';
 
 function LoginForm( { isModalClose }) {
     const [showpassword , setShowPassword ] = useState(false);
@@ -47,19 +48,10 @@ function LoginForm( { isModalClose }) {
 
     const onSubmit = async (values, { setSubmitting }) => {
         console.log(values)
+        const username = values.username;
+        const password = values.password
         try {
-
-            const response = await axios.post('http://127.0.0.1:8000/user_api/userlogin/', values , {
-                headers : {
-                    "Content-Type" : "application/json"
-                }
-            })
-            console.log(response.data.user.id)
-            toastr.success(response.data.message)
-            console.log(response.data.user)
-            dispatch(setUser_id(response.data.user.id))
-            dispatch(setUsername(response.data.user.username))
-            dispatch(setEmail(response.data.user.email))
+            const res = await login( dispatch , username , password , 'user')
             isModalClose()
             
         }catch(e) {

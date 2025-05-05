@@ -33,7 +33,8 @@ urlpatterns = [
     path('adminside/',include('adminside.urls')),
     path('theatre_owner/',include('theatre_owner.urls')),
     path('seats/' , include('seats.urls')),
-    path('booking/', include('booking.urls'))
+    path('booking/', include('booking.urls')),
+    path('blog/' , include('blog.urls'))
 ]
 if settings.DEBUG :
     urlpatterns += static(settings.MEDIA_URL , document_root = settings.MEDIA_ROOT)

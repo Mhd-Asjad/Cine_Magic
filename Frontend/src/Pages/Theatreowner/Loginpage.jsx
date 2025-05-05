@@ -1,14 +1,14 @@
 import React , {useEffect, useState } from 'react'
 import { useDispatch } from "react-redux";
-import TheatreApi from '@/Axios/theatreapi';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
-import { setTheatreOwner } from '../../Redux/Features/Theatreownerslice';
 import { useNavigate } from 'react-router-dom';
-
+import Squares from '../ReactBits/Squares';
+import login from '../userauth/AuthService';
 function Loginpage() {
   
-  const [formData , setFormData ] = useState({username : '' , password : ''});
+  const [formData , setFormData ] = useState({username : '' , password : '' , user_type : 'theatre'});
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -22,50 +22,36 @@ function Loginpage() {
   const handleChange = (e) => {
     setFormData({ ...formData , [e.target.name] : e.target.value })
   }
+  console.log(formData)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
     try {
-      const response = await TheatreApi.post('/theatre-login/' ,
-        formData ,
-        { headers: { "Content-Type": "application/json" } }
-      )
-      console.log(formData)
-      console.log(response.data)
-      const {access_token , refresh_token ,  theatre_owner } = response.data
-
-      localStorage.setItem('theatre_token' , access_token )
-      localStorage.setItem('refresh_token',refresh_token)
-      console.log(theatre_owner.owner_id)
-
-      
-      dispatch(setTheatreOwner({
-        owner_id : theatre_owner.owner_id,  
-        theatreId : theatre_owner.id ,
-        theatreName : theatre_owner.theatre_name,
-        location : theatre_owner.location ,
-        state : theatre_owner.state ,
-        pincode : theatre_owner.pincode ,
-        ownership_status :  'pending '
-
-      }));
+      const res = await login( dispatch , formData.username , formData.password , formData.user_type)
+      console.log(res , 'owner log fetch')
       navigate('/theatre-owner/dashboard')
-
     } catch (e) {
-      console.log(e.response)
-      toastr.error(e.response?.data?.error || 'an error occur')
+      console.log(e)
       console.log(e.response?.data?.error || 'an eroor occurs')
-
+      toastr.error(e.response?.data?.error || 'an error occur')
     }
   };
   return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-900">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
+      <div className="reletive h-screen bg-black ">
+        <Squares 
+          speed={0.5} 
+          squareSize={40}
+          direction='diagonal'
+          borderColor='#777'
+          hoverFillColor='#444'
+        />
+       <div className='absolute pointer-events-none inset-0 flex justify-center items-center z-10' >
+
+       <div className="bg-white/15 backdrop-blur-xl pointer pointer-events-auto p-8 rounded-lg shadow-lg w-96 z-10">
           <h2 className="text-white text-2xl font-semibold text-center mb-6">
               🎭 Theatre Owner Login
           </h2>
-          
           <form onSubmit={handleSubmit} className="space-y-4">
               <input
                   type="text"
@@ -73,7 +59,7 @@ function Loginpage() {
                   placeholder="Username"
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 rounded-lg  text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
                   type="password"
@@ -81,7 +67,7 @@ function Loginpage() {
                   placeholder="Password"
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 rounded-lg  text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button 
                   type="submit" 
@@ -93,7 +79,10 @@ function Loginpage() {
           <p className="text-gray-400 text-sm text-center mt-4">
               Forgot password? <a href="/reset" className="text-blue-400 hover:underline">Reset here</a>
           </p>
-      </div>
+      </div> 
+   
+
+       </div>
   </div>
   )
   

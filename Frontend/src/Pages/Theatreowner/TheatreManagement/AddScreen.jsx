@@ -17,7 +17,6 @@ function AddScreen() {
     const [screenCount, setScreenCount] = useState(0);
     const [selectedLayout, setSelectedLayout] = useState(null);
     const [ timeSlots, setTimeSlot ]  = useState([{ start_time : "" }])
-    const [gaps , setGaps] = useState([])
     const [gapPositions, setGapPositions] = useState([]);
     const initialValue = {
         screen_number: '',
@@ -81,11 +80,12 @@ function AddScreen() {
     };
 
     const toggleGap = (row, col) => {
+        const label = `${String.fromCharCode(65+row,)}${col+1}`
         const exists = gapPositions.some(pos => pos.row === row && pos.col === col);
         if (exists) {
           setGapPositions(prev => prev.filter(pos => !(pos.row === row && pos.col === col)));
         } else {
-          setGapPositions(prev => [...prev, { row, col }]);
+          setGapPositions(prev => [...prev, { row , col , label }]);
         }
     };
 
@@ -112,6 +112,7 @@ function AddScreen() {
 
     });
 
+
     const handleLayoutChange = (e, setFieldValue) => {
         const layoutId = e.target.value;
         if (layoutId) {
@@ -126,9 +127,11 @@ function AddScreen() {
         }
         setFieldValue('layout', layoutId);
     };
+    
 
     const handleSubmit = async (values, { resetForm }) => {
         values.theatre = id;
+        values.unselected_seats = gapPositions
         values.time_slots = timeSlots.filter(slot => slot.  start_time !== '') 
         try {
 
@@ -288,7 +291,7 @@ function AddScreen() {
                                      onClick={() => toggleGap(row , col)}
                                      className={`w-8 h-8 cursor-pointer flex items-center justify-center bg-blue-100 text-xs rounded
                                         ${isGap ? "bg-white border border-dashed text-white" : "bg-blue-100"}`}
-                                        style={ isGap ? { marginLeftm : '12px' }:{}}
+                                        style={ isGap ? { paddingLeft : '12px' }:{}}
                                         
                                         >
                 

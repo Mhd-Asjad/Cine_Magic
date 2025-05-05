@@ -34,7 +34,6 @@ function PendingTheatres() {
 
   return (
     <div className="mt-10 flex flex-wrap justify-center gap-10">
-      {/* Pending Theatres Section */}
       <div className="rounded-lg shadow-lg bg-white py-6 px-8 w-[400px]">
         <h1 className="text-red-500 text-2xl font-bold mb-6 text-center">
           Pending Theatre Approvals
@@ -60,10 +59,10 @@ function PendingTheatres() {
                 className={`w-full mt-4 py-2 rounded-lg font-bold transition ${
                   theatre.has_screens
                     ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    : "bg-green-500 hover:bg-green-600 text-white"
+                    : "bg-orange-400 hover:bg-orange-500 text-white"
                 }`}
               >
-                {theatre.has_screens ? "Requested" : "Verify Now ✅"}
+                {theatre.has_screens ? "Requested" : "Verify Screen ‼️"}
               </button>
             </div>
           ))

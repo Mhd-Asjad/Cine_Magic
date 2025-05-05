@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from .models import *
 from seats.models import *
 from .serializers import *
@@ -12,6 +13,10 @@ from django.utils.decorators import method_decorator
 import requests
 from django.db import transaction
 from .serializers import *
+
+from theatre_owner.serializers import FetchMovieSerializer
+from django.shortcuts import get_object_or_404
+from movies.models import Movie
 
 class Checkout(APIView) :
     def get(self , request , user_id):
@@ -74,7 +79,8 @@ class Checkout(APIView) :
             
         except Exception as e:
             return Response({'error' : str(e)}, status=status.HTTP_400_BAD_REQUEST)
-# payment callback handling 
+        
+# payment callback handling
 @method_decorator(csrf_exempt , name='dispatch')
 class ProcessPayment(APIView):
     def post(self , request):
@@ -105,10 +111,9 @@ class Create_Booking(APIView):
             total_amount = data['total_amount']
             paymentdet = data['payment_details']    
             price = total_amount // len(seat_ids)
-            
+
             with transaction.atomic():
                 show = ShowTime.objects.get(id=show_id)
-                print(show)
                 booking = Booking.objects.create(
                     user=user ,
                     show = show,
@@ -117,16 +122,23 @@ class Create_Booking(APIView):
                     status = 'confirmed',
                     payment_id = paymentdet['id'],
                     amount = total_amount
-                    
                 )
-                for seat_id in seat_ids:
+                booking.generate_qrcode()
+                booking.save()
+                for seat_id in seat_ids:    
                     seat = seats.objects.get(id=seat_id)
                     BookingSeat.objects.create(
                         booking=booking,
                         seat=seat,
                         price = price
                     )
+                    try : 
+                        seat_lock = SeatLock.objects.filter(seat = seat).delete()
+                        print(seat_lock, 'seat lock')
+                    except SeatLock.DoesNotExist:
+                        pass
                     
+
                 Payment.objects.create(
                     booking = booking,
                     order_id = booking.booking_id,
@@ -141,14 +153,12 @@ class Create_Booking(APIView):
 class Verify_Booking(APIView):
     def get(self , request ) :
         show_id = request.GET.get('show_id')
-        selected_seat_ids = request.GET.get('selected_seats') 
+        print(show_id)
+        selected_seat_ids = request.GET.getlist('selected_seats[]') 
         print(selected_seat_ids)
         booking_exists = BookingSeat.objects.filter(booking__show_id=show_id , seat_id__in=selected_seat_ids, booking__status = 'confirmed' ).exists()
         
         if booking_exists :
-            print('hhii')
-            # booked_seats_ids = BookingSeat.objects.filter(booking=booking_exists).values_list('seat_id',flat=True)
-            # if set(selected_seat_ids).issubset(booked_seats_ids):
             return Response({'success' : True , 'booking' : True },status=status.HTTP_200_OK)
 
         return Response({'success':False},status=status.HTTP_200_OK)
@@ -162,19 +172,20 @@ class Booking_Info(APIView):
         serializer = BookingSerializer(booking)
         return Response(serializer.data , status=status.HTTP_200_OK)    
             
-# @csrf_exempt
+@method_decorator(csrf_exempt , name='dispatch')
 class Show_Bookings(APIView):
     def get(self , request , user_id ):
         try :
             
             user = User.objects.get(id=user_id)
             
-            bookings = Booking.objects.filter(user=user).order_by('-booking_time')
+            bookings = Booking.objects.filter(user=user , status='confirmed').order_by('-booking_time')
             
             data = []
             for booking in bookings :
                 seats = [ bs.seat.row + str(bs.seat.number) for bs in booking.bookingseats.all()]
                 data.append({
+                    'id' : booking.id,
                     'booking_id' : booking.booking_id,
                     'show': {
                     'movie' : booking.show.movie.title,
@@ -194,3 +205,44 @@ class Show_Bookings(APIView):
         
         except Exception as e :
             return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+def Ticket_View( request , booking_id ):
+    print('entered into the view')
+    try :
+        booking = Booking.objects.get(id=booking_id)
+    
+    except Booking.DoesNotExist :
+        return Response({'error':'booking not found'},status=status.HTTP_404_NOT_FOUND)
+    
+    show_det = Movie.objects.get(id=booking.show.movie_id)
+    show = FetchMovieSerializer(show_det, context={'request' : request})
+    print(show.data)
+    booking_seats = BookingSeat.objects.filter(booking=booking)
+    seat_det = {}
+    for seat in booking_seats :
+        if 'seats' not in seat_det :
+            seat_det['seats'] = []
+            
+        seat_det['seats'].append(f'{seat.seat.row}{seat.seat.number}')
+        
+    print(type(seat_det))
+    
+    data = {
+        'id' : booking.id,
+        'booking_id' : booking.booking_id,
+        'email' : booking.customer_email,
+        'show_time' : booking.show.slot.start_time.strftime(' %H:%M'),
+        'booking_time' : booking.booking_time.strftime('%Y:%m:%d %H:%M'),   
+        'qrcode_img' : request.build_absolute_uri(booking.qr_code.url) if booking.qr_code else None,
+        'screen_number' : booking.show.screen.screen_number,
+        'theatre' : booking.show.screen.theatre.name , 
+        'screen_type' : booking.show.screen.screen_type,
+        'screen_number' : booking.show.screen.screen_number,
+        
+        
+
+    }
+
+    return Response({'ticket_data' : data , 'movie_details' : show.data , 'seats' : seat_det['seats'] },status=status.HTTP_200_OK)
+        

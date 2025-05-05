@@ -2,25 +2,23 @@ import React , {useState} from 'react'
 import apiAdmin from '../../Axios/api'
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN , REFRESH_TOKEN } from '../../constants';
+import login from '../userauth/AuthService';
+import { useDispatch } from 'react-redux';
+
 function AdminLogin() {
   const [ username , setUsername] = useState('');
   const [ password , setPassword ] = useState('')
   const [ usernameError , setUsernameError   ] = useState(false)
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [error , setError] = useState('');
+   
 
 
     const handleAdminLogin = async (e) => {
       e.preventDefault( )
       try {
-        const response = await apiAdmin.post('admin/login/',
-          {
-            username,
-            password
-          })
-
-          localStorage.setItem(ACCESS_TOKEN , response.data.access)
-          localStorage.setItem(REFRESH_TOKEN , response.data.refresh)
+          const res = await login( dispatch , username,password , 'admin')
           navigate('/admin/dashboard')
         
       }catch(error) {

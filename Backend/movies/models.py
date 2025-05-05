@@ -17,6 +17,5 @@ class Movie(models.Model) :
     genre = models.CharField(max_length=50)
     poster = models.ImageField(max_length=500, blank=True , null= True , upload_to='posters/')
     created_at = models.DateTimeField(default=datetime.now)
-
     def __str__(self):
         return self.title

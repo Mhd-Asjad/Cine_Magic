@@ -39,6 +39,21 @@ class GetScreenLayout(APIView):
         layouts = SeatScreenLayout.objects.all()
         serializer = LayoutSerializers(layouts , many=True)   
         return Response(serializer.data , status=status.HTTP_200_OK )
+    
+    
+class Update_Layout(APIView):
+    def patch(self , request , layout_id):
+        
+        try :
+            layout = SeatScreenLayout.objects.get(id =layout_id)        
+        except Exception as e :
+            return Response({'error': str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = LayoutSerializer(instance=layout , data=request.data , partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
 class get_theatre_screenlayout(APIView):
@@ -68,23 +83,28 @@ class get_screen_seats(APIView):
     def get(self , request , screen_id):
         try :
             show_id = request.query_params.get('show_id')
-            print(show_id)
             seatss = seats.objects.filter(screen = screen_id , is_active = True).order_by('row' , 'number')
             
-      
+            inactive_seats = seatss.filter(is_seat=False).count() 
+            total_active = seatss.count()
+            print(inactive_seats , total_active)
+            seat_data = []
+            for seat in seatss:
+                
+                seat_data.append({
+                     
+                     
             
-            seat_data = [
-                {
-                'id' : seat.id,
-                'row' : seat.row,
-                'number' : seat.number,
-                'category_id' : seat.category.id,
-                'category_name' : seat.category.name,
-                'price' : seat.category.price,
-                'is_booked' : BookingSeat.objects.filter(seat=seat.id , booking__show_id = show_id ).exists()
-                }
-                for seat in seatss
-            ]
+                    'id' : seat.id,
+                    'row' : seat.row,
+                    'number' : seat.number,
+                    'category_id' : seat.category.id,
+                    'category_name' : seat.category.name,
+                    'price' : seat.category.price,
+                    'is_booked' : BookingSeat.objects.filter(seat=seat.id , booking__show_id = show_id ).exists(),
+                    'label' : seat.row + str(seat.number) if seat.is_seat else ''
+                    
+                })
             # print(seat_data)
             return Response(seat_data , status=status.HTTP_200_OK)
         except Exception as e :
@@ -156,7 +176,7 @@ class Lock_seats(APIView):
                 
         )
         if locked_seats.exists():
-            return Response({'error' : 'some seats are not available'} , status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error' : 'some seats are not available‼️'} , status=status.HTTP_400_BAD_REQUEST)
                     
         for seat_id in seats_ids:
             SeatLock.objects.get_or_create(

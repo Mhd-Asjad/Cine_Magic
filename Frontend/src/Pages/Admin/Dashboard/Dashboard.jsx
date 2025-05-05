@@ -24,7 +24,7 @@ function Dashboard() {
   return (
     
 
-        <div className="p-12">
+        <div className="p-12 min-h-screen">
           <h1 className="mt-10 text-2xl font-bold mb-6">Dashboard</h1>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 w-[70%]">

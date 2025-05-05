@@ -12,10 +12,6 @@ class Theatre(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
      
     def has_screen(self):
-        if self.screens.exists():
-            print('has screen')
-        else : 
-            print('no screeen')
         return self.screens.exists()
     
     def __str__(self):
@@ -27,6 +23,7 @@ class Screen(models.Model) :
     capacity = models.PositiveIntegerField(default=100)
     screen_type =  models.CharField(max_length=50 , null=True , blank=True )
     layout = models.ForeignKey('seats.SeatScreenLayout',on_delete=models.SET_NULL,null=True ,blank=True , related_name='screens')
+    is_approved = models.BooleanField(default=False)
     def __str__(self) :
         return f"Screen {self.screen_number} - {self.theatre.name}"
    

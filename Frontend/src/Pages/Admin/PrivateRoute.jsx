@@ -1,48 +1,49 @@
 import React, { useCallback, useEffect , useState } from "react";
 import { Navigate , useNavigate } from 'react-router-dom'
 import { ACCESS_TOKEN , REFRESH_TOKEN } from "../../constants";
-import apiAdmin from "../../Axios/api";
 import {jwtDecode} from 'jwt-decode'
+import userApi from "@/Axios/userApi";
 
 function PrivateRoute({ children }) {
     
     const [isAuthenticated , setIsAuthenticated ] = useState(null);
     const navigate = useNavigate();
+    const currentRole = localStorage.getItem('current_user_type')
 
     useEffect(() => {
         check_auth().catch((e) => e.message)
     },[navigate , setIsAuthenticated])
 
     const refreshtoken = useCallback(async () => {
-        const refreshtoken = localStorage.getItem(REFRESH_TOKEN)
+        const refreshtoken = localStorage.getItem(`${currentRole}_token_refresh`)
         if (!refreshtoken) {
             setIsAuthenticated(false)
-            navigate('/admin/login')
+            navigate()
             return;
         }
         try {
-            const res = await apiAdmin.post('token/refresh/', {
+            const res = await userApi.post('token/refresh/', {
                 'refresh' : refreshtoken
             });
             const newAccessToken = res.data.access
             console.log(newAccessToken,'refreshed token')
-            localStorage.setItem(ACCESS_TOKEN , newAccessToken)
+            localStorage.setItem(`${currentRole}_token` , newAccessToken)
             setIsAuthenticated(true)
         }catch(error){
             console.log('token expaired canot be refresheeddd')
             console.log(error)
             setIsAuthenticated(false)
-            navigate('/admin/login')
+            navigate(currentRole === 'user' ? '/' :`/${currentRole}/login`)
         } 
     },[])
 
-
     const check_auth = useCallback(async() => {
-        const access_token = localStorage.getItem(ACCESS_TOKEN)
+        const access_token = localStorage.getItem(`${currentRole}_token`)
         if (!access_token) {
-            setIsAuthenticated(False)
+            setIsAuthenticated(false)
+            console.log('ivde ndd')
             navigate('/admin/login')
-            return
+            return  
         }
         try {
             console.log('i am getting in to this for new access ton')
@@ -73,7 +74,7 @@ function PrivateRoute({ children }) {
     if(!isAuthenticated ) {
         return <div className="flex justify-center" >loading...</div>
     }else {
-        return isAuthenticated ? children : <Navigate to="login" />;
+        return isAuthenticated ? children : <Navigate to={`/${currentRole}/login`} />;
     }
 }
 export default PrivateRoute

@@ -3,14 +3,20 @@ import Nav from '@/Components/Navbar/Nav'
 import { useSelector } from 'react-redux'
 import axios from 'axios'
 import notFound from '../../assets/no-booking.png'
+import { useNavigate } from 'react-router-dom'
 function MyBookings() {
     const userId = useSelector((state) => state.user.id)
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchBookings = async() => {
+            if (!userId) {
+                setLoading(false)
+                return;
+            }
+        
             console.log('api calling in orders')
             try {
                 const res = await axios.get(`http://localhost:8000/booking/my-bookings/${userId}/`);
@@ -61,15 +67,20 @@ function MyBookings() {
                                     <div className="bg-blue-50 px-4 py-2">
                                         <h3 className="font-medium text-blue-800 truncate">Booking #{booking.booking_id}</h3>
                                     </div>
+
                                     <div className="p-4">
-                                        <div className="mb-4">
+                                        <div className="mb-4 flex justify-center">
                                             <h4 className="text-lg font-semibold text-gray-800">{booking.show.movie}</h4>
-                                            <div className="flex items-center text-sm text-gray-600 mt-1">
-                                                <span>{booking.show.show_date} on {formatTime(booking.show.start_time)}</span>
-                                            </div>
                                         </div>
                                         
                                         <div className="space-y-2 text-sm">
+
+                                            <div className='flex justify-between' >
+                                                <span className="text-gray-600">Show on :</span>
+                                            <div className="flex items-center text-sm text-gray-600 mt-1">
+                                                <span>{booking.show.show_date} at {formatTime(booking.show.start_time)}</span>
+                                            </div>
+                                            </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-600">Seats:</span>
                                                 <span className="font-medium">{booking.seats.join(', ')}</span>
@@ -84,15 +95,28 @@ function MyBookings() {
                                                 <span className="text-gray-600">Amount:</span>
                                                 <span className="font-medium">₹{booking.amount}</span>
                                             </div>
+                      
+
                                             <div className="pt-2 text-xs text-gray-500 border-t border-gray-100">
-                                                Booked on {booking.booking_time}
+                                                <div className='flex justify-end mb-2 ' >
+
+                                                <button 
+                                                    className='outline outline-2 px-2 py-2 text-black rounded-md outline-blue-200' 
+                                                    onClick={() => navigate(`/booking/${booking.id}/ticket`)}
+                                                >
+
+                                                 Ticket Overview
+                                                </button>
                                             </div>
+                                           </div>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
+
                     ) : (
+                        
                         <div className="text-center py-2">
                             <div className="inline-block p-3 rounded-ful">
                                <img src={notFound} alt="notfound" className='w-[320px] h-[300px] ' />

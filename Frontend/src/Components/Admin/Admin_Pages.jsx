@@ -6,7 +6,7 @@ import Section from './Section'
 function Admin_Pages() {
   return (
     
-    <div className='grid min-h-screen'>
+    <div className='grid min-h-screen grid-rows-[auto,1fr]'>
 
       <Sidebar/>
       <div className="flex flex-col w-full">

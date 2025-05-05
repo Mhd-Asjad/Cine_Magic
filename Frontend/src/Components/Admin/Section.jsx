@@ -9,6 +9,7 @@ import Enquery from "@/Pages/Admin/Customer/Enquery";
 import EditTheatre from "@/Pages/Theatreowner/TheatreManagement/EditTheatre";
 import ShowRequest from '@/Pages/Admin/TheatreManagement/ShowRequest';
 import EditMovie from '@/Pages/Admin/MovieManagement/EditMovie';
+import ShowTheatres from '@/Pages/Admin/TheatreManagement/Showtheatres';
 
 function Section() {
   return (
@@ -21,7 +22,8 @@ function Section() {
             <Route path="movies/:movie_id/edit" element={<PrivateRoute><EditMovie/></PrivateRoute>} />
             <Route path='add-movies' element={<PrivateRoute><AddMovies /></PrivateRoute>} />
             <Route path="theatres/:theatreId/edit" element={<PrivateRoute><EditTheatre /></PrivateRoute>} />
-            <Route path='showtheatres' element={<PrivateRoute><ShowRequest/></PrivateRoute>} />
+            <Route path='pending-theatres' element={<PrivateRoute><ShowRequest/></PrivateRoute>} />
+            <Route path='showtheatres' element={<PrivateRoute><ShowTheatres/></PrivateRoute>} />
             
         </Routes>
       

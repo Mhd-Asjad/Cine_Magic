@@ -10,10 +10,14 @@ import {
     Dialog,
     DialogTrigger,
     DialogContent,
-    DialogHeader, 
     DialogTitle, 
 
 } from '@/components/ui/dialog';
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert"
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,8 +33,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@radix-ui/react-toast';
-import { Eye , X ,  } from 'lucide-react';
+import { Eye , X } from 'lucide-react';
 import { TbClockPlus } from "react-icons/tb";
+import Swal from 'sweetalert2';
+import apiAdmin from '@/Axios/api';
+import { Terminal } from 'lucide-react';
 function ShowScreen() {
     const { id } = useParams();
     const [screens, setScreens] = useState([]);
@@ -44,6 +51,7 @@ function ShowScreen() {
     const [selectedShowTime , setSelectedShowTime] = useState(null);
     const [ showDetails , setShowDetails ] = useState([]);
     const [ isShowDialogOpen , setIsDialogOpen] = useState(false)
+    const [ message , setMessage ] = useState('')
     const {toast} = useToast();
     const navigate = useNavigate();
     useEffect(() => {
@@ -128,6 +136,7 @@ function ShowScreen() {
 
             }
     }
+
     console.log(showTimes)
     const sortedShows = showTimes.sort((a , b) => {
         return a.start_time.localeCompare(b.start_time) 
@@ -144,14 +153,45 @@ function ShowScreen() {
         }
     }   
     console.log(showDetails)
-
+    
     const handleAddScreen = () => {
         navigate(`/theatre-owner/${id}/add-screen`)
     }
-    console.log(showTimes)
-   
+
+    const today = new Date();
+
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    const upcomingShows = showDetails.filter((show) => {
+        const showDate = new Date(show.show_date);
+        return showDate > yesterday;
+    });
+    
+    
+    let sortedShowDetails = [...upcomingShows].sort((a , b)=>{
+        a.movie_name.localeCompare(b.movie_name)
+    });
+    console.log(sortedShowDetails , 'sorted one')
+    
+    const handleCancel = async(show_id) => {
+
+        try{
+            const res = await apiAdmin.delete(`cancel-show/${show_id}/`)
+            const res1 = await TheatreApi.get(`/showtime/${id}/`);
+            setMessage(res.data.message)
+            setShowDetails(res1.data)
+
+        }catch(e) {
+            console.log(e)
+        }
+        
+    }
     return (
         <div className='p-10 m-10'>
+
+            
+
             <Card className="w-full py-10 max-w-4xl mx-auto">
                 <CardHeader>
                     <CardTitle className="flex justify-center text-xl font-semibold text-gray-700">
@@ -172,21 +212,24 @@ function ShowScreen() {
                                     <th className='p-3 text-left'>Screen Number</th>
                                     <th className='p-3 text-left'>Capacity</th>
                                     <th className='p-3 text-left'>Screen Type</th>
-                                    <th className='p-3 text-left'>Action</th>
+                                    <th className='p-3 text-center'>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {screens.length > 0 ? (
                                     screens.map((screen, indx) => (
+                                        screen.is_approved ? (
+
+                                        
                                         <tr key={indx} className="border-b hover:bg-gray-50">
-                                            <td className='pl-9'>
+                                            <td className='pl-10'>
                                                 <Badge className="py-3">
                                                     {screen.screen_number}
                                                 </Badge>
                                             </td>
-                                            <td className='p-3'>{screen.capacity}</td> 
-                                            <td className='p-3'>{screen.screen_type}</td> 
-                                            <td className='p-3'> 
+                                            <td className='p-4'>{screen.capacity}</td> 
+                                            <td className='p-4'>{screen.screen_type}</td> 
+                                            <td className='p-4'> 
                                                 <div className='flex space-x-2'>
 
                                                 <Dialog 
@@ -208,6 +251,7 @@ function ShowScreen() {
                                                         </Button>
                                                     </DialogTrigger>
 
+                                                    {sortedShowDetails.length > 0 ? (
                                                     <Dialog>
                                                         <DialogTrigger>
                                                             <Button variant="outline" size="icon" 
@@ -218,7 +262,20 @@ function ShowScreen() {
 
                                                         </DialogTrigger>
                                                         
-                                                            <DialogContent className="sm:max-w-xl max-h-screen overflow-y-auto bg-white" >
+                                                            <DialogContent className="sm:max-w-xl max-h-screen overflow-y-auto mb-1 bg-white" >
+
+                                                            {message &&(
+
+                                                                <Alert className='cursor-pointer hover:bg-gray-100 hover:border-1 mt-3' onClick={() => setMessage('')} >
+                                                                <Terminal className="h-4 w-4" />
+                                                                <AlertTitle>alert</AlertTitle>
+                                                                <AlertDescription>
+                                                                    {message}
+                                                                </AlertDescription>
+                                                                </Alert>
+                                                                )
+
+                                                                }
                                                             <div className="p-4">
                                                                 <DialogTitle className="text-xl font-bold mb-4 text-center">
 
@@ -226,34 +283,48 @@ function ShowScreen() {
                                                                 </DialogTitle>
 
                                                   
-                                                                    { showDetails.length > 0 ? (
                                                                         
                                                                         <ul className="list-disc pl-5">
-                                                                        {showDetails.map((show) => {
+                                                                        {sortedShowDetails.map((show) => {
                                                         
                                                                             if (show.screen_number == screen.screen_number ) { 
 
                                                                                 return (
-                                                                                    <li key={show.id} className="mb-2">
-                                                                                        <p>Movie name: {show.movie_name}</p>
-                                                                                        <p>Show Date : {show.show_date}</p>
-                                                                                        <p>Start Time: {formatTime(show.start_time)}</p>
-                                                                                        {/* <p>End Time: {formatTime(show?.end_time)}</p> */}
-                                                                                    </li>
+                                                                                    <div key={show.id} className="grid grid-cols-3 items-center gap-4 p-4 border rounded my-2">
+                                                                                    
+                                                                                    <div className="flex">
+                                                                                        <img className="w-44 h-32 object-cover" src={show.poster} alt="Poster" />
+                                                                                    </div>
+
+                                                                                    <div className="flex flex-col text-sm w-52">
+                                                                                        <p><strong>Movie name:</strong> {show.movie_name}</p>
+                                                                                        <p><strong>Show Date:</strong> {show.show_date}</p>
+                                                                                        <p><strong>Start Time:</strong> {formatTime(show.start_time)}</p>
+                                                                                    </div>
+                                                                                    
+                                                                                    <div className="flex justify-center ml-5 mt-[60%]">
+                                                                                        <Button
+                                                                                        onClick={() => handleCancel(show.id)}
+                                                                                        className="border text-white px-2 py-2 rounded"
+                                                                                        >
+                                                                                        <X className='h-4 w-2' /> Cancel Show
+                                                                                        </Button>
+                                                                                    </div>
+
+                                                                                    </div>
+
                                                                                 );
                                                                             }
                                                                             return null  
                                                                             
                                                                         })}
                                                                         </ul>   
-                                                                        ) : (
-                                                                            <p className="text-center text-gray-500">No showtimes available</p>
-                                                                        ) 
-                                                                    }
                                                             </div>
                                                         
                                                             </DialogContent>
                                                     </Dialog>
+                                                    ) : null
+                                                }
                                                     <DialogContent className="sm:max-w-3xl max-h-screen overflow-y-auto bg-white">
                                                         <DialogTitle className="text-xl font-bold mb-4 text-center" >
                                                         Select a Movie
@@ -385,6 +456,25 @@ function ShowScreen() {
                                                 </button>
                                             </td>
                                         </tr>
+                                        ):(
+                                            <tr key={indx} className="border-b hover:bg-gray-50">
+                                            <td className='pl-10'>
+                                                <Badge className="py-3">
+                                                    {screen.screen_number}
+                                                </Badge>
+                                            </td>
+                                            <td className='p-3'>{screen.capacity}</td> 
+                                            <td className='p-3'>{screen.screen_type}</td> 
+                                            <div className='flex justify-end' >
+                                            <td className='p-3'> 
+                                                <button className='hover-gray-100 border-2 py-2 px-1 cursor-not-allowed rounded-md' >
+                                                    requested
+                                                </button>
+                                            </td>
+
+                                            </div>
+                                            </tr>
+                                        )
                                     ))
                                 ) : (
                                     <tr>

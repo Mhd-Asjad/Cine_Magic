@@ -5,6 +5,7 @@ import apiAdmin from '../../../Axios/api';
 import Button from "@mui/material/Button";
 import { useNavigate } from 'react-router-dom';
 import { FaListOl } from "react-icons/fa";
+import SearchBar from '@/Components/search/SearchBar';
 
 function CustomerManagement() {
   const [users , setUsers ] = useState([]);
@@ -47,11 +48,17 @@ function CustomerManagement() {
 
 
           <h1 className='text-2xl font-bold mb-4' >Customer Management</h1>
+
+
           <div className='overflow-x-auto' >
 
+            <SearchBar 
+              placeholder='search by username'   
+            
+            />
             <div className='flex justify-end mb-4'>
               <Button  
-                color="secondary"
+                color="primary"
                 onClick={handleClick}
                 
               >
@@ -66,12 +73,12 @@ function CustomerManagement() {
 
               <thead>
 
-                <tr className='bh-gray-200' >
+                <tr className="bg-blue-600 text-white text-left">
 
-                  <th className='border border-gray-300 px-4 py-2 bg-purple-500'  >Id</th>
-                  <th className='border border-gray-300 px-4 py-2 bg-purple-500'  >username</th>
-                  <th className='border border-gray-300 px-4 py-2 bg-purple-500'  >Status</th>
-                  <th className='border border-gray-300 px-4 py-2 bg-purple-500'  >Action</th>
+                  <th className='border border-gray-300 px-4 py-2'  >Id</th>
+                  <th className='border border-gray-300 px-4 py-2'  >username</th>
+                  <th className='border border-gray-300 px-4 py-2'  >Status</th>
+                  <th className='border border-gray-300 px-4 py-2'  >Action</th>
                 </tr>
 
               </thead>

@@ -10,6 +10,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(),name='token_refresh'),
     path('seats-layout/',GetScreenLayout.as_view(), name="seats-layout"),
     path('add-layout/' , create_layout.as_view() , name='add-layout'),
+    path('edit-layout/<int:layout_id>/',Update_Layout.as_view() , name='edit-layout'),
     path('screen-layout/<int:owner_id>/' , get_theatre_screenlayout.as_view() , name='screen-layout'),
     path('screens/<int:screen_id>/seats/' , get_screen_seats.as_view() , name='screeen-seats'),
     path('get-theatre-screen/<int:id>/' , get_theatre_screens.as_view(),name='theatre-screen'),

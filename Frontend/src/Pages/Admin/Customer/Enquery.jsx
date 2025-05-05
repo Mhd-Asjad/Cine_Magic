@@ -30,13 +30,14 @@ function Enquery() {
         }
     }
     console.log(enquery)
-    const handleAccept = async (userId) => {
+    const handleAccept = async (ownerProfile_id , user_id) => {
         setIsLoading(true)
         try {
             
             const res = await TheatreApi.post('theatreowners/', {
-                'id' :  userId ,
-                'ownership_status' : 'confirmed'
+                'id' :  ownerProfile_id ,
+                'ownership_status' : 'confirmed',
+                'userId' : user_id
             })
             console.log(res.data.message)
         }catch(e){
@@ -58,7 +59,7 @@ function Enquery() {
             console.log(e.response?.error || 'unexpected error occurs ')
         }
     }
-
+    console.log(enquery)
   return (
     
     <div className='flex min-h-screen bg-gray-100' >
@@ -98,7 +99,7 @@ function Enquery() {
                                 <Typography>{value.message}</Typography>
                             </CardContent>
                             <div className="py-3 px-5 flex gap-2 justify-end">
-                                <Button variant="contained" color="success" onClick={() => handleAccept(value.id)}>
+                                <Button variant="contained" color="success" onClick={() => handleAccept(value.id , value.user_id)}>
                                     Accept
                                 </Button>
                                 <Button variant="outlined" color="error" onClick={() => handleDecline(value.id)}>

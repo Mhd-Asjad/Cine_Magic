@@ -5,3 +5,4 @@ from .models import *
 admin.site.register(Booking)
 admin.site.register(BookingSeat)
 admin.site.register(Payment)
+admin.site.register(SeatLock)

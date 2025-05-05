@@ -16,11 +16,9 @@ import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { Payment } from "@mui/icons-material";
 import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
 import MyBookings from "./Pages/Bookings/MyBookings";
-
-// const initalOptions = {
-//     "clientId" : PAYPAL_CLIENT_ID,
-//     currency : 
-// }
+import TicketView from "./Pages/Bookings/TicketView";
+import BlogPosts from "./Pages/blogs/BlogPosts";
+import AddBlog from "./Pages/blogs/AddBlog";
 
 function App() {
 
@@ -41,9 +39,12 @@ function App() {
                             <Checkout/>
                         </PayPalScriptProvider>
                         } />
-
+                        
                     <Route path="payment/:booking_id/success" element={<PaymentSuccess/>} />
                     <Route path='movies/my-orders' element={<MyBookings/>} />
+                    <Route path='booking/:id/ticket' element={<TicketView/>} />
+                    <Route path='/blogs' element={<BlogPosts/>} />
+                    <Route path='/blogs/add' element={<AddBlog/>} />
 
                     {/* adminpages */}
                     <Route path="/admin/login" element={<AdminLogin />} />

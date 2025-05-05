@@ -1,5 +1,9 @@
 from django.db import models
 from theatres.models import ShowTime
+import qrcode
+import io
+from django.core.files.base import ContentFile
+
 # Create your models here.
 
 class Booking(models.Model):
@@ -11,6 +15,7 @@ class Booking(models.Model):
     )
     
     booking_id = models.CharField(max_length=20 , unique=True )
+    qr_code = models.ImageField(upload_to='qrcodes/' , blank=True , null=True)
     user = models.ForeignKey('useracc.User' , on_delete=models.CASCADE , null=True , blank=True)
     show = models.ForeignKey(ShowTime , on_delete=models.CASCADE)
     customer_name = models.CharField(max_length=100)
@@ -20,8 +25,29 @@ class Booking(models.Model):
     payment_id = models.CharField(max_length=100 , null=True , blank=True)
     amount = models.DecimalField(max_digits=10 , decimal_places=2 )
     
-    def __str__(self):
-        return self.booking_id
+    def generate_qrcode(self) :
+        if self.status == 'confirmed' and not self.qr_code :
+            qr_data = f'ID{self.booking_id} \nMovie : {self.show.movie.title}\nDate{self.show.show_date.strftime('%Y:%m:%d')}\nShowTime{self.show.slot.start_time.strftime('%H:%M')}'
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.ERROR_CORRECT_L,
+                box_size=10,
+                border=4
+            )
+            qr.add_data(qr_data)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color='black' , back_color='white')
+            
+            buffer = io.BytesIO()
+            img.save(buffer , format="PNG")
+            buffer.seek(0)
+            
+            file_name = f"qr-{self.booking_id}.png"
+            self.qr_code.save(file_name , ContentFile(buffer.read()),save=False)
+            return True
+        
+        return False
+    
     
     def save(self , *args , **kwargs ):
         if not self.booking_id :
@@ -29,12 +55,15 @@ class Booking(models.Model):
             import string
             from datetime import datetime
             
-            date_str = datetime.now().strftime('%Y%m%d')
+            date_str = datetime.now().strftime('%Y%m%d')[::-1]
             random_str = ''.join(random.choices(string.ascii_uppercase + string.digits , k=4))
             self.booking_id = f'MOV-{date_str}-{random_str}'
             
         super().save(*args , **kwargs)
         
+    def __str__(self):
+        id = str(self.id)
+        return id
         
 class BookingSeat(models.Model) :
     booking = models.ForeignKey(Booking , on_delete=models.CASCADE , related_name='bookingseats')

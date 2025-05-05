@@ -4,9 +4,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import Footer from '../../Components/Footer/footer'
 import CastCards from './CastCards'
+import Upcomingmovies from '@/Components/MovieCards/Upcomingmovies'
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w780';
 
-function MovieSpecification() {
+function MovieSpecification( ) {
   const {id} = useParams()
   const [movie , setMovies] = useState(null);
   const [error , setError] = useState('') ;
@@ -42,23 +43,22 @@ function MovieSpecification() {
     )
   }
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div>
+
       <Nav />
-      {error && (
-        <div className="text-center text-red-600 font-bold mt-5">{error}</div>
-      )}
+
+    <div className="bg-gray-100 ">
+
   
       {movie && (
-        <div className="relative w-full h-[400px] md:h-[500px]">
-          {/* Background Image */}
-          <img 
+        <div className="relative w-full h-[400px] md:h-[600px]">
+          <img
             src={`${IMAGE_BASE_URL}${movie.bg_image}`} 
             alt="Backdrop" 
             className="w-full h-full object-cover opacity-30"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent"></div>
   
-          {/* Movie Info Overlay */}
           <div className="absolute inset-0 z-10 flex flex-col md:flex-row items-center justify-center max-w-7xl px-4">
             {/* Poster */}
             <div className="w-full md:w-64 mb-6 md:mb-0 md:mr-8">
@@ -69,7 +69,6 @@ function MovieSpecification() {
               />
             </div>
   
-            {/* Info */}
             <div className="text-black max-w-xl">
               <h1 className="text-4xl font-bold mb-2">{movie.title}</h1>
               <p className='text-xl' ><span className="font-semibold bg-gray-100 outline outline-1 outline-gray-400 rounded-sm px-1">2D</span> {movie.language}</p>
@@ -97,7 +96,7 @@ function MovieSpecification() {
       {/* Movie Description and Cast */}
       {movie && (
         <div className="max-w-7xl mx-auto px-4 mt-10">
-          <div className="p-6 shadow-md rounded-lg">
+          <div className="p-6 shadow-md rounded-lg bg-white">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">About the Movie</h2>
             <p className="text-gray-700 leading-relaxed">{movie.description}</p>
           </div>
@@ -107,8 +106,10 @@ function MovieSpecification() {
           </div>
         </div>
       )}
+      <Upcomingmovies/>
   
       <Footer />
+    </div>
     </div>
   )
 }  

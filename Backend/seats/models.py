@@ -31,8 +31,8 @@ class seats(models.Model):
     is_active = models.BooleanField(default=True)
     is_seat = models.BooleanField(default=True)
     
-    class Meta :
-        unique_together = ('screen' , 'row' , 'number')        
+    # class Meta :
+    #     unique_together = ('screen' , 'row' , 'number')        
         
     def __str__(self):
         return f"{self.row}{self.number} - {self.screen}"

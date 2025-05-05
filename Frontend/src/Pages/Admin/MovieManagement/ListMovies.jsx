@@ -6,10 +6,12 @@ import { Button } from '@/Components/ui/button';
 import Swal from 'sweetalert2';
 import { CandlestickChart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import SearchBar from '@/Components/search/SearchBar';
 
 function ListMovies() {
     const navigate = useNavigate();
     const [ movies , setMovies ] = useState([])
+    const [searchTerm , setSearchTerm ] = useState('');
     const {toast} = useToast();
     
     useEffect(() => {
@@ -56,10 +58,23 @@ function ListMovies() {
     const addMoviesData = () =>{
         navigate('/admin/add-movies')
     }
+
+    const searchMovies = movies.filter(movie => {
+      return movie.title.toLowerCase().includes(searchTerm.toLocaleLowerCase())
+    })
+
     return (
-      <div className="min-h-screen bg-gray-100 py-10 px-4 md:ml-64">
+      <div className="min-h-screen bg-gray-100 py-10  mt-8 px-4 md:ml-64">
         <h2 className="mb-8 text-center font-bold text-3xl text-gray-800">All Movies</h2>
-  
+      
+
+        <SearchBar
+
+          placeholder='Search by movie title'
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        
+        />
         <div className="flex justify-end mb-5">
           <button
             onClick={addMoviesData}
@@ -85,7 +100,12 @@ function ListMovies() {
               </tr>
             </thead>
             <tbody>
-              {movies.map((movie) => (
+              {searchMovies.length > 0 ?(
+
+
+
+
+              searchMovies.map((movie) => (
                 <tr key={movie.id} className="hover:bg-gray-50 transition">
                   <td className="border px-4 py-2 text-center">
                     {movie.poster ? (
@@ -119,7 +139,16 @@ function ListMovies() {
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))
+            ):(
+              <div className='flex justify-center' >
+
+                <p className='font-semibold text-red-400' >No movies found</p>
+
+              </div>
+
+            )
+            }
             </tbody>
           </table>
         </div>

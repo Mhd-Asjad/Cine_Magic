@@ -18,8 +18,6 @@ seatsApi.interceptors.request.use((config) => {
     }
 )
 
-
-
 const getRefreshToken = () => localStorage.getItem('refresh_token')
 seatsApi.interceptors.response.use(
     response => response,
@@ -29,19 +27,20 @@ seatsApi.interceptors.response.use(
                 const refreshResponse = await axios.post(`${API_BASE_URL}/token/refresh/`, {
                     refresh : getRefreshToken()
                 });
-
+                console.log(refreshResponse , 'data not refreshing on th seats api')
                 localStorage.setItem('theatre_token', refreshResponse.data.access)
                 error.config.headers['Autherization'] = `Bearer ${refreshResponse.data.access}`;
                 return axios(error.config)
 
             }catch (refreshError) {
+                console.log(refreshError)
+
                 localStorage.removeItem("theatre_token")
                 localStorage.removeItem("")
-                window.location.href ='/theatre/login'  
-            }   
+                window.location.href ='/theatre/login'
+            }
         }
         return Promise.reject(error)
     }
 )
-
 export default seatsApi

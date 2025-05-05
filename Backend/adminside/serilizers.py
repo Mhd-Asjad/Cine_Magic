@@ -43,16 +43,17 @@ class TheatreOwnerSerialzers(serializers.ModelSerializer) :
         
 class ShowTimeSerializer(serializers.ModelSerializer):
     start_time = serializers.CharField(source='slot.start_time')
+    movie = serializers.CharField(source='movie.title')
     class Meta:
         model = ShowTime
         fields = [ 'movie', 'start_time' , 'end_time']
 
 class ScreenSerializer(serializers.ModelSerializer):
-    showtimes = ShowTimeSerializer(many=True)
+    # showtimes = ShowTimeSerializer(many=True)
 
     class Meta:
         model = Screen
-        fields = ['id','screen_number', 'capacity', 'screen_type', 'showtimes']
+        fields = ['id','screen_number', 'capacity', 'screen_type' , 'is_approved' ]
         
 class TheatreSerializer(serializers.ModelSerializer) :
     owner = TheatreOwnerSerialzers(read_only=True)
@@ -61,6 +62,8 @@ class TheatreSerializer(serializers.ModelSerializer) :
     class Meta :
         model = Theatre
         fields = ['id' , 'name' , 'city', 'address' , 'is_confirmed', 'has_screen' , 'owner' , 'screens']
+    
+    
     
 class MovieSerializers(serializers.ModelSerializer) :
 

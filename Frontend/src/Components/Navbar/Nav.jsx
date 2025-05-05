@@ -1,7 +1,6 @@
 import React , {useEffect, useState} from 'react'
-import logo from '../../assets/cinelogo.png'
+import logo from '../../assets/logopic2.png'
 import Modal from '../Modals/Modal';
-import RegistrationForm from '../../Pages/userauth/RegistrationForm';
 import OtpVerificationForm from '../../Pages/userauth/OtpVerificationForm';
 import { MdOutlineAddLocation } from "react-icons/md";
 import Cityselction from '../../Pages/Home/Cityselction';
@@ -15,7 +14,7 @@ import { resetUser } from '../../Redux/Features/UserSlice';
 import AuthContainer from '../../Pages/userauth/AuthContainer';
 import { useNavigate } from 'react-router-dom';
 import { selectCityId } from '../../Redux/Features/Location.slice';
-
+import { logout } from '@/Pages/userauth/AuthService';
 
 function Nav() {
   const [isModalOpen , setIsModalOpen] = useState(false);
@@ -66,31 +65,38 @@ function Nav() {
     }
 
   }
+  window.addEventListener('storage', (event) => {
+      if (event.key === 'current_user_type') {
+          window.location.reload();
+      }
+  });
+
   const handleLogout = () => {
     dispatch(resetUser())
+    logout()
     toggleDropdown()
     navigate('/')
   }
   return (
 
     <nav className="bg-white-800 shadow-md">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between h-16">
           <div classNam="flex items-center justify-start px-4">
-            <img src={logo} className='h-40 w-auto' ></img>
+            {/* <img src={logo} className='h-[160px] rounded-lg ' ></img> */}
           </div>
 
           <div className="hidden md:flex flex-1 justify-start px-40 space-x-10 font-bold">
-            <a href="/" className="text-black-300 hover::text-red">
+            <a href="/" className="text-black-300 hover:bg-blue-200 py-1 px-1 rounded-md">
               Home
             </a>
-            <a href="#" className="text-black-300">
+            <a href="#" className="text-black-300  hover:bg-blue-200 py-1 px-1 rounded-md">
               movies
             </a>
-            <a href="#" className="text-black-300">
+            <a href="/blogs" className="text-black-300 hover:bg-blue-200 py-1 px-1 rounded-md ">
               Blogs
             </a>
-            <a href="/movies/my-orders" className="text-black-300">
+            <a href="/movies/my-orders" className="text-black-300 hover:bg-blue-200 py-1 px-1 rounded-md">
               Order
             </a>
           </div>
@@ -114,12 +120,12 @@ function Nav() {
 
             <button 
             onClick={toggleDropdown}
-            className='flex items-center text-xl bg-blue-500 text-white font-semibold px-5 w-full py-2 rounded-lg transition duration-300' > 
+            className='flex items-center text-xl bg-blue-200  text-black font-semibold px-5 w-full py-2 rounded-lg transition duration-300' > 
             
-              <HiUser className='text-2xl' />
+              <HiUser className='text-2xl text-black' />
                {username}
 
-               <IoMdArrowDropdown className='text-3xl gap-3 mx-auto' />
+               <IoMdArrowDropdown className='text-xl text-black gap-3 mx-auto' />
 
             </button>
 

@@ -9,13 +9,12 @@ from useracc.models import User
 from django.http import JsonResponse
 from .serilizers import CitySerializers ,TheatreSerializer , MovieSerializers
 from movies.models import City , Movie
-from theatres.models import Theatre
+from theatres.models import *
 from theatre_owner.models import *
-import json
+from rest_framework.decorators import api_view
 
 
 # Create your views here.
-
 
 class AdminLoginView(APIView) :
     def post(self , request) :
@@ -34,7 +33,6 @@ class AdminLoginView(APIView) :
                 'refresh' : str(refresh)
 
             },status=status.HTTP_200_OK)
-        
 
         else :
             return Response({
@@ -65,20 +63,6 @@ class CreateCity(APIView) :
             
             return Response({"message":'city was created successfully' , "data" : serializer.data},status=status.HTTP_201_CREATED)
         return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
-# class DeleteCity(APIView) :
-#     def delete( self , request, city_id ):
-
-#         try :
-#             item = City.objects.get(id = city_id)
-
-#         except City.DoesNotExist :
-#             return Response({'error' : 'Item is not found'},status=status.HTTP_404_NOT_FOUND )
-
-#         item.delete()
-#         remaining_cities = list(City.objects.values('id' , 'name','state' , 'pincode'))
-#         return Response({"message":'City deleted successfully','remaining_cities':remaining_cities})
-            
 
 class CityTheatreView(APIView) :
     def get(self , request , city_id) :
@@ -185,7 +169,7 @@ class CreateMovieView(APIView) :
         return Response(
             serializer.errors ,status=status.HTTP_400_BAD_REQUEST
         )
-class update_movie(APIView):        
+class update_movie(APIView):     
     def get(self ,request , movie_id):   
         movie = Movie.objects.get(id=movie_id)
     
@@ -212,13 +196,18 @@ class DeleteMovies(APIView) :
             return Response({'error' : 'movie not found'} , status=status.HTTP_404_NOT_FOUND)
         movie.delete()
         return Response({'message' : f'{movie.title} deleted successfully'} , status=status.HTTP_200_OK)
-class ShowTheatreRequest(APIView):
     
-    def get(self , request) :
+class ShowTheatreRequest(APIView):
+    def get(self , request) :   
         print('hello')
-        theatres = Theatre.objects.all()
+        try :
+            
+            theatres = Theatre.objects.filter(  screens__is_approved = False )
+        except Theatre.DoesNotExist:
+            return Response({'message' : 'pending theatres not found'},status=status.HTTP_404_NOT_FOUND)
+        
         serializer = TheatreSerializer(theatres , many=True)
-        print(serializer.data )
+        print(serializer.data)
         return Response(serializer.data , status=status.HTTP_200_OK)
     
     def post(self , request ):
@@ -236,14 +225,57 @@ class ShowTheatreRequest(APIView):
                 theatre_det.is_confirmed = True
                 theatre_det.save()
                 
+                screen_data = Screen.objects.filter(theatre=theatre_det,is_approved=False)
+                if screen_data :
+                    for screen in screen_data :
+                        screen.is_approved = True
+                        screen.save()
+
+                
                 return Response(
                     {'message' : 'theatre verified successfully'},
                     status=status.HTTP_200_OK
                 )
-            else :
-                pass
+                
         except Theatre.DoesNotExist:
             return Response(
                 {'error':'theatre not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+@api_view(['get'])
+def Verified_Theatres(request):
+    theatres = Theatre.objects.filter(is_confirmed=True).order_by('-created_at')
+    serializers = TheatreSerializer(theatres , many=True)
+    return Response(serializers.data , status=status.HTTP_200_OK)
+
+class verify_screen(APIView):
+    def post(self , request,screen_id):
+        print('view check✅')
+        print(screen_id)
+        try :
+            screen = Screen.objects.get(id=screen_id)
+            screen.is_approved = True
+            screen.save()
+            return Response({'message' : 'approved successfully'},status=status.HTTP_200_OK)
+        
+        except Screen.DoesNotExist:
+            return Response({'error' : 'not found screen'}, status=status.HTTP_404_NOT_FOUND)
+            
+            
+    def delete(self , request , screen_id):
+        screen = Screen.objects.get(id=screen_id)
+        screen_number = screen.screen_number
+        theatre_name = screen.theatre.name
+        screen.delete()
+            
+        return Response({'message' , f'Screen : {screen_number} from {theatre_name} deleted successfully  '})
+    
+    
+@api_view(['DELETE'])
+def Cancel_Show(request , show_id) :
+    show = ShowTime.objects.get(id=show_id)
+    screen_number = show.screen.screen_number
+    movie = show.movie.title
+    show.delete()
+    return Response({'message' : f'{movie} on screen {screen_number} was successfully cancelled'})
+    

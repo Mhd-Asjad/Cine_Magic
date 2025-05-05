@@ -7,5 +7,6 @@ urlpatterns = [
     path('process-payment/', ProcessPayment.as_view(), name='process-payment'),
     path('verify/' , Verify_Booking.as_view() , name='verify'),
     path('booking-info/<int:id>/',Booking_Info.as_view(),name='booking-info'),
-    path('my-bookings/<int:user_id>/',Show_Bookings.as_view() , name='my-bookings')
+    path('my-bookings/<int:user_id>/',Show_Bookings.as_view(),name='my-bookings'),
+    path('ticket/<int:booking_id>/', Ticket_View,name='ticket')
 ]

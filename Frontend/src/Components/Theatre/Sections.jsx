@@ -27,7 +27,7 @@ function Sections() {
                 <Route path='list-theatre/add-theatre' element={<PrivateRoute><AddTheatre/></PrivateRoute>}  />
                 <Route path=':id/edit-theatre' element={<PrivateRoute><EditTheatre/></PrivateRoute>} />
                 <Route path="seats-layout" element={<privateRoute><SeatHome/></privateRoute>} />
-                <Route path="cards/" element={<LayoutCards/>} />
+                <Route path="cards/" element={<PrivateRoute><LayoutCards/></PrivateRoute>} />
             </Routes>
 
         </div>

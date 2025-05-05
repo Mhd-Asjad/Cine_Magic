@@ -13,7 +13,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login
 from django.views import View
 from allauth.socialaccount.models import SocialAccount
-
+from rest_framework_simplejwt.tokens import RefreshToken
+from theatre_owner.serializers import TheatreOwnerSerialzers
+from theatre_owner.models import TheaterOwnerProfile
 class UserRegisterView(APIView) :
     def post(self , request ):
         print(request.data , 'post man')
@@ -51,16 +53,60 @@ class UserLoginView(APIView) :
             data = request.data
             username = data.get('username')
             password = data.get('password')
+            user_type = data.get('user_type' , 'normal')
             user = authenticate(request , username=username , password=password)
-            if user is not None :
-                user_data = {
-                    "id" : user.id ,
-                    "username" : user.username,
-                    "email" : user.email
-                }
-                return Response({'message' : 'logined successfully' , 'user' : user_data} ,status=status.HTTP_200_OK)
+        
+            if user is None :
+                return Response({'error' : 'invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
     
-            return Response({'error' : 'invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
+            if user_type == 'admin' and not user.is_staff :
+                return Response({'error' : 'User is unautherized as Admin'})
+            
+            theatre_data = None
+            print(user.is_approved)
+            if user_type == 'theatre':
+      
+
+                if not user.is_theatre_owner:
+
+                    return Response({
+                        'error': 'User is not registered as a theatre owner'
+                    }, status=status.HTTP_403_FORBIDDEN)
+                
+                if not user.is_approved :
+                    return Response({'error' : 'your theatre owner account is pending approval'},status=status.HTTP_400_BAD_REQUEST)
+                
+                
+                try :
+                    owner_data = TheaterOwnerProfile.objects.get(user=user)
+                    serializer = TheatreOwnerSerialzers(instance=owner_data)
+                    theatre_data = serializer.data
+                    
+                except TheaterOwnerProfile.DoesNotExist:
+                        
+                    return Response({'error': 'Theatre owner profile not found'},
+                    status=status.HTTP_404_NOT_FOUND)
+            
+            refresh = RefreshToken.for_user(user)
+           
+            print(refresh , 'values')
+            
+            user_data = {
+                'access_token' : str(refresh.access_token),
+                'refresh_token' : str(refresh),
+                "id" : user.id,
+                "username" : user.username,
+                "email" : user.email,
+                'is_admin': user.is_staff,
+                'is_theatre_owner': user.is_theatre_owner,
+                'is_approved': user.is_approved,
+                'theatre_profile' : theatre_data
+                
+            }
+            print(user_data , 'userdata')
+            
+            return Response({'message' : 'logined successfully' , 'user' : user_data} ,status=status.HTTP_200_OK)
+    
         
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

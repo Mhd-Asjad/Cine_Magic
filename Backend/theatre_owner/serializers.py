@@ -7,7 +7,7 @@ from seats.models import *
 class TheatreOwnerSerialzers(serializers.ModelSerializer) :
     class Meta :
         model = TheaterOwnerProfile
-        fields = ['user' , 'theatre_name' ,'owner_photo' , 'location' , 'state' , 'pincode' ,'latitude' , 'longitude' , 'user_message']
+        fields = ['id' , 'user' , 'theatre_name' ,'owner_photo' , 'location' , 'state' , 'pincode' ,'latitude' , 'longitude' , 'user_message']
 
     def create(self, validated_data) :
         
@@ -38,26 +38,31 @@ class TimeSlotSerializer(serializers.ModelSerializer) :
         showtime = ShowTime.objects.filter(slot = obj).first()
         if showtime and showtime.end_time :
             return showtime.end_time.strftime('%H:%M')
-        return None
+        return None 
     
 class CreateScreenSerializer(serializers.ModelSerializer):
     theatre_name = serializers.CharField(source='theatre.name',read_only=True)
     time_slots = TimeSlotSerializer(many=True , write_only = True)
+    selected_seats = serializers.ListField(
+        child=serializers.CharField(), required=False
+    )
     class Meta :
         model = Screen
-        fields = [ 'id' , 'theatre' , 'theatre_name', 'screen_number' , 'capacity' , 'screen_type' , 'layout' , 'time_slots']
-
+        fields = [ 'id' , 'theatre' , 'theatre_name', 'screen_number', 'capacity' , 'screen_type' , 'is_approved' , 'layout' , 'time_slots' , 'selected_seats']
+        
+        
     def create(self, validated_data):
         time_slot_data =  validated_data.pop('time_slots' , [])
         layout = validated_data.get('layout')
+        gap_labels = validated_data.pop('selected_seats' ,[])
         screen = Screen.objects.create(**validated_data)
         
         for time_slot in time_slot_data :
             TimeSlot.objects.create(screen=screen , **time_slot)
-                
+        
+        print(gap_labels , 'unselected seats')      
         rows = layout.rows
         cols = layout.cols
-        
         try:
             default_category = SeatCategory.objects.first()  
         except SeatCategory.DoesNotExist:
@@ -71,97 +76,35 @@ class CreateScreenSerializer(serializers.ModelSerializer):
                     screen=screen,
                     row=row_letter,
                     number =  seat_number ,
-                    category= default_category
+                    category= default_category,
+                    is_seat = False if row_letter + str(seat_number) in gap_labels else True
                 )
         return screen
-
-class EditShowTimeSerializer(serializers.ModelSerializer) :
-    # start_time = serializers.TimeField()
+    
+class FechShowSerializer(serializers.ModelSerializer):
+    start_time = serializers.CharField(source='slot.start_time' , read_only=True)
+    theatre_name = serializers.CharField(source='screen.theatre.name' ,read_only=True)
+    theatre_details = serializers.CharField(source='screen.theatre.address' ,read_only=True)
+    movie_title = serializers.CharField(source='movie.title' , read_only=True)
+    
     class Meta :
         model = ShowTime
-        fields = ['id' ,'screen' ,'movie' ,'slot' ,'show_date' , 'end_date']
-        
-        
-    # def validate(self, data):
-    #     screen_id = data.get('screen')
-    #     new_start_time = data.get('start_time')
-    #     duration = timedelta(hours=3)
+        fields = ['screen' , 'movie' , 'movie_title' , 'theatre_name' ,'theatre_details' ,'slot' , 'show_date' , 'start_time' , 'end_time' ]
 
-    #     new_start_dt = datetime.combine(datetime.today(), new_start_time)
-    #     new_end_dt = new_start_dt + duration
-
-    #     existing_slots = TimeSlot.objects.filter(screen=screen_id)
-
-    #     for slot in existing_slots:
-    #         existing_start_dt = datetime.combine(datetime.today(), slot.start_time)
-    #         existing_end_dt = existing_start_dt + duration
-
-    #         if new_start_dt < existing_end_dt and existing_start_dt < new_end_dt:
-    #             raise serializers.ValidationError("This time slot overlaps with an existing one.")
-
-    #     return data
-        
-    def update(self , instance , validated_data):
-        screen = validated_data.get('screen' , instance.screen)
-        movie = validated_data.get('movie' , instance.movie)
-        slot = validated_data.get('slot' , instance.slot)
-        new_start_date = validated_data.get('show_date' , instance.show_date)
-        new_end_date = validated_data.get('end_date' , instance.end_date)
-        print(new_start_date)
-        print(new_end_date)
-
-            
-        ShowTime.objects.filter(
-            screen = screen,
-            movie = movie,
-            slot = slot,
-            show_date__gt = new_end_date
-        ).delete()
-        
-        existing_dates = set(
-            ShowTime.objects.filter(
-                screen=screen,
-                slot=slot,
-                movie=movie,
-                show_date__range=(new_start_date, new_end_date)
-            ).values_list('show_date', flat=True)
-        )
-        print(existing_dates)
-        
-        date_list = [new_start_date + timedelta(days=i) for i in range((new_end_date - new_start_date).days + 1)]
-        start_time = slot.start_time
-        end_time = (datetime.combine(datetime.today(), start_time) + timedelta(minutes=movie.duration)).time()
-        print('reachers hereee')
-        new_showtimes = []
-        
-        for show_date in date_list : 
-            if show_date not in existing_dates :
-                new_showtimes.append(ShowTime(
-                    screen=screen,
-                    movie=movie,
-                    slot=slot,
-                    show_date=show_date,
-                    end_time=end_time
-                ))
-                
-        ShowTime.objects.bulk_create(new_showtimes)
-        
-        # updating new showdate for instancess
-        instance.show_date = new_start_date
-        instance.end_date = new_end_date
-        instance.save()
-
-        return instance
-        
 class Createshowtimeserializers(serializers.ModelSerializer):
     movie_name = serializers.CharField(source='movie.title',read_only = True)
     screen_number = serializers.CharField(source='screen.screen_number')
     start_time = serializers.CharField(source='slot.start_time' , read_only=True)
-    
+    poster = serializers.SerializerMethodField()
     class Meta :
         model = ShowTime
-        fields = ['id' ,'movie_name' ,'screen_number' ,'screen' ,'movie' ,'slot' ,'show_date' , 'end_date' , 'start_time' ,'end_time']
+        fields = ['id' ,'movie_name' , 'poster' , 'screen_number' ,'screen' ,'movie' ,'slot' ,'show_date' , 'end_date' , 'start_time' ,'end_time']
         
+    def get_poster(self , obj):
+        request = self.context.get('request')
+        if obj.movie and obj.movie.poster:
+            return request.build_absolute_uri(obj.movie.poster.url)
+        return None
     
     def create(self , validated_data):  
         screen = validated_data['screen']
@@ -202,4 +145,6 @@ class Createshowtimeserializers(serializers.ModelSerializer):
 class UpdateTheatreOwnerSeriailizer(serializers.ModelSerializer):
     class Meta :
         model = TheaterOwnerProfile
-        fields = ['id' , 'theatre_name' , 'location' , 'state' , 'pincode']
+        fields = ['id' , 'user' , 'theatre_name' , 'location' , 'state' , 'pincode' , 'ownership_status']
+        
+        

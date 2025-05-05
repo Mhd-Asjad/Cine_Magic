@@ -23,7 +23,7 @@ import Swal from 'sweetalert2';
   
 function ShowRequest() {
     const [ theatreData , setTheatreData ] = useState([])
-    const {toast} = useToast()
+    const {toast} = useToast();
     console.log(theatreData)
     useEffect(()=> {
         handleTheatresRequest()
@@ -38,19 +38,6 @@ function ShowRequest() {
         }
     }
     console.log(theatreData)
-
-    const getStatusVariant = (status) => {
-        if (status) {
-            return 'secondary'
-
-        }else if(!status) {
-            return 'default' 
-
-        }else {
-            return 'destructive';
-        }
-
-    }
 
     const handleApprove = async (theatre_id) => {
         const status = 'confirmed'
@@ -67,14 +54,28 @@ function ShowRequest() {
 
             handleTheatresRequest()
 
-        }catch(e){
+        }catch(error){
+            console.log(error.response)
             toast({
-                description: "Failed to approve theatre.",
+                description: error.response?.data?.error,
                 variant: "destructive",
             });
-            console.log(e.response)
         }
     }
+
+    const getStatusVariant = (status) => {
+        if (status) {
+            return 'secondary'
+
+        }else if(!status) {
+            return 'default' 
+
+        }else {
+            return 'destructive';
+        }
+
+    }
+
     const handleReject = async(theatre_id) => {
 
         console.log(theatre_id)
@@ -105,15 +106,14 @@ function ShowRequest() {
             }
         }
     }
-
+    console.log(theatreData)
   return (
-    <div className='p-10 mt-10' >
+    <div className='p-10 mt-10 min-h-screen' >
 
     
     <Card className='w-full py-10 max-w-4xl mx-auto md:ml-20 sm:ml-30'>
         <CardHeader >
-            <CardTitle className="flex justify-center text-xl font-semibold text-gray-500" >Theatre Owner Register Request</CardTitle>
-                <CardDescription>Card Description</CardDescription>
+            <CardTitle className="flex justify-center text-xl font-semibold text-gray-500" >Theatre Screen and Ownership Request</CardTitle>
                 <CardContent>
                     <div className="w-full overflow-x-auto">
                         <table className='w-full border-collapse' >
@@ -127,80 +127,81 @@ function ShowRequest() {
 
                             <tbody>
 
-                                {theatreData.map((data) => (
-                                    <tr key={data.id} className="border-b hover:bg-gray-50" >
+                            {theatreData.map((data) => (
+    
+                                <tr key={data.id} className="border-b hover:bg-gray-50" >
 
-                                        <td className='p-3'>{data.owner.user_name}</td>
-                                        <td className='p-3'>{data.name}</td>
-                                        <td className='p-3' >{`${data.city.name}`}</td>
-                                        <td>
+                                    <td className='p-3'>{data.owner.user_name}</td>
+                                    <td className='p-3'>{data.name}</td>
+                                
+                                    <td className='p-3' >{`${data.city.name}`}</td>
+                                    <td>
 
-                                        < Badge variant={getStatusVariant(data.is_confirmed)} >
-                                            {data.is_confirmed ? 'accepted' : 'pending'}
-                                        </Badge>
+                                    < Badge variant={getStatusVariant(data.is_confirmed)} >
+                                        {data.is_confirmed? 'acive' : 'pending'}
+                                    </Badge>
 
-                                        </td>
+                                    </td>
 
-                                        <td className='p-3' >
-                                            <div className='flex space-x-2' >
-                                                <Dialog>
+                                    <td className='p-3' >
+                                        <div className='flex space-x-2' >
+                                            <Dialog>
 
-                                                    <DialogTrigger asChild >
-                                                        <Button variant="outline" size="icon" >
-                                                            <Eye className='h-4 w-2' />
-                                                        </Button>
-                                                        
-                                                    </DialogTrigger>
-                                                    < DialogContent className="max-w-2xl" >
-                                                        <DialogHeader >
-                                                            <DialogTitle className="flex justify-content-center" >
-                                                                Theatre Details for {data.name}
-                                                            </DialogTitle>
-                                                        </DialogHeader>
-                                                        <div className='grid grid-cols-1 gap-2'>
-                                                            <h3 className='font-semibold mb-2' >Owner Information</h3>
-                                                            <p> Username : {data.owner.user_name}</p>
-                                                            <p> Location : {data.owner.location} </p>
-                                                            <p> pincode: {data.owner.pincode} </p>
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="font-semibold mb-2">Theatre Info</h3>
-                                                            <div className="mb-2 p-2 border rounded">
-                                                                <p><strong>Name:</strong> {data.name}</p>
-                                                                <p><strong>City:</strong> {`${data.city.name}`}</p>
-                                                                <p><strong>Address:</strong> {data.address}</p>
+                                                <DialogTrigger asChild >
+                                                    <Button variant="outline" size="icon" >
+                                                        <Eye className='h-4 w-2' />
+                                                    </Button>
+                                                    
+                                                </DialogTrigger>
+                                                < DialogContent className="max-w-2xl" >
+                                                    <DialogHeader >
+                                                        <DialogTitle className="flex justify-content-center" >
+                                                            Theatre Details for {data.name}
+                                                        </DialogTitle>
+                                                    </DialogHeader>
+                                                    <div className='grid grid-cols-1 gap-2'>
+                                                        <h3 className='font-semibold mb-2' >Owner Information</h3>
+                                                        <p> Username : {data.owner.user_name}</p>
+                                                        <p> Location : {data.owner.location} </p>
+                                                        <p> pincode: {data.owner.pincode} </p>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-semibold mb-2">Theatre Info</h3>
+                                                        <div className="mb-2 p-2 border rounded">
+                                                            <p><strong>Name:</strong> {data.name}</p>
+                                                            <p><strong>City:</strong> {`${data.city.name}`}</p>
+                                                            <p><strong>Address:</strong> {data.address}</p>
 
-                                                                <h4 className="font-medium mt-2">Screens:</h4>
+                                                            <h4 className="font-medium mt-2 text-red-500">Unverified Screen:</h4>
 
-                                                                {data.screens.length > 0 ? (
-                                                                    data.screens.map((screen) => (
-                                                                        <div key={screen.id} className="text-sm pl-2 border rounded p-2 my-2">
-                                                                            <p><strong>Screen {screen.screen_number} - {screen.screen_type || "N/A"}</strong></p>
-                                                                            <p>Capacity: {screen.capacity}</p>
+                                                            {data.screens.length > 0 ? (
+                                                                data.screens.map((screen) => (
 
-                                                                            <h5 className="font-medium mt-2">Showtimes:</h5>
-                                                                            {screen.showtimes.length > 0 ? (
-                                                                                <ul className="list-disc pl-4">
-                                                                                    {screen.showtimes.map((show) => (
-                                                                                        <li key={show.id}>
-                                                                                            {show.movie} | {show.start_time} - {show.end_time}
-                                                                                        </li>
-                                                                                    ))}
-                                                                                </ul>
-                                                                            ) : (
-                                                                                <p className="text-gray-500">No showtimes available</p>
-                                                                            )}
+                                                                    screen?.is_approved === false ? (
+
+                                                                        <div key={screen.id} className="text-sm pl-2 mb-8 text-center rounded p-2 my-2">
+                                                                            <div className='border py-3 px-2 mx-auto mb-5  w-[80%]'  >
+
+                                                                                <p><strong>Screen {screen.screen_number} - {screen.screen_type || "N/A"}</strong></p>
+                                                                                <p>Capacity: {screen.capacity}</p>
+
+                                                                                
+                                                                            </div>
+    
                                                                         </div>
-                                                                    ))
-                                                                ) : (
-                                                                    <p className="text-red-500">No screens available</p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </DialogContent>
-                                                </Dialog>
 
-                                            {!data.is_confirmed && (
+                                                                    ): null
+
+                                                                ))
+                                                            ) : (
+                                                                <p className="">Not available</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </DialogContent>
+                                            </Dialog>
+
+                                        {!data.is_confirmed && (
 
                                                 <>
                                                 
