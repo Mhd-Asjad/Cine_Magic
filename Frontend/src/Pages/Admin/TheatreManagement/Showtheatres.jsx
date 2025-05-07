@@ -3,12 +3,13 @@ import React, { useEffect , useState } from 'react'
 import { ChevronDown, Film, MapPin, User, Info, Check, X } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import Swal from 'sweetalert2';
+import { useToast } from '@/hooks/use-toast';
 
 function ShowTheatres() {
   const [ theatres , setTheatres ] = useState([])
   const [expandedTheatre, setExpandedTheatre] = useState(null);
   const [expandedScreens, setExpandedScreens] = useState({});
-
+  const {toast} = useToast();
 
   useEffect(() => {
     const fetchTheaters = async() => {
@@ -20,7 +21,7 @@ function ShowTheatres() {
       }
     };
     fetchTheaters()
-  },[])
+  },[expandedScreens])
   console.log(theatres , 'adfjksjl')
 
   const toggleTheatreExpansion = (theatreId) => {
@@ -35,17 +36,19 @@ function ShowTheatres() {
       [screenId]: !prev[screenId]
     }));
   };
+  console.log(expandedScreens , 'expanded')
 
   const handleApprove = async(screen_id) => {
     console.log(screen_id)
     try{
       const res = await apiAdmin.post(`handle-screen/${screen_id}/`)
-      alert(res.data.message)
+      toast({title : res.data.message})
+      setExpandedScreens({})
     }catch(e) {
       console.log(e)
     }
-
   }
+  
 
   const handleDelete = async(screen_id )=> {
     const result = await Swal.fire({
@@ -60,12 +63,19 @@ function ShowTheatres() {
     if (result.isConfirmed) {
       try {
         const res = await apiAdmin.delete(`handle-screen/${screen_id}/`)
-        alert(res.data.message)
+        console.log(res.data.message)
+        if (res.status === 200){
+
+          toast({title : res.data.message})
+          setExpandedScreens({})
+
+        }
       }catch(e){
         console.log(e)
       };
     };
   }
+  
 
   return (
 
@@ -164,7 +174,6 @@ function ShowTheatres() {
                     </div>
                   </div>
 
-                  {/* Owner Information Section */}
                   <div className="p-4 border-t border-gray-100">
                     <h4 className="font-medium text-gray-700 mb-2 flex items-center">
                       <User size={16} className="mr-2" /> Owner Details
@@ -238,66 +247,69 @@ function ShowTheatres() {
                             </div>
                             
                             {expandedScreens[screen.id] && (
-                              <div className="p-3 bg-gray-50 border-t border-gray-200">
-                                <table className="w-full text-sm">
-                                  <tbody>  
-                                
-                                    <tr>
-                                      <td className="py-2 font-medium text-gray-600">Capacity:</td>
-                                      <td className="py-2 text-gray-800">{screen.capacity} seats</td>
-                                    </tr>
-                                    <tr>
-                                      <td className="py-2 font-medium text-gray-600">Type:</td>
-                                      <td className="py-2 text-gray-800">{screen.screen_type}</td>
-                                    </tr>
-                                    <tr>
-                                      
-                                      <td className="py-2 font-medium text-gray-600">Status:</td>
-                                      <td className="py-2 text-gray-800">{screen.is_approved ? 'Active' : 'Inactive'}</td>
-                                    </tr>
-                                    
-                                      <tr>
+                             <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 border-t border-gray-200">
+                             {/* Left Side: Details */}
+                             <div>
+                               <table className="w-full text-sm">
+                                 <tbody>
+                                   <tr>
+                                     <td className="py-2 font-medium text-gray-600">Capacity:</td>
+                                     <td className="py-2 text-gray-800">{screen.capacity} seats</td>
+                                   </tr>
+                                   <tr>
+                                     <td className="py-2 font-medium text-gray-600">Type:</td>
+                                     <td className="py-2 text-gray-800">{screen.screen_type}</td>
+                                   </tr>
+                                   <tr>
+                                     <td className="py-2 font-medium text-gray-600">Status:</td>
+                                     <td className="py-2 text-gray-800">{screen.is_approved ? 'Active' : 'Inactive'}</td>
+                                   </tr>
+                                   {!screen.is_approved && (
+                                     <tr>
+                                       <td className="py-2 font-bold text-gray-600">Action:</td>
+                                       <td className="py-2 text-gray-800">
+                                         <div className="flex gap-3">
+                                           <Button
+                                             variant="outline"
+                                             size="icon"
+                                             onClick={() => handleApprove(screen.id)}
+                                           >
+                                             <Check className="h-4 w-4 text-green-500" />
+                                           </Button>
+                                           <Button
+                                             variant="outline"
+                                             size="icon"
+                                             onClick={() => handleDelete(screen.id)}
+                                           >
+                                             <X className="h-4 w-4 text-red-500" />
+                                           </Button>
+                                         </div>
+                                       </td>
+                                     </tr>
+                                   )}
+                                 </tbody>
+                               </table>
+                             </div>
+                           
+                             <div>
+                               <p className="text-gray-600 font-medium mb-2">Available seats:</p>
+                               <div className="flex flex-wrap gap-2">
+                                 {screen.seats.map((seat) => (
+                                   seat?.label ? (
+                                     <div 
+                                       key={seat.id}
+                                       className="w-10 h-10 bg-green-500 text-white flex items-center justify-center rounded text-xs"
+                                     >
+                                       {seat.label}
 
-
-                                      <td className="py-2 font-bold text-gray-600">{!screen.is_approved ? 'Action' : ''}</td>
-                                      <td className="py-2 text-gray-800">
-
-                                      {!screen.is_approved ?(
-
-                                        <div className='flex justify-content-between gap-3' >
-
-                                          <Button 
-                                              variant='outline'
-                                              size='icon'
-                                              onClick={() => handleApprove(screen.id)}
-                                          >
-                                              <Check className='h-4 w-4 text-green-500' />
-
-                                          </Button>
-                                          <Button 
-                                              variant="outline"
-                                              size="icon"
-                                              onClick={() => handleDelete(screen.id)}
-                                          >
-                                              <X className='h4 w-4 text-red-500' />
-                                          </Button>
-
-                                        </div>
-                                      ):null
-
-
-
-                                      }
-                                      
-         
-                                      </td>
-
-
-                                      </tr>
-                                    
-                                  </tbody>
-                                </table>
-                              </div>
+                                     </div>
+                                   ) : (
+                                     <div key={seat.id} className="w-10 h-10" />
+                                   )
+                                 ))}
+                               </div>
+                             </div>
+                           </div>
                             )}
                           </div>
                         ))}

@@ -19,18 +19,19 @@ import MyBookings from "./Pages/Bookings/MyBookings";
 import TicketView from "./Pages/Bookings/TicketView";
 import BlogPosts from "./Pages/blogs/BlogPosts";
 import AddBlog from "./Pages/blogs/AddBlog";
-
+import PrivateRoute from "./Pages/Admin/PrivateRoute";
+import { UserRoute } from "./Pages/Routes/ProtectedRoute";
 function App() {
 
     return (
         <>
             <Router>
                 <Routes>
-                    <Route path="/" element={<Landingpage />} />
-                    <Route path="/movie/:id/details" element={<MovieSpecification />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path={`/available-show-details/:id`} element={<AvailableShowDetails/>} />
-                    <Route path={'/available-show-details/:screenId/:showId/seats'} element={<Seats/>} />
+                    <Route path="/" element={<PrivateRoute><Landingpage/></PrivateRoute>}/>
+                    <Route path="/movie/:id/details" element={<PrivateRoute><MovieSpecification /></PrivateRoute>} />
+                    <Route path="/profile" element={<Profile/>} />
+                    <Route path={`/available-show-details/:id`} element={<PrivateRoute><AvailableShowDetails/></PrivateRoute>} />
+                    <Route path={'/available-show-details/:screenId/:showId/seats'} element={<PrivateRoute><Seats/></PrivateRoute>} />
                     <Route path="seat-layout/:location" element={
                         <PayPalScriptProvider options={{
                             "clientId" : PAYPAL_CLIENT_ID,
@@ -40,19 +41,19 @@ function App() {
                         </PayPalScriptProvider>
                         } />
                         
-                    <Route path="payment/:booking_id/success" element={<PaymentSuccess/>} />
-                    <Route path='movies/my-orders' element={<MyBookings/>} />
+                    <Route path="payment/:booking_id/success" element={<PrivateRoute><PaymentSuccess/></PrivateRoute>} />
+                    <Route path='movies/my-orders' element={<PrivateRoute><MyBookings/></PrivateRoute>} />
                     <Route path='booking/:id/ticket' element={<TicketView/>} />
                     <Route path='/blogs' element={<BlogPosts/>} />
                     <Route path='/blogs/add' element={<AddBlog/>} />
 
                     {/* adminpages */}
                     <Route path="/admin/login" element={<AdminLogin />} />
-                    <Route path="/admin/*" element={<Admin_Pages/>}/>
+                    <Route path="/admin/*" element={<PrivateRoute><Admin_Pages/></PrivateRoute>}/>
 
                     {/* theatre owner */}
                     <Route path="/theatre/login" element={<Loginpage />} />
-                    <Route path="/theatre-owner/*" element={<TheatreOwner />} />
+                    <Route path="/theatre-owner/*" element={<PrivateRoute><TheatreOwner/></PrivateRoute>} />
 
                 </Routes>
             </Router>

@@ -16,16 +16,18 @@ function Addshowtime() {
   const [showTimes , setShowTimes ] = useState([])
   const [showAddForm, setShowAddForm] = useState(false);
   const [time , setTime ] = useState('12:00:00');
+  const [ screenApproved , setScreenApproved ] = useState(false)
   const navigate = useNavigate();
   const {toast} = useToast();
-  const [showId , setShowId] = useState(null)
-  console.log(time)
+  let is_approved = null;
+
   useEffect(() => {
     const fetchCurrentShowTime = async() => {
       try {
         const res = await TheatreApi.get(`/get_time-slots/?screen_id=${screenId}`)
-        console.log(res.data)
-        setShowTimes(res.data)
+        console.log(res.data.data)
+        setScreenApproved(res.data.is_approved)
+        setShowTimes(res.data.data)
      
       }catch(e) {
         console.log(e)
@@ -33,11 +35,11 @@ function Addshowtime() {
     }
     fetchCurrentShowTime()
   },[screenId])
+  console.log(is_approved)
 
   const handleSubmit = async(e) => {
     e.preventDefault()
     try {
-
       const res = await TheatreApi.post('/add-timeslot/ ' ,{
         'screen_id' : screenId ,
         'start_time' : time.length === 5 ? time + ':00' : time ,
@@ -58,9 +60,21 @@ function Addshowtime() {
       });
       
     }
-      
-
   }
+
+  const handleAddForm = () => {
+    if (screenApproved) {
+      setShowAddForm(true)
+    }else{
+      setShowAddForm(false)
+      toast({
+        title : 'no access until theatre approval',
+        variant : 'destructive'
+      })
+    }
+    
+  }
+
   const formatTime = (timeString) => {
     if (!timeString) {
       return 'not defined'
@@ -82,18 +96,17 @@ function Addshowtime() {
     navigate(`/theatre-owner/edit-show/${timeslot_id}`)
 
   }
-  console.log(showId)
   return (
     <div className="min-h-screen bg-gradient-to-br to-indigo-100 p-8 mt-10 font-sans">
           <h1 className=" flex justify-center text-2xl md:text-3xl font-bold mb-4">Movie Showtimes</h1>
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden">
         <div className="bg-gradient-to-r from-blue-500 to-indigo-700 p-6">
-          <p className="mt-1 text-gray-50 flex gap-1"><CircleAlert className=' text-yellow-300' />Try to add show time gap atleast 3 Hours</p>
+          <p className="mt-1 text-gray-50 flex gap-1"><CircleAlert className=' text-yellow-300' />{screenApproved ? 'Try to add show time gap atleast 3 Hours' : 'no access to modify time'}</p>
         </div>
         
         <div className="p-6">
           {showTimes.length > 0 ? (
-            <div className="mb-8">
+            <div className="mb-8">  
               <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center">
                 <Clock size={20} className="mr-2 text-blue-600" />
                 Available Times
@@ -125,7 +138,7 @@ function Addshowtime() {
             </div>
           )}
           
-          {showAddForm ? (
+          {showAddForm && screenApproved ? (
             <div className="bg-blue-50 p-6 rounded-lg shadow-inner mt-6">
               <h2 className="text-xl font-bold text-gray-700 mb-4">Add New Showtime</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -151,6 +164,7 @@ function Addshowtime() {
                   >
                     Cancel
                   </button>
+
                   <button
                     type="submit"
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
@@ -161,10 +175,13 @@ function Addshowtime() {
               </form>
             </div>
           ) : (
+
+            
             <div className="flex justify-center mt-8">
               <button
-                onClick={() => setShowAddForm(true)}
+                onClick={handleAddForm}
                 className="px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-full hover:shadow-lg transition-all duration-200 flex items-center font-medium"
+                
               >
                 <span className="mr-2">+</span> Add New Showtime
               </button>

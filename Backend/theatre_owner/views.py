@@ -66,7 +66,8 @@ class ConfirmTheatreOwner(APIView) :
     # getting unverified theatre enquries 
     def get(self , request ) :
         try :
-            unverified_theatre = TheaterOwnerProfile.objects.filter(ownership_status = 'pending')
+            unverified_theatre = TheaterOwnerProfile.objects.filter(ownership_status = 'confirmed' , user__is_theatre_owner = False)
+            print(unverified_theatre)
             data = []
             for theatre in unverified_theatre :
                 enqueiry_data = {
@@ -308,7 +309,8 @@ class get_theatre_screens(APIView):
 class get_timeslots(APIView) :
     def get(self ,request ):
         screen_id = request.query_params.get('screen_id')
-        print(screen_id,'inside views') 
+        screen = Screen.objects.get(id=screen_id)
+        
         try :
             time_slots = TimeSlot.objects.filter(screen = screen_id)
             
@@ -316,13 +318,12 @@ class get_timeslots(APIView) :
             return Response({'error' : 'timeslot not added'} , status=status.HTTP_404_NOT_FOUND)
             
         serilizer = TimeSlotSerializer(time_slots , many=True)
-        return Response(serilizer.data , status=status.HTTP_200_OK)
+        return Response({'data' : serilizer.data , 'is_approved' : screen.is_approved }, status=status.HTTP_200_OK)
 
 class create_timeslot(APIView):
     def post(self , request) :
         
         data = request.data
-        print(data,'adjfsajdljal')
         
         try :
             show_time = data.pop("start_time")

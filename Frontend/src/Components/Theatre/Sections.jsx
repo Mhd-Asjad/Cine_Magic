@@ -12,22 +12,23 @@ import SeatHome from '@/Pages/Theatreowner/SeatManagement/SeatHome';
 import LayoutCards from '@/Pages/Theatreowner/SeatManagement/LayoutCards';
 import Addshowtime from '@/Pages/Theatreowner/ShowManagement/Addshowtime';
 import EditShow from '@/Pages/Theatreowner/ShowManagement/EditShow';
+import { TheatreRoute } from '@/Pages/Routes/ProtectedRoute';
 function Sections() {
     return (
         <div>
             <Routes>
-                <Route path="dashboard" element={<PrivateRoute> <TheatreDashboard/></PrivateRoute>}/>
-                <Route path="add-theatre" element={<PrivateRoute> <AddTheatre/> </PrivateRoute>} />
-                <Route path="theatre-confimation" element={<PrivateRoute><PendingTheatres/></PrivateRoute>} />
-                <Route path=":id/add-screen" element={<PrivateRoute><AddScreen/></PrivateRoute>}/>
-                <Route path='list-theatre' element={<PrivateRoute><ListTheatre/></PrivateRoute>} />
-                <Route path=':id/screens' element={<PrivateRoute><ShowScreen/></PrivateRoute>} />
-                <Route path='add-showtime/:theatreId/:screenId' element={<PrivateRoute><Addshowtime/></PrivateRoute>} />
-                <Route path='edit-show/:id' element={<PrivateRoute><EditShow/></PrivateRoute>} />
-                <Route path='list-theatre/add-theatre' element={<PrivateRoute><AddTheatre/></PrivateRoute>}  />
-                <Route path=':id/edit-theatre' element={<PrivateRoute><EditTheatre/></PrivateRoute>} />
-                <Route path="seats-layout" element={<privateRoute><SeatHome/></privateRoute>} />
-                <Route path="cards/" element={<PrivateRoute><LayoutCards/></PrivateRoute>} />
+                <Route path="dashboard" element={<TheatreRoute> <TheatreDashboard/></TheatreRoute>}/>
+                <Route path="add-theatre" element={<TheatreRoute> <AddTheatre/> </TheatreRoute>} />
+                <Route path="theatre-confimation" element={<TheatreRoute><PendingTheatres/></TheatreRoute>} />
+                <Route path=":id/add-screen" element={<TheatreRoute><AddScreen/></TheatreRoute>}/>
+                <Route path='list-theatre' element={<TheatreRoute><ListTheatre/></TheatreRoute>} />
+                <Route path=':id/screens' element={<TheatreRoute><ShowScreen/></TheatreRoute>} />
+                <Route path='add-showtime/:theatreId/:screenId' element={<TheatreRoute><Addshowtime/></TheatreRoute>} />
+                <Route path='edit-show/:id' element={<TheatreRoute><EditShow/></TheatreRoute>} />
+                <Route path='list-theatre/add-theatre' element={<TheatreRoute><AddTheatre/></TheatreRoute>}  />
+                <Route path=':id/edit-theatre' element={<TheatreRoute><EditTheatre/></TheatreRoute>} />
+                <Route path="seats-layout" element={<TheatreRoute><SeatHome/></TheatreRoute>} />
+                <Route path="cards/" element={<TheatreRoute><LayoutCards/></TheatreRoute>} />
             </Routes>
 
         </div>

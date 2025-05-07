@@ -126,8 +126,8 @@ function ShowRequest() {
                             </thead>
 
                             <tbody>
-
-                            {theatreData.map((data) => (
+                        { theatreData.length > 0 ? (
+                            theatreData.map((data) => (
     
                                 <tr key={data.id} className="border-b hover:bg-gray-50" >
 
@@ -136,7 +136,6 @@ function ShowRequest() {
                                 
                                     <td className='p-3' >{`${data.city.name}`}</td>
                                     <td>
-
                                     < Badge variant={getStatusVariant(data.is_confirmed)} >
                                         {data.is_confirmed? 'acive' : 'pending'}
                                     </Badge>
@@ -226,7 +225,17 @@ function ShowRequest() {
                                             </div>        
                                         </td>
                                     </tr>
-                                ))}
+                                ))
+
+                            ):(
+
+                                <div className='' >
+
+                                    <p className="text-red-700 mx-auto">Not available</p>
+
+                                </div>
+
+                            )}
                             </tbody>
 
                         </table>

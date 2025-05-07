@@ -24,7 +24,7 @@ function Nav() {
   const dispatch = useDispatch();
   const selectedcity = useSelector((state) => state.location.selectedCity);
   const cityid = useSelector(selectCityId);
-  const username = useSelector((state) => state.user.username);
+  const user = useSelector((state) => state.user);
   const [ isCityModalOpen , setIsCityModalOpen] = useState(false);
   const [dropdownOpen , setDropdownOpen ] = useState(false);
   const  navigate = useNavigate();
@@ -114,7 +114,7 @@ function Nav() {
               </span>
             </button>
 
-          { username ? (
+          { user.username ? (
 
           <div className='reletive' >
 
@@ -123,7 +123,7 @@ function Nav() {
             className='flex items-center text-xl bg-blue-200  text-black font-semibold px-5 w-full py-2 rounded-lg transition duration-300' > 
             
               <HiUser className='text-2xl text-black' />
-               {username}
+               {user.username}
 
                <IoMdArrowDropdown className='text-xl text-black gap-3 mx-auto' />
 
@@ -132,18 +132,38 @@ function Nav() {
               {dropdownOpen && (
    
                 <div className="absolute mx-auto mt-1 w-48 bg-white border rounded-md shadow-lg z-10">
+                  
+
+
 
                   <a
                     href="/profile"
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
                     profile
                   </a>
-                    <a
-                      onClick={handleLogout}
-                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                      Logout
 
+                  { user.is_approved && (
+                    <a
+                    href="/theatre-owner/dashboard"
+                    className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                     theatre Profile
                     </a>
+                  )}
+
+                  {user.is_admin &&(
+                     <a
+                     href="/admin/dashboard"
+                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                     admin dashboard
+                   </a>
+                  )}
+                  
+                  <a
+                    onClick={handleLogout}
+                    className="block px-4 py-2 cursor-pointer text-gray-800 hover:bg-gray-100">
+                    Logout
+
+                  </a>
                 </div>
               )}
             </div>

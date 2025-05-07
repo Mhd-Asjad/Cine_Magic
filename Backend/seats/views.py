@@ -76,7 +76,7 @@ class get_theatre_screenlayout(APIView):
                 'theatre_id' : theatre.id,
                 'theatre_name' : theatre.name,
                 'screens' :serializers.data
-            })    
+            })
         return Response(data, status=200)
         
 class get_screen_seats(APIView):

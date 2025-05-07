@@ -10,12 +10,12 @@ import EditTheatre from "@/Pages/Theatreowner/TheatreManagement/EditTheatre";
 import ShowRequest from '@/Pages/Admin/TheatreManagement/ShowRequest';
 import EditMovie from '@/Pages/Admin/MovieManagement/EditMovie';
 import ShowTheatres from '@/Pages/Admin/TheatreManagement/Showtheatres';
-
+import { AdminRoute } from '@/Pages/Routes/ProtectedRoute';
 function Section() {
   return (
     <div>
         <Routes>
-            <Route path="dashboard" element={<PrivateRoute> <Dashboard /></PrivateRoute>}/>
+            <Route path="dashboard" element={<AdminRoute> <Dashboard /></AdminRoute>}/>
             <Route path="customers" element={<PrivateRoute><CustomerManagement /></PrivateRoute>} />
             <Route path="enquery" element={<PrivateRoute> <Enquery /> </PrivateRoute>} />
             <Route path="movies" element={<PrivateRoute><ListMovies /></PrivateRoute>} />

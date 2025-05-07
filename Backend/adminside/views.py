@@ -263,12 +263,16 @@ class verify_screen(APIView):
             
             
     def delete(self , request , screen_id):
-        screen = Screen.objects.get(id=screen_id)
+        try :
+                    
+            screen = Screen.objects.get(id=screen_id)
+        except Screen.DoesNotExist:
+            return Response({'error' : 'screen not found'},status=status.HTTP_404_NOT_FOUND)
         screen_number = screen.screen_number
         theatre_name = screen.theatre.name
         screen.delete()
             
-        return Response({'message' , f'Screen : {screen_number} from {theatre_name} deleted successfully  '})
+        return Response({'message' : f'Screen : {screen_number} from {theatre_name} deleted successfully  '},status=status.HTTP_200_OK)
     
     
 @api_view(['DELETE'])

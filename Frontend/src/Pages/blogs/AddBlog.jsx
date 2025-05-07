@@ -3,6 +3,7 @@ import { X, CloudDownload, Tags, DeleteIcon, Plus } from 'lucide-react';
 import Nav from '@/Components/Navbar/Nav';
 import ShinyText from '../ReactBits/ShinyButton';
 import apiBlogs from '@/Axios/Blogapi';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,10 +16,11 @@ function AddBlog() {
   const [imagePreview, setImagePreview] = useState(null);
   const [titleError, setTitleError] = useState('');
   const [imageError, setImageError] = useState('');
+  const [tagError , setTagError] = useState('');
   const maxTitleLength = 200;
   const userId = useSelector((state) => state.user.id);
   const { toast } = useToast();
-
+  const navigate = useNavigate();
   const handleTitleChange = (e) => {
     const value = e.target.value;
     setTitle(value);
@@ -30,9 +32,17 @@ function AddBlog() {
   };
 
   const handleAddTag = () => {
+    if (!tags){
+      setTagError('please fill out this field')
+      return
+    }
     if (!tags.trim()) return;
     setNewTags((prevItems) => [...prevItems, tags.trim()]);
     setTags(''); 
+    if (tagError) {
+      setTagError('')
+    }
+    
   };
 
   const handleImageDelete = () => {
@@ -123,6 +133,7 @@ function AddBlog() {
         setNewTags([]);
         setImage(null);
         setImagePreview(null);
+        navigate('/profile')
       }
     } catch (error) {
       console.error('Error:', error);
@@ -172,6 +183,7 @@ function AddBlog() {
                     <span className="text-sm text-gray-700 font-semibold">
                       <Tags className="inline" size={15} /> {tag}
                     </span>
+                    
                     <button
                       onClick={() => handleRemoveTag(tag)}
                       className="ml-2 text-gray-500 hover:text-gray-700"
@@ -198,6 +210,11 @@ function AddBlog() {
                   Add tags
                 </button>
               </div>
+                  {tagError && (
+                    <div className="flex items-center text-red-500 text-xs">
+                      <span className="mr-1">⚠</span> {tagError}
+                    </div>
+                  )}
               <div
                 className={`relative w-full h-48 border-2 mt-4 border-dashed rounded-lg flex items-center justify-center ${
                   imageError ? 'border-red-500' : 'border-gray-300'
@@ -228,7 +245,7 @@ function AddBlog() {
                         upload media <CloudDownload className="inline" />
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/*"  
                           onChange={handleImageChange}
                           className="hidden"
                         />
@@ -252,12 +269,13 @@ function AddBlog() {
                 />
               </div>
 
-              <div className="mt-2 flex justify-end">
+              <div className="mt-2 flex justify-center">
                 <button
-                  className="outline outline-1 rounded-md text-md outline-gray-400 py-2 px-1"
+                  className="border-dashed rounded-md border-2 border-gray-200 text-md py-2 px-2"
                   type="submit"
+                  title='create post'
                 >
-                  Add Post <Plus className="inline" />
+                   Post <CloudDownload className="inline"/>
                 </button>
               </div>
             </div>

@@ -158,7 +158,7 @@ const MovieGrid = () => {
         
         <div className="flex-1 bg-white "> 
           {filteredMovies.length === 0 ? (
-            <div className="text-gray-800  text-center py-10">No Movies available</div>
+            <div className="text-gray-800 font-semibold  text-center py-10">No Movies available</div>
           ) : (
             <div className="grid grid-cols-1 mt-10 sm:grid-cols-2lg:grid-cols-3 xl:grid-cols-3 gap-6">
               {filteredMovies.map((movie) => (

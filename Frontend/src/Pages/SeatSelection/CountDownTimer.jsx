@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react'
 
 function CountDownTimer({ onExpiresAT , onExpire }) {
-    console.log(onExpiresAT , 'countdown page')
     const calculateTimeLeft = () => {
         const difference = new Date( onExpiresAT ) - new Date();
         return difference > 0 ? Math.floor(difference / 1000) : 0;
         };
-    
         const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
     
         useEffect(() => {

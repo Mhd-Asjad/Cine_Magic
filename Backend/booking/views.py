@@ -13,12 +13,14 @@ from django.utils.decorators import method_decorator
 import requests
 from django.db import transaction
 from .serializers import *
-
+from rest_framework import permissions
 from theatre_owner.serializers import FetchMovieSerializer
 from django.shortcuts import get_object_or_404
 from movies.models import Movie
 
+# provides checkout details
 class Checkout(APIView) :
+    permission_classes = [permissions.IsAuthenticated]
     def get(self , request , user_id):
         try :
             user = User.objects.get(id=user_id)
@@ -83,6 +85,7 @@ class Checkout(APIView) :
 # payment callback handling
 @method_decorator(csrf_exempt , name='dispatch')
 class ProcessPayment(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def post(self , request):
         order_id = request.data.get('orderId')
         print(order_id,'orderidddd')
@@ -239,10 +242,7 @@ def Ticket_View( request , booking_id ):
         'theatre' : booking.show.screen.theatre.name , 
         'screen_type' : booking.show.screen.screen_type,
         'screen_number' : booking.show.screen.screen_number,
-        
-        
 
     }
 
     return Response({'ticket_data' : data , 'movie_details' : show.data , 'seats' : seat_det['seats'] },status=status.HTTP_200_OK)
-        

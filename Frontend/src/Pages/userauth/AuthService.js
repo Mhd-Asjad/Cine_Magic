@@ -1,8 +1,8 @@
 import userApi from "@/Axios/userApi"
-import { useDispatch } from "react-redux"
 import { setUsername , setEmail , setUser_id , setPrevilage } from "@/Redux/Features/UserSlice"
 import { setTheatreOwner } from '../../Redux/Features/Theatreownerslice';
-
+import {jwtDecode} from 'jwt-decode';
+ 
 const TOKEN_KEYS = {
     user: 'user_token',
     admin: 'admin_token',
@@ -62,7 +62,7 @@ export const logout = () => {
     if (userType) {
         localStorage.removeItem(TOKEN_KEYS[userType]);
         localStorage.removeItem(`${TOKEN_KEYS[userType]}_refresh`);
-        localStorage.removeItem('current_user_type');
+        // localStorage.removeItem('current_user_type');
     } else {
         clearAllTokens();
     }
@@ -70,6 +70,33 @@ export const logout = () => {
     window.dispatchEvent(new Event('storage'));
 };
 
+
+export const getCurrentUser = () => {
+    const userType = localStorage.getItem('current_user_type')
+    if (!userType) return null
+
+    const token= localStorage.getItem(TOKEN_KEYS[userType])
+    if (!token) return null
+
+    try {
+        const decodedToken = jwtDecode(token);
+
+
+        const current_time = Date.now() / 1000 
+        if (decodedToken.exp < current_time + 30) {
+            logout()
+            return null
+        }
+        return {
+            ...decodedToken , 
+            userType
+        }
+    }catch(error) {
+        console.log(error , 'Token Decode error')
+        logout()
+        return null
+    }
+}
 
 export const clearAllTokens = () => {
     Object.values(TOKEN_KEYS).forEach(value => {

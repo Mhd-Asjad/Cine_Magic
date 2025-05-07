@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Nav from "../../Components/Navbar/Nav";
 import Footer from "../../Components/Footer/footer";
 import { useSelector } from "react-redux";
@@ -13,12 +13,12 @@ import "toastr/build/toastr.min.css";
 import { useDispatch } from "react-redux";
 import { setUsername , setEmail } from "@/Redux/Features/UserSlice";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, CheckCircle, Trash, X } from 'lucide-react';
+import { Plus, Edit, CheckCircle, DeleteIcon,  User , CalendarRange , Trash, X } from 'lucide-react';
 import LocationPicker from "@/Components/Map/LocationPicker";
 import 'leaflet/dist/leaflet.css';
 import { postAdded } from "@/Redux/Features/BlogSlice";
 import { useNavigate } from "react-router-dom";
-
+import apiBlogs from "@/Axios/Blogapi";
 const Profile = () => {
 
   toastr.options = {
@@ -47,17 +47,15 @@ const Profile = () => {
   const [latitude , setLatitude ] = useState('')
   const [ longitude , setLongitude ] = useState('') 
   const [ text , setText ] = useState('');
+  const [blogs , setBlogs] = useState([]);
   const user = useSelector((state) => state.user)
-  const owner = useSelector((state) => state.theatreOwner)
-  console.log(user)
-  console.log(owner , 'owner valeus')
-
   const [ errors , setErrorMessage ] = useState({});
-  const username = useSelector((state) => state.user.username)
-  const email = useSelector((state) => state.user.email)
   const [newUsername , setNewUsername ] = useState('');
   const [newEmail , setNewEmail ] = useState('');
   const [ isEditing , setIsEditing] = useState(false);
+  const [ editBlog , setEditBlog] = useState(null);
+  const [imagePreview , setImagePreview] = useState([]);
+  const [ imageError , setImageError] = useState('');
   const {toast} = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -140,6 +138,65 @@ const Profile = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchBlogs = async() => {
+
+      try {
+          const res = await apiBlogs.get(`get-posts/${user.id}/`)
+          setBlogs(res.data)
+      }catch(error){
+        console.log(error?.response)        
+      }
+  
+    }
+    fetchBlogs()
+  },[])
+
+
+  const handleEditBlog = (blog_id) => {
+    const blogToEdit = blogs.filter(blog => blog.id === blog_id)
+    setEditBlog(...blogToEdit);
+    setIsEditing(true)
+  }
+
+  useEffect(()=> {
+    const createPreview = () => {
+      const file = editBlog?.images[0]?.image
+      console.log(file)
+      setImagePreview(file)
+    }
+    createPreview()
+
+  },[editBlog])
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0] || null ;
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      console.log(previewUrl)
+      // setEditBlog(prev => ({
+      //   ...prev , 
+      //   images: [{ image: previewUrl }]
+
+      // }));
+      setImagePreview(previewUrl);
+      setImageError('');
+    } else {
+      setImagePreview(null);
+      setImageError('Please add a media file.');
+    }
+  }
+
+  const handleRemoveTag = (removedTag) => {
+    const filteredTags = editBlog.tags.filter((tag) => tag !== removedTag)
+    console.log(filteredTags , 'fltered tags')
+    setEditBlog(prev => ({
+      ...prev , 
+      tags : filteredTags
+    }))
+  }
+   
+
   const handleUserEdit = async(e) => {
     e.preventDefault()
     try {
@@ -161,31 +218,33 @@ const Profile = () => {
     }
   }
 
-  
-    const handleCrud = ( ) => {
-      setIsAdding(false);
-      setIsEditing(false);
-    }
 
-    const handleAddPost = async(e) => {
-      e.preventDefault()
-      if (!image) return;
-      try {
+  const handleCrud = ( ) => {
+    setIsEditing(false);
+  }
+  const handleEditTask = async(e , blog_id) => {
+    e.preventDefault()
+    if (!imagePreview) return;
+    const formData = new FormData();
+    formData.append('title' ,editBlog.title)
+    formData.append('content' , editBlog.content)
+    formData.append('image' , JSON.stringify(editBlog?.images[0]?.image))
+    formData.append('tags', JSON.stringify(editBlog.tags));
+    formData.append('author' , editBlog.author_name)
 
-        console.log('passed image check')
-        const imageURL = await getDownloadURL(imageRef);
-        dispatch(postAdded({
-          title , 
-          description , 
-          image : imageURL ,
-          user
-        }))
-        alert('post is added successfully')
-      }catch(e) {
-        console.log('error while updating fb image' , e)
+    try {
+      const res = await apiBlogs.put(`edit-post/${blog_id}/`,formData, {
+        headers : { 'Content-Type': 'multipart/form-data' }
+      })
+      if (res.status === 200){
+
+        alert('post is Editedd successfully')
+        handleCrud()
       }
-
+    }catch(e) {
+      console.log('error while updating blog ' , e)
     }
+  }
 
   const handleLocationSelect = async(location) => {
     setLatitude(location[0] )
@@ -203,6 +262,17 @@ const Profile = () => {
     }
     
   };
+
+  const formatTime = (dateTime) => {
+    const dateString = dateTime.split('T')[0]
+    const timeString = dateTime.split('T')[1]
+    const [hours , minutes] = timeString.split(':');
+    const date = new Date();
+    date.setHours(hours , minutes)
+    const formattedTime = date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
+    return dateString + ' ' + formattedTime
+  }
+  console.log(editBlog ,'jfdsljla')
   return (  
     <div>
 
@@ -214,8 +284,8 @@ const Profile = () => {
       </div>
       <div className="text-center mt-4 p-2" >
 
-      <h1 className="text-xl font-semibold text-gray-800">{username}</h1>
-      <p className="text-gray-500 text-sm">{email}</p>
+      <h1 className="text-xl font-semibold text-gray-800">{user.username}</h1>
+      <p className="text-gray-500 text-sm">{user.email}</p>
       </div>
     </div>
 
@@ -260,8 +330,6 @@ const Profile = () => {
                 onChange={(event) => setOwnerImage(event.currentTarget.files[0] || null)}
               />
               </div>
-
- 
             </div>
 
             <div className="mt-3" >
@@ -334,7 +402,7 @@ const Profile = () => {
           <FaAngellist className="text-2xl text-gray-500" /> Blogs
         </div>
           { showPostForm && 
-            <div className="mt-4 shodow-md rounded-md bg-gray-100 mb-8" >
+            <div className="mt-4 shodow-md rounded-md bg-gray-50 mb-8" >
                 <div className="max-w-6xl max-auto" >
                   <div className="flex justify-between ml-2 items-center mb-5">
                     <h1 className="text-2xl font-bold text-gray-800">My Blog🎬</h1>
@@ -351,78 +419,157 @@ const Profile = () => {
                       </div>
 
 
-                        {isEditing && (
+                      {isEditing && (
 
-                          <div className="bg-white mx-auto rounded-lg p-6 mb-8 border border-gray-200" >
+                        <div className="bg-white mx-auto rounded-lg p-6 mb-8 border border-gray-200" >
 
-                            <div className="flex justify-between items-center" >
-                                <h2 
-                                  className="text-lg text-gray-800 font-semibold"
-                                >
-
-                          
-                                </h2>
-                                <button
-                                  onClick={() => handleCrud()}
-                                  className="text-gray-500 hover:text-gray-700"
-
-                                >
-                                  <X size={20} />
-
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                              <input
-                                type="text"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Enter blog title"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
-                              <textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
-                                placeholder="Enter blog content"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">image</label>
-                              <input
-                                type="file"
-                                // value={image}
-                                onChange={(e) => setImage(e.target.files[0] || null)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Enter author name"
-                              />
-                            </div>
-                            <div className="flex justify-center mb-4" >
-
-                              <button
-                                onClick={handleAddPost}
+                          <div className="flex justify-between items-center" >
+                              <h2 
+                                className="text-lg text-gray-800 font-semibold"
                               >
-                                edit Post
-                              </button>
-                            </div>
 
+                        
+                              </h2>
+                              <button
+                                onClick={() => handleCrud()}
+                                className="text-gray-500 hover:text-gray-700"
+
+                              >
+                                <X size={20} />
+
+                              </button>
+                          </div>
+
+                          <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <input
+                              type="text"
+                              value={editBlog.title}
+                              onChange={(e) => setEditBlog({...editBlog , title : e.target.value})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Enter blog title"
+                            />
                           </div>
                           
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                            <textarea
+                              value={editBlog.content}
+                              onChange={(e) => setEditBlog({...editBlog , content : e.target.value})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
+                              placeholder="Enter blog content"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">image</label>
+                            <input
+                              type="file"
+                              accept=""
+                              onChange={handleImageChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Enter author name"
+                              />
+                              </div>
+                              {imagePreview &&
+
+                              <div className="relative w-full h-full">
+                                <img
+                                  src={imagePreview}
+                                  alt="Preview"
+                                  className="w-full h-full object-cover rounded-lg"
+                                />
+                                <button
+                                  className="absolute top-4 right-4 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:text-red-600"
+                                  // onClick={handleImageDelete}
+                                  type="button"
+                                >
+                                  <DeleteIcon size={23} />
+                                </button>
+                              </div>
+                              }
+
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                          <div className="flex gap-2 flex-wrap mb-2">
+                            {editBlog.tags.length > 0 ? (
+                            editBlog.tags.map((tag, index) => (
+                              <div key={index} className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
+                                <span className="text-sm text-gray-700">{tag}</span>
+                                <button 
+                                  onClick={() => handleRemoveTag(tag)}
+                                  className="ml-2 text-gray-500 hover:text-gray-700"
+                                >
+                                  <X size={16} />
+                                </button>
+                              </div>
+                            ))):(
+                              <div className="flex justify-center" >
+
+                                <p>no tag found</p>
+                              </div>
+                            )}
                           </div>
 
-                        )}  
+                            
 
+                          <div className="flex justify-center mb-4" >
 
+                            <button
+                              onClick={(e)=> handleEditTask( e ,editBlog.id)}
+                            >
+                              edit Post
+                            </button>
+                          </div>
+
+                        </div>
+                        
+                        </div>
+
+                      )}  
+                    <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                      {blogs.map((blog) => (
+                        <div key={blog.id} className="bg-white rounded-lg overflow-hidden shadow-md transition-transform duration-300 hover:shadow-lg hover:translate-y-px border border-gray-200">
+                          <img
+                            src={blog.images[0].image}
+                            alt={blog.title}
+                            className="w-full h-48 object-cover"
+                          />
+                          <div className="p-5">
+                            <div className="flex justify-between items-start mb-3">
+                              <h3 className="text-xl font-semibold text-gray-800 mb-2">{blog.title}</h3>
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => handleEditBlog(blog.id)}
+                                  className="text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                                >
+                                  <Edit size={18} />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteBlog(blog.id)}
+                                  className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                                >
+                                  <Trash size={18} />
+                                </button>
+                              </div> 
+                            </div>
+                            <p className="text-gray-600 mb-4 line-clamp-3">{blog.content}</p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {blog.tags.map((tag, index) => (
+                                <span key={index} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="flex justify-between items-center text-sm text-gray-500">
+                              <span className="mt-3" > <User size={18} className="inline" /> {blog.author_name}</span>
+                              <span> <CalendarRange size={20} className="inline" /> {formatTime(blog.created_at)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                 </div>
-
-
             </div>
           }
 

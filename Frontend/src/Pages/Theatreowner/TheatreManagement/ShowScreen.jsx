@@ -38,6 +38,9 @@ import { TbClockPlus } from "react-icons/tb";
 import Swal from 'sweetalert2';
 import apiAdmin from '@/Axios/api';
 import { Terminal } from 'lucide-react';
+import seatsApi from '@/Axios/seatsaApi';
+import screenimg from '../../../assets/screen.png'
+
 function ShowScreen() {
     const { id } = useParams();
     const [screens, setScreens] = useState([]);
@@ -52,6 +55,7 @@ function ShowScreen() {
     const [ showDetails , setShowDetails ] = useState([]);
     const [ isShowDialogOpen , setIsDialogOpen] = useState(false)
     const [ message , setMessage ] = useState('')
+    const [ seats , setSeats ] = useState({})
     const {toast} = useToast();
     const navigate = useNavigate();
     useEffect(() => {
@@ -71,14 +75,51 @@ function ShowScreen() {
             console.log(e.response);
         }
     };
-    console.log(selectedScreen);
+    
+    const fetchSeatLayout = async(screen_id) => {
+        try {
+            const res = await seatsApi.get(`screens/${screen_id}/seats/`)
+            const organizeData = organizeByRow(res.data)
+            setSeats(organizeData)
+        }catch(e){
+            console.log(e.response)
+        }
+    }
+    const organizeByRow = (seats) => {
+        const rowMap = {}
+        seats.forEach((seat) => {
+          if (!rowMap[seat.row]) {
+            rowMap[seat.row] = []
+          }
+          rowMap[seat.row].push(seat)
+        })
+        Object.values(rowMap).forEach((rowSeats) => {
+          rowSeats.sort((a, b) => a.number - b.number)
+        })
+        return rowMap
+      }
+
+      console.log(seats)
+    const getSeatClass = (seat) => {
+    return 'bg-white text-blue cursor-not-allowed outline outline-1 outline-blue-600'
+    }
 
     useEffect(() => {
         const fetchTimeSlot = async() => {
             try{
 
                 const res = await TheatreApi.get(`/get_time-slots/?screen_id=${selectedScreen.id}`);
-                setShowTime(res.data);
+
+
+                const sortedShowtimes = [...response.data].sort((a, b) => {
+                    const timeA = a.start_time ?? '';
+                    const timeB = b.start_time ?? '';
+                    return timeA.localeCompare(timeB);
+                  });
+                  
+                  console.log(sortedShowtimes);
+                  
+                setShowTime(sortedShowDetails);
                     
             }catch(e) {
                 console.log(e.response , 'error while fetching show time')
@@ -88,6 +129,8 @@ function ShowScreen() {
         fetchTimeSlot()
     },[selectedScreen])
     console.log(showTimes,'rajabma')
+
+
 
     const formatTime = (timeString) => {
         const [hours , minutes] = timeString.split(':');
@@ -137,12 +180,11 @@ function ShowScreen() {
             }
     }
 
-    console.log(showTimes)
-    const sortedShows = showTimes.sort((a , b) => {
-        return a.start_time.localeCompare(b.start_time) 
-    })
+    // const sortedShows = showTimes.sort((a , b) => {
+    //     return a.start_time.localeCompare(b.start_time) 
+    // })
     
-    console.log(sortedShows)
+    // console.log(sortedShows)
     console.log(selectedShowTime , 'new')
     const fetchShowtime = async() => {
         try{
@@ -212,7 +254,11 @@ function ShowScreen() {
                                     <th className='p-3 text-left'>Screen Number</th>
                                     <th className='p-3 text-left'>Capacity</th>
                                     <th className='p-3 text-left'>Screen Type</th>
+                                    <th className='p-3 text-left' >Status</th>
+                                
+
                                     <th className='p-3 text-center'>Action</th>
+    
                                 </tr>
                             </thead>
                             <tbody>
@@ -228,11 +274,19 @@ function ShowScreen() {
                                                 </Badge>
                                             </td>
                                             <td className='p-4'>{screen.capacity}</td> 
-                                            <td className='p-4'>{screen.screen_type}</td> 
+                                            <td className='p-4'>{screen.screen_type}</td>
+                                            <div className='flex justify-end' >
+                                            <td className='p-3'> 
+                                                <button className='border-green-400 border-2 py-2 px-1 cursor-not-allowed rounded-md' >
+                                                    confirmed 
+                                                </button>
+                                            </td>
+
+                                            </div> 
                                             <td className='p-4'> 
                                                 <div className='flex space-x-2'>
 
-                                                <Dialog 
+                                                <Dialog
                                                     open={isDialogOpen}
                                                     onOpenChange={(open) => {
                                                         setDialogOpen(open);
@@ -274,8 +328,7 @@ function ShowScreen() {
                                                                 </AlertDescription>
                                                                 </Alert>
                                                                 )
-
-                                                                }
+                                                            }
                                                             <div className="p-4">
                                                                 <DialogTitle className="text-xl font-bold mb-4 text-center">
 
@@ -324,6 +377,7 @@ function ShowScreen() {
                                                             </DialogContent>
                                                     </Dialog>
                                                     ) : null
+
                                                 }
                                                     <DialogContent className="sm:max-w-3xl max-h-screen overflow-y-auto bg-white">
                                                         <DialogTitle className="text-xl font-bold mb-4 text-center" >
@@ -410,7 +464,7 @@ function ShowScreen() {
                                                                     <div className='flex flex-wrap gap-3 mt-2 justify-center' >
                                                                         {showTimes.length > 0 ? (
 
-                                                                            sortedShows.map((showtime) => (
+                                                                            showTimes.map((showtime) => (
                                                                             <div
                                                                                 key={showtime.id}
                                                                                 onClick={() => setSelectedShowTime(showtime)}
@@ -463,16 +517,121 @@ function ShowScreen() {
                                                     {screen.screen_number}
                                                 </Badge>
                                             </td>
-                                            <td className='p-3'>{screen.capacity}</td> 
-                                            <td className='p-3'>{screen.screen_type}</td> 
+                                            <td className='p-3'>{screen.capacity}</td>
+                                            <td className='p-3'>{screen.screen_type}</td>
                                             <div className='flex justify-end' >
-                                            <td className='p-3'> 
-                                                <button className='hover-gray-100 border-2 py-2 px-1 cursor-not-allowed rounded-md' >
-                                                    requested
+                                            <td className='p-3'>
+                                                <div className='flex space-x-2' >
+                                                    
+                                                <button className='border-orange-300 border-2 py-2 px-1 cursor-not-allowed rounded-md' >
+                                                    requested 
                                                 </button>
+                                                    
+                                                </div> 
                                             </td>
-
                                             </div>
+
+                                            <td className='p-3' >
+                                            <Dialog>
+
+                                                <DialogTrigger asChild >
+                                                    <Button 
+                                                        onClick={() => {
+
+                                                         fetchSeatLayout(screen.id);
+                                                        
+                                                        }}
+                                                    >
+                                                    
+                                                    Seat Layout
+
+                                                    </Button>
+
+
+                                                </DialogTrigger>
+
+                                                <DialogContent>
+ 
+                                                    <div className='p-4' >
+
+                                                        <DialogTitle className="text-xl font-bold mb-10 text-center" >
+                                                            seat Layout
+                                                        </DialogTitle>
+
+                                                        <div className='mt-5'>
+                                                    <div className='flex flex-wrap gap-2'>
+                                                    {Object.entries(seats).map(([row, rowSeats]) => {
+                                
+
+                                                        return (
+                                                        <div
+                                                            key={row}
+                                                            className='flex justify-center w-full mb-4'
+                                                        >
+                                                            <button
+                                                            className={`w-6 h-6 font-bold mr-2 rounded cursor-not-allowed`}
+                                                            >
+                                                            {row}
+                                                            </button>
+
+                                                            <div className='flex space-x-1'>
+                                                            {rowSeats.map((seat) => (
+                                                                seat?.label ? (
+
+
+                                                                <button
+                                                                    type='button'
+                                                                    key={seat.id}
+                                                                    disabled={true }
+                                                                    title={`${seat.category_name || 'No Category'} - ₹${seat.price}`}
+                                                           
+                                                                
+                                                                    className={`w-6 h-6 rounded-sm  flex items-center justify-center text-xs ${getSeatClass(
+                                                                    seat
+                                                                    )}`}
+                                                                >
+                                                                    {seat.number}
+                                                                </button>
+
+                                                                ):(
+
+                                                                <div key={seat.id} className="w-6 h-6"/>
+                                                                )
+                                                            ))}
+                                                            </div>
+                                                        </div>
+                                                        )
+                                                    })}
+                                                    <div className="relative mb-8 pb-28 z-0">
+                                                    <div className="flex justify-center ">
+                                                        <img src={screenimg} className='w-[80%] mt-3' alt="screen image" ></img>
+                                                    </div>
+                                                    </div>
+                                                    </div>
+
+                                                    
+                                                </div>
+
+
+
+
+                                                    </div>
+
+
+                                                </DialogContent>
+                                            </Dialog>
+
+                                            </td>
+                                            <td className='p-2' >
+
+
+                                                <button className='outline outline-1 py-2 px-2 rounded outline-gray-300'
+                                                    onClick={() => navigate(`/theatre-owner/add-showtime/${id}/${screen.id}`)}
+                                                >
+                                                    <TbClockPlus size={20}  />
+                                                </button>
+
+                                            </td>
                                             </tr>
                                         )
                                     ))

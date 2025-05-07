@@ -6,7 +6,7 @@ import { Info, ChevronDown, ChevronUp } from 'lucide-react';
 import Paypalcomponet from './Paypalcomponet';
 import CountDownTimer from '../SeatSelection/CountDownTimer';
 import seatsApi from '@/Axios/seatsaApi';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function Checkout() {
   const [checkoutItems , setCheckoutItems] = useState({});
@@ -16,6 +16,7 @@ function Checkout() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [taxesOpen, setTaxesOpen] = useState(false);
   const navigate = useNavigate()
+  const location = useLocation();
   const TAX_RATE = 0.1;
   
   const params = new URLSearchParams();
@@ -23,9 +24,12 @@ function Checkout() {
   params.append('show_id' , showId)
 
   console.log(selectedSeats)
+
+  const from = location;
+  console.log('redirected from ' , from)
   useEffect(() => {
     const checkout = async() => {
-      console.log('hello world')      
+      
       try {
         console.log('inside useEffect')
         console.log(selectedSeats)

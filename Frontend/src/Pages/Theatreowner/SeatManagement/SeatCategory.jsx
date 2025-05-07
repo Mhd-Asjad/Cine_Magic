@@ -171,7 +171,7 @@ function SeatCategory() {
               value={selectedScreen || ''}
               onChange={(e) => setSelectedScreen(e.target.value)}
             >
-              <option value=''>Select a screen</option>
+              <option value=''>{ theatreScreen.length > 0 ? "Select a screen" : 'no available screen'}</option>
               {theatreScreen.map((screen) => (
                 <option key={screen.id} value={screen.id}>
                   {screen.theatre?.name} - Screen {screen.screen_number}
