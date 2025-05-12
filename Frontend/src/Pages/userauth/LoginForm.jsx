@@ -11,11 +11,10 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
-import axios from 'axios';
-import { setUser_id , setEmail, setUsername } from '../../Redux/Features/UserSlice';
 import { useDispatch } from 'react-redux';
 import Button from '@mui/material/Button';
 import login from './AuthService';
+import userApi from '@/Axios/userApi';
 
 function LoginForm( { isModalClose }) {
     const [showpassword , setShowPassword ] = useState(false);
@@ -45,13 +44,31 @@ function LoginForm( { isModalClose }) {
         password : Yup.string().required('*password is required')
     })
 
-
+    const checkUserType = async(username , password) => {
+        try{
+            const response = await userApi.post('get-usertype/' , 
+                {
+                    'username' : username ,
+                    'password' : password
+                }
+            );
+            console.log('response in checking user type' , response) 
+            const userType = response.data.user_type;
+            return userType
+        }catch(e) {
+            console.log('error in checking user type' , e)
+        }
+    }
     const onSubmit = async (values, { setSubmitting }) => {
         console.log(values)
         const username = values.username;
         const password = values.password
+        
+        const userType = await checkUserType(username , password)
+        console.log('user type on login form' , userType )
+
         try {
-            const res = await login( dispatch , username , password , 'user')
+            const res = await login( dispatch , username , password , userType)
             isModalClose()
             
         }catch(e) {

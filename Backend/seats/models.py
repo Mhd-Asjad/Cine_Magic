@@ -35,4 +35,4 @@ class seats(models.Model):
     #     unique_together = ('screen' , 'row' , 'number')        
         
     def __str__(self):
-        return f"{self.row}{self.number} - {self.screen}"
+        return f"{self.row}{self.number} - screen {self.screen.screen_number} in {self.screen.theatre.name}"

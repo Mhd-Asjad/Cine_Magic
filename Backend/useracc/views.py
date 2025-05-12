@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status , permissions
 from .serializers import UserSerializer , OtpVerificationSerializer , RegisterSerializers , UserEditSerializers
 from .models import User
 from django.contrib.auth import authenticate
@@ -17,6 +17,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from theatre_owner.serializers import TheatreOwnerSerialzers
 from theatre_owner.models import TheaterOwnerProfile
 class UserRegisterView(APIView) :
+    permission_classes = [permissions.AllowAny]
     def post(self , request ):
         print(request.data , 'post man')
         serializer =  RegisterSerializers(data=request.data)
@@ -31,6 +32,7 @@ class UserRegisterView(APIView) :
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyOtpView(APIView) :
+    permission_classes = [permissions.AllowAny]
     def post(self , request):
         serializer = OtpVerificationSerializer(data = request.data)
         if serializer.is_valid():
@@ -48,6 +50,7 @@ class VerifyOtpView(APIView) :
 
 
 class UserLoginView(APIView) :
+    permission_classes = [permissions.AllowAny]
     def post(self , request , *args , **kwargs ) :
         try :
             data = request.data
@@ -89,7 +92,6 @@ class UserLoginView(APIView) :
             
             refresh = RefreshToken.for_user(user)
            
-            print(refresh , 'values')
             
             user_data = {
                 'access_token' : str(refresh.access_token),
@@ -114,6 +116,8 @@ class UserLoginView(APIView) :
 
 @method_decorator(csrf_exempt , name='dispatch')
 class GoogleAuthView(View):
+    permission_classes = [permissions.AllowAny]
+
     def post(self , request):
         try :
             data = json.loads(request.body) 
@@ -155,6 +159,7 @@ class GoogleAuthView(View):
             
             
 class editUser(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def put(self , request , userId):
         try :
             user = User.objects.get(id=userId)
@@ -167,3 +172,26 @@ class editUser(APIView):
             serializers.save()
             return Response(serializers.data , status=status.HTTP_200_OK)
         return Response(serializers.errors , status=status.HTTP_400_BAD_REQUEST)
+    
+class checkUserType(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self , request ):
+        data = request.data
+        username = data.get('username')
+        password = data.get('password')
+        print(username , password)
+        user = authenticate(request , username=username , password=password)
+        if user is None :
+            return Response({'error' : 'not a valid user'},status=status.HTTP_401_UNAUTHORIZED)
+        user_type = None
+        if user.is_staff :
+            user_type = 'admin'
+        elif user.is_approved and user.is_theatre_owner:
+            user_type = 'theatre'
+        else :
+            user_type = 'user'
+            
+        print(user_type)
+            
+        return Response({'user_type' : user_type} , status=status.HTTP_200_OK)

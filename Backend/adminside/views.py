@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
-from rest_framework import status
+from rest_framework import status , permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from useracc.models import User
 from django.http import JsonResponse
@@ -12,40 +12,24 @@ from movies.models import City , Movie
 from theatres.models import *
 from theatre_owner.models import *
 from rest_framework.decorators import api_view
-
-
+from booking.models import *
+from booking.serializers import BookingSerializer
 # Create your views here.
 
-class AdminLoginView(APIView) :
-    def post(self , request) :
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        user = authenticate(request , username = username , password = password)
-        if user is not None and user.is_staff :
-            print('user authenticated')
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-
-            return Response({
-
-                'access' : access_token ,
-                'refresh' : str(refresh)
-
-            },status=status.HTTP_200_OK)
-
-        else :
-            return Response({
-                'detail' : 'invalid credentials or user is not an admin'
-            },status=status.HTTP_400_BAD_REQUEST)
-
+# customer listed views
 class UserListView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+    
     def get(self , request):
+        
         users = User.objects.all().values().order_by('id')
         user_list = list(users)
         return JsonResponse(user_list, safe=False)
     
+# user status update view
 class UserStatusUpdate(APIView) :
+    permission_classes = [permissions.IsAdminUser]
+
     def post(self , request , pk) :
         try :
             user = User.objects.get(pk=pk)
@@ -54,15 +38,6 @@ class UserStatusUpdate(APIView) :
             return Response({'message': 'user status updated successfully'},status=status.HTTP_200_OK)
         except user.DoesNotExist:
             return Response({ 'error' : 'user not found'},status=status.HTTP_404_NOT_FOUND)
-
-class CreateCity(APIView) :
-    def post(self , request) :
-        serializer = CitySerializers(data = request.data)
-        if serializer.is_valid() :
-            serializer.save()
-            
-            return Response({"message":'city was created successfully' , "data" : serializer.data},status=status.HTTP_201_CREATED)
-        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class CityTheatreView(APIView) :
     def get(self , request , city_id) :
@@ -81,7 +56,7 @@ class CityTheatreView(APIView) :
         except Exception as e :
             return Response({'detail' : str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-
+# add theatre view
 class AddTheatre(APIView) :
     def post(self , request , owner_id ) :
 
@@ -119,8 +94,7 @@ class AddTheatre(APIView) :
         
 class DeleteTheatre(APIView) :
     def delete(self , request , id):
-        print(id)
-        print('reaches the view')
+    
         try :
             theatre = Theatre.objects.get(id = id)
         except Theatre.DoesNotExist :
@@ -153,11 +127,10 @@ class ListMovies(APIView) :
         return JsonResponse(movie_list , safe=False)
 
         
-
+# create movie view 
 class CreateMovieView(APIView) :
     def post(self , request) :
         data = request.data
-        print(data)
         serializer = MovieSerializers(data= data)
         if serializer.is_valid() :
             serializer.save()
@@ -169,16 +142,22 @@ class CreateMovieView(APIView) :
         return Response(
             serializer.errors ,status=status.HTTP_400_BAD_REQUEST
         )
+# update movie view
 class update_movie(APIView):     
     def get(self ,request , movie_id):   
-        movie = Movie.objects.get(id=movie_id)
-    
+        try:
+            movie = Movie.objects.get(id=movie_id)
+        except Movie.DoesNotExist:
+            return Response({"error": "Movie not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = MovieSerializers(movie)
         return Response(serializer.data)
     
     def put(self , request , movie_id):
-        movie = Movie.objects.get(id=movie_id)
-        print(request.data)
+        try:
+            movie = Movie.objects.get(id=movie_id)
+        except Movie.DoesNotExist:
+            return Response({"error": "Movie not found"}, status=status.HTTP_404_NOT_FOUND)
+       
         serializer = MovieSerializers(movie, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -186,7 +165,7 @@ class update_movie(APIView):
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-    
+# delete movie view
 class DeleteMovies(APIView) :
     def delete(self , requst , id):
         try :
@@ -197,6 +176,7 @@ class DeleteMovies(APIView) :
         movie.delete()
         return Response({'message' : f'{movie.title} deleted successfully'} , status=status.HTTP_200_OK)
     
+# show pending theatres view including screens
 class ShowTheatreRequest(APIView):
     def get(self , request) :   
         print('hello')
@@ -242,12 +222,18 @@ class ShowTheatreRequest(APIView):
                 {'error':'theatre not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+# show verified theatres view
 @api_view(['get'])
 def Verified_Theatres(request):
-    theatres = Theatre.objects.filter(is_confirmed=True).order_by('-created_at')
+    try :
+        theatres = Theatre.objects.filter(is_confirmed=True).order_by('-created_at')
+    except Theatre.DoesNotExist:
+        return Response({'error' : 'no theatres found'},status=status.HTTP_404_NOT_FOUND)
+            
     serializers = TheatreSerializer(theatres , many=True)
     return Response(serializers.data , status=status.HTTP_200_OK)
 
+# check theatre verfication view
 class verify_screen(APIView):
     def post(self , request,screen_id):
         print('view check✅')
@@ -274,12 +260,29 @@ class verify_screen(APIView):
             
         return Response({'message' : f'Screen : {screen_number} from {theatre_name} deleted successfully  '},status=status.HTTP_200_OK)
     
-    
+# delete show view
+from rest_framework.decorators import permission_classes
 @api_view(['DELETE'])
+@permission_classes([IsAdminUser])
 def Cancel_Show(request , show_id) :
     show = ShowTime.objects.get(id=show_id)
     screen_number = show.screen.screen_number
     movie = show.movie.title
     show.delete()
     return Response({'message' : f'{movie} on screen {screen_number} was successfully cancelled'})
+
+# pending cancelled shows view
+# @permission_classes([IsAdminUser])
+class PendingCancelledShows(APIView):
     
+    def get(self , request) :
+        try : 
+            bookings = Booking.objects.all().exclude(status='not-applicable').filter(status='cancelled').order_by('-booking_time')
+            
+        except Booking.DoesNotExist:
+            return Response({'error' : 'not booking found'},status=status.HTTP_404_NOT_FOUND)
+        
+        
+        serializer = BookingSerializer(bookings , many=True)
+        return Response(serializer.data , status=status.HTTP_200_OK)
+        

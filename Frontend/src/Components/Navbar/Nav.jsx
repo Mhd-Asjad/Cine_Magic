@@ -15,6 +15,7 @@ import AuthContainer from '../../Pages/userauth/AuthContainer';
 import { useNavigate } from 'react-router-dom';
 import { selectCityId } from '../../Redux/Features/Location.slice';
 import { logout } from '@/Pages/userauth/AuthService';
+import apiMovies from '@/Axios/Moviesapi';
 
 function Nav() {
   const [isModalOpen , setIsModalOpen] = useState(false);
@@ -49,7 +50,7 @@ function Nav() {
     console.log(id,'id from location')
     try {
       console.log(cityid , ' fetch city id')
-      const response = await axios.get(`http://localhost:8000/movies/fetch_movies/${id}/`)
+      const response = await apiMovies.get(`/fetch_movies/${id}/`)
       const { movies , city_id , location } = response.data;
       console.log(movies)
       dispatch(setMovies(movies))
@@ -157,7 +158,7 @@ function Nav() {
                      admin dashboard
                    </a>
                   )}
-                  
+
                   <a
                     onClick={handleLogout}
                     className="block px-4 py-2 cursor-pointer text-gray-800 hover:bg-gray-100">

@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from .models import *
 from django.http import JsonResponse
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status , permissions
 import requests
 from django.conf import settings
 from theatres.models import *
@@ -14,10 +14,12 @@ from seats.models import *
 # Create your views here.
 
 class Fetchcities(APIView):
+    permission_classes = [permissions.AllowAny]
+
     def get(self , request) :
-        print(request.user)
+        print(request.user , 'user')
         now = datetime.now()
-        theatres = Theatre.objects.annotate(movie_count = Count('screens__showtimes__movie')).filter(movie_count__gte=1 , screens__showtimes__show_date__gte = now)
+        theatres = Theatre.objects.annotate(movie_count = Count('screens__showtimes__movie')).filter(movie_count__gte=1 , screens__showtimes__show_date__gte = now).distinct()
         city_data = [{
             
             "id" : theatre.city.id,
@@ -31,6 +33,7 @@ class Fetchcities(APIView):
         return JsonResponse({ "cities" : city_data},safe=False)
 
 class CityBasedMovies(APIView) :
+    permission_classes = [permissions.AllowAny]
     def get(self , request , city_id ): 
         try :   
             print(city_id)
@@ -46,7 +49,6 @@ class CityBasedMovies(APIView) :
         movie_data = [
             
             {
-        
                 'id' : movie.id ,
                 'title' : movie.title,
                 'language': movie.language ,
@@ -82,33 +84,48 @@ class DetailedMovieView(APIView) :
             "page" : 1 , 
         }
 
-        tmdb_response = requests.get(tmdb_url , params=tmdb_params)
         movie_id = 0
-        if tmdb_response.status_code == 200 :
-            tmdb_data = tmdb_response.json()
-            results = tmdb_data.get("results",[])
-            print(results[0])
-            
-            if results :
-                movie_id = results[0]['id']
-                backdrop_url = results[0]['backdrop_path'] or results[0]['poster_path']
+        backdrop_url = ''
+        try :
+            tmdb_response = requests.get(tmdb_url , params=tmdb_params,timeout=10)
+            tmdb_response.raise_for_status()
                 
+            if tmdb_response.status_code == 200 :
+                tmdb_data = tmdb_response.json()
+                results = tmdb_data.get("results",[])
+                print(results[0])
+                
+                if results :
+                    movie_id = results[0]['id']
+                    backdrop_url = results[0]['backdrop_path'] or results[0]['poster_path']
         
+            print('respose status' ,tmdb_response.status_code)
+            movie_data = {
+                'movie_id' : movie_id,
+                'bg_image' : backdrop_url,
+                "title": movie.title,
+                "language": movie.language,
+                "duration": movie.duration,
+                "release_date": movie.release_date,
+                "description": movie.description,
+                "genre": movie.genre,
+                "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
+            }
+            return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
 
-        movie_data = {
-            'movie_id' : movie_id,
-            'bg_image' : backdrop_url,
-            "title": movie.title,
-            "language": movie.language,
-            "duration": movie.duration,
-            "release_date": movie.release_date,
-            "description": movie.description,
-            "genre": movie.genre,
-            "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
-        }
-        return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
-
-
+                    
+        except requests.exceptions.RequestException as e:
+            print(f'error fetching tmdb data {e}')
+            movie_data = {
+                "title": movie.title,
+                "language": movie.language,
+                "duration": movie.duration,
+                "release_date": movie.release_date,
+                "description": movie.description,
+                "genre": movie.genre,
+                "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
+            }
+            return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
 
 def get_showtime_label(start_time):
     if not start_time:
@@ -126,9 +143,10 @@ def get_showtime_label(start_time):
 class movie_showtime(APIView):
     def get(self , request  , id):
         cityid = request.GET.get('city_id')
-        
-        movie = Movie.objects.get(id = id)
-        
+        try:
+            movie = Movie.objects.get(id = id)
+        except Movie.DoesNotExist:
+            return Response({'error' : 'movie not found'} , status=status.HTTP_404_NOT_FOUND)
             
         try :
             showtimes = ShowTime.objects.filter(
@@ -182,7 +200,6 @@ class movie_showtime(APIView):
                         'screen_type' : show.screen.screen_type
                     },
             })
-            
         shows = ShowTime.objects.filter(screen__theatre__city = cityid)
         movies = set(show.movie for show in shows)
         movie_data = []
@@ -196,7 +213,10 @@ class movie_showtime(APIView):
 
 class Show_Details(APIView):
     def get(self , request , show_id ):
-        show = ShowTime.objects.get(id = show_id)
+        try :
+            show = ShowTime.objects.get(id = show_id)
+        except ShowTime.DoesNotExist:
+            return Response({'error' : 'show not found'} , status=status.HTTP_404_NOT_FOUND)
         serializer = FechShowSerializer(show)
         return Response(serializer.data , status=status.HTTP_200_OK)
         

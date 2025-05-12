@@ -1,6 +1,6 @@
 import React from 'react'
 import {BrowserRouter as Router , Route , Routes} from 'react-router-dom'
-import PrivateRoute from '@/Pages/Admin/PrivateRoute'
+import PrivateRoute from '@/Pages/Routes/PrivateRoute'
 import Dashboard from '@/Pages/Admin/Dashboard/Dashboard';
 import CustomerManagement from '@/Pages/Admin/Customer/CustomerManagement';
 import ListMovies from "@/Pages/Admin/MovieManagement/ListMovies";
@@ -11,6 +11,8 @@ import ShowRequest from '@/Pages/Admin/TheatreManagement/ShowRequest';
 import EditMovie from '@/Pages/Admin/MovieManagement/EditMovie';
 import ShowTheatres from '@/Pages/Admin/TheatreManagement/Showtheatres';
 import { AdminRoute } from '@/Pages/Routes/ProtectedRoute';
+import PendingRefund from '@/Pages/Admin/BookingManagement/PendingRefund';
+import ShowBookings from '@/Pages/Theatreowner/BookingManagement/ShowBookings';
 function Section() {
   return (
     <div>
@@ -24,6 +26,7 @@ function Section() {
             <Route path="theatres/:theatreId/edit" element={<PrivateRoute><EditTheatre /></PrivateRoute>} />
             <Route path='pending-theatres' element={<PrivateRoute><ShowRequest/></PrivateRoute>} />
             <Route path='showtheatres' element={<PrivateRoute><ShowTheatres/></PrivateRoute>} />
+            <Route path='bookings' element={<PendingRefund/>} ></Route>
             
         </Routes>
       

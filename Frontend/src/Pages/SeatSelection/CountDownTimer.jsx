@@ -28,7 +28,6 @@ function CountDownTimer({ onExpiresAT , onExpire }) {
 
     const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
     const seconds = String(timeLeft % 60).padStart(2, '0');
-  
 
   return (
     <div className='flex justify-end text-red-600 font-bold text-sm mb-4 pr-[10%]'  >

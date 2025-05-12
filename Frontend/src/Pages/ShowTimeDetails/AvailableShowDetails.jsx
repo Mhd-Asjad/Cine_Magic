@@ -12,6 +12,7 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import not_found from '../../assets/not-found.png'
 import { Sliders } from 'lucide-react';
+import apiMovies from '@/Axios/Moviesapi';
 
 
 const AvailableShowDetails = () => {
@@ -35,7 +36,7 @@ const AvailableShowDetails = () => {
   
   const fetchShowDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/movies/showtimes/${id}/`, {
+      const response = await apiMovies.get(`/showtimes/${id}/`, {
         params : {
           'city_id' : cityid
         }

@@ -8,5 +8,9 @@ urlpatterns = [
     path('verify/' , Verify_Booking.as_view() , name='verify'),
     path('booking-info/<int:id>/',Booking_Info.as_view(),name='booking-info'),
     path('my-bookings/<int:user_id>/',Show_Bookings.as_view(),name='my-bookings'),
-    path('ticket/<int:booking_id>/', Ticket_View,name='ticket')
+    path('ticket/<int:booking_id>/', Ticket_View,name='ticket'),
+    path('refund-info/<int:booking_id>/',Calculate_Refund_amount.as_view(),name='refund-info'),
+    path('cancel-ticket/<int:booking_id>/',Cancel_Ticket.as_view(),name='cancel-ticket'),
+    path('process-refund/<int:booking_id>/',process_refund.as_view(),name='process-refund'),
+    path('booking-status/<int:booking_id>/',Get_Booking_Status.as_view(),name='booking-status'),
 ]

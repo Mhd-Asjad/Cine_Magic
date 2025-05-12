@@ -17,6 +17,7 @@ from datetime import datetime , timedelta ,date
 from django.utils import timezone
 from django.db.models import Count
 from seats.models import *
+from booking.models import Booking
 import string
 
 # Create your views here.
@@ -174,7 +175,7 @@ class ConfirmTheatreOwner(APIView) :
             )
             
             
-
+# checking theatre owner for the pending theatres
 class validateowner(APIView):
     def get(self , request):
         owner_id = request.GET.get('owner_id')
@@ -187,7 +188,7 @@ class validateowner(APIView):
         else : 
             return Response({'message' : 'valid one'},status=status.HTTP_200_OK) 
         
-        
+# fetching all movies data
 class FetchAllMovies(APIView):
     def get(self , request):
         try :
@@ -197,7 +198,8 @@ class FetchAllMovies(APIView):
         except Exception as e:
             print(serializer.errors)
             return Response({'error': str(e)},status=500)
-        
+     
+# fetching all the showtimes for the theatre   
 class fetch_showtime(APIView):
     def get(self , request , theatre_id):      
         print(theatre_id, 'reached in the vieews')  
@@ -212,10 +214,10 @@ class fetch_showtime(APIView):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+# show pending theatres for the theatre owner
 class pending_theatres(APIView):
-    def get(self , request):
-        theatre_owner = TheaterOwnerProfile.objects.get(user=request.user)
+    def get(self , request , owner_id):
+        theatre_owner = TheaterOwnerProfile.objects.get(id =owner_id)
         pendings = Theatre.objects.filter(owner = theatre_owner)
         if pendings is None :
             return Response({'warning' : 'no theatres to verify'},status=status.HTTP_200_OK)
@@ -235,6 +237,7 @@ class pending_theatres(APIView):
             
         return JsonResponse(pending_li , safe=False)
     
+# creating a screen for the theatre
 class CreateScreen(APIView):
     def post(self , request):
         data = request.data
@@ -268,11 +271,12 @@ class CreateScreen(APIView):
         print(serializers.errors)
         return Response(serializers.errors , status=status.HTTP_400_BAD_REQUEST)
 
-
+# show verified theatres for the theatre owner
 class ShowVerifiedTheatre(APIView):
     def get(self , request ) :
         owner = request.query_params.get('owner_id')
         print(owner)
+        
         try :
             available_theatres = Theatre.objects.filter(owner=owner, is_confirmed=True)
             
@@ -287,6 +291,7 @@ class ShowVerifiedTheatre(APIView):
                 }
                 for theatre in available_theatres
             ]
+            print(theatre_data)
             return Response({
                 'available_theatre': theatre_data    
             },status=status.HTTP_200_OK)
@@ -295,7 +300,7 @@ class ShowVerifiedTheatre(APIView):
             return Response({
                 'error': 'Verified Theatre not found'
             }, status=status.HTTP_404_NOT_FOUND)   
-            
+# get theatre screens for the theatre owner
 class get_theatre_screens(APIView):
     def get(self , request):
         print(request.data)
@@ -306,6 +311,7 @@ class get_theatre_screens(APIView):
         print(serializer.data)
         return Response({'data' : serializer.data ,'screen_count':screen_count}, status=status.HTTP_200_OK)
             
+# get all the time slots for the screen
 class get_timeslots(APIView) :
     def get(self ,request ):
         screen_id = request.query_params.get('screen_id')
@@ -320,6 +326,7 @@ class get_timeslots(APIView) :
         serilizer = TimeSlotSerializer(time_slots , many=True)
         return Response({'data' : serilizer.data , 'is_approved' : screen.is_approved }, status=status.HTTP_200_OK)
 
+# adding time slots for the screen
 class create_timeslot(APIView):
     def post(self , request) :
         
@@ -352,7 +359,8 @@ class create_timeslot(APIView):
             return Response({'message' : f'show time {formatted_time} created on screen {screen.screen_number}' } , status=status.HTTP_201_CREATED)
         except Exception as e :
             return Response({'error' : str(e)} , status=status.HTTP_400_BAD_REQUEST)
-            
+        
+# adding show time for the screen
 class Add_Show_Time(APIView):
     def post(self , request):
         data = request.data
@@ -369,7 +377,11 @@ class Add_Show_Time(APIView):
             start_time = timezone.make_aware(start_time)
             
             from_date = datetime.strptime(show_date, "%Y-%m-%d").date()
+            if not end_date:
+                return Response({'Error': 'end date is required'}, status=status.HTTP_400_BAD_REQUEST)
             to_date = datetime.strptime(end_date , '%Y-%m-%d').date()
+            
+            print(to_date)
             
             today = date.today()
             if not to_date :
@@ -391,20 +403,18 @@ class Add_Show_Time(APIView):
             except Screen.DoesNotExist:
                 return Response({'Error': 'Invalid screen ID'}, status=status.HTTP_400_BAD_REQUEST)
             
+            # checking overlaping show time
             overlapping_shows = ShowTime.objects.filter(
                 screen=screen ,
                 slot = timeslot_id,
                 show_date = show_date,
             )
-            if overlapping_shows:
-                print('exists')
-            print('not existing')
+
             if overlapping_shows.exists():
                 print('there is overlapping showww')    
                 return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
 
-            print("Comparison result:", to_date <= from_date)      
-            print(data)
+       
             serializers = Createshowtimeserializers(data=data)
             if serializers.is_valid():
                 serializers.save()
@@ -414,7 +424,7 @@ class Add_Show_Time(APIView):
                 
         except ValueError as e :
             return Response({'Error': f'Invalid date format: {str(e)}'}, status=400)
-        
+# add theatres
 class AddTheatre(APIView) :
     def post(self , request , city_id ) :
         print(city_id)
@@ -457,7 +467,8 @@ class AddTheatre(APIView) :
                 {"error" : f"An erorr occurred : {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
+            
+# edit theatre data
 class EditTheatreData(APIView):
     def get(self , request , id) :
         try :
@@ -493,7 +504,7 @@ class EditTheatreData(APIView):
         theatre.address = address
         theatre.save()
         return Response({'message' : 'theatre updated successfully'}, status=status.HTTP_200_OK)
-
+# delete theatre data
 class DeleteTheatre(APIView) :
     
     def delete(self , request , id) :
@@ -512,7 +523,9 @@ def get_date_range(start_date, end_date):
     end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
     return [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
 
+# editing show date view
 class Edit_show_det(APIView):
+    # to get the show time details
     def get( self , request , slot_id ) :
         try:
             
@@ -536,6 +549,7 @@ class Edit_show_det(APIView):
         except ShowTime.DoesNotExist:
             return Response({'error' : 'show not found'},status=status.HTTP_404_NOT_FOUND)
         
+    # manipulation of show time data
     def put(self, request, slot_id):
         data = request.data
 
@@ -627,3 +641,42 @@ class Edit_show_det(APIView):
 
         except Exception as e:
             return Response({'Error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+# get all the bookings for the theatre owner
+class Get_Theatre_Bookings(APIView):
+    def get(self , request):
+        owner = request.query_params.get('owner_id')
+        try:
+                
+            booking = Booking.objects.filter(
+                show__screen__theatre__owner=owner
+            ).select_related(
+                'user',
+                'show__movie',
+                'show__screen__theatre',
+                'show__screen',
+                'show__movie',
+                'payment'
+            ).order_by('-booking_time')
+            
+            booking_data = []
+            for book in booking :
+                booking_dict = {
+                    'id' : book.id,
+                    'booking_id' : book.booking_id,
+                    'movie_name' : book.show.movie.title,
+                    'theatre_name' : book.show.screen.theatre.name,
+                    'screen_number' : book.show.screen.screen_number,
+                    'show_date' : book.show.show_date,
+                    'start_time' : book.show.slot.start_time,
+                    'total_price' : book.amount,
+                    'status' : book.status,
+                    'user_name' : f"{book.user.username}",
+                    'user_email' : book.user.email,}
+                booking_data.append(booking_dict)
+                
+            return Response({'booking_data' : booking_data} , status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(str(e))
+            return Response({'error' : str(e)} , status=status.HTTP_500_INTERNAL_SERVER_ERROR)        

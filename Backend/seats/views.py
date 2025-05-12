@@ -3,11 +3,11 @@ from rest_framework.views import APIView
 from .models import *
 from .serializers import *
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status , permissions
 from django.utils import timezone
 from django.db.models import Count
 from booking.models import SeatLock
-# import rest_framework.permissions import isAuth
+from useracc.permissions import IsAuthenticatedUser
 from booking.models import BookingSeat
 class create_layout(APIView):
     def post(self, request  ) :
@@ -101,7 +101,7 @@ class get_screen_seats(APIView):
                     'category_id' : seat.category.id,
                     'category_name' : seat.category.name,
                     'price' : seat.category.price,
-                    'is_booked' : BookingSeat.objects.filter(seat=seat.id , booking__show_id = show_id ).exists(),
+                    'is_booked' : BookingSeat.objects.filter(seat=seat.id , booking__show_id = show_id , status='booked' ).exists(),
                     'label' : seat.row + str(seat.number) if seat.is_seat else ''
                     
                 })
@@ -136,6 +136,8 @@ class get_theatre_screens(APIView):
             return Response({'message':'theatre not found'} , status=status.HTTP_404_NOT_FOUND)
         
 class get_seats_category(APIView):
+    permission_classes = [IsAuthenticatedUser]
+    print('user is authenticated')    
     def get(self , request):
         cat = SeatCategory.objects.all()
         serializer = All_SeatCategory(cat , many=True)
@@ -143,10 +145,9 @@ class get_seats_category(APIView):
    
         
 class update_seats_category(APIView):
-    # permission_classes = [isAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     
     def post(self , request ):
-        print(request.data)
         seats_ids = request.data.get('seats_ids',[])
         category_id = request.data.get('category_id')
         
@@ -159,6 +160,7 @@ class update_seats_category(APIView):
     
 
 class Lock_seats(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def post(self , request):
         data = request.data
         seats_ids = data.get('seats_ids')
@@ -168,7 +170,7 @@ class Lock_seats(APIView):
             session_id = request.session.session_key
 
         print(session_id , 'this session id')
-        expires_at = timezone.now() + timezone.timedelta(minutes=10)
+        expires_at = timezone.now() + timezone.timedelta(seconds=600)
         locked_seats = SeatLock.objects.filter(
             seat_id__in = seats_ids ,
             show_id = show_id,
@@ -197,7 +199,16 @@ class Unlock_Seats(APIView):
             data = request.data
             seat_ids = data['selected_seats']
             show_id = data['show_id']
-            
+            print(show_id , 'show value')
+            try : 
+                show = ShowTime.objects.get(id=show_id)
+            except ShowTime.DoesNotExist:
+                return Response({'eror':'show does not found'} , status=status.HTTP_400_BAD_REQUEST)
+            selected_show = SeatLock.objects.filter(seat_id__in=seat_ids , show_id = show_id).first()
+            if selected_show is None :
+                return Response({ 'message' : 'seat lock expired','movie_id' : show.movie.id},status=status.HTTP_200_OK)
+                
+            movie_id = selected_show.show.movie.id  
             now = datetime.now()
             SeatLock.objects.filter(
                 seat_id__in= seat_ids,
@@ -205,7 +216,8 @@ class Unlock_Seats(APIView):
                 expires_at__lt = now
             ).delete()
             
-            return Response({'message' : 'seats unloacked'} , status=status.HTTP_200_OK)
+            
+            return Response({'message' : 'seats unloacked' , 'movie_id' : movie_id} , status=status.HTTP_200_OK)
         
         except Exception as e :
-            return Response({'error' : 'not found'},status=status.HTTP_404_NOT_FOUND)
+            return Response({'error' : str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)

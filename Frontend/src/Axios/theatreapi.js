@@ -1,4 +1,5 @@
 import axios from 'axios'
+
 const API_BASE_URL  = 'http://127.0.0.1:8000/theatre_owner'
 const TheatreApi = axios.create({
     baseURL : API_BASE_URL ,
@@ -7,9 +8,9 @@ const TheatreApi = axios.create({
     }
 });
 
-
 TheatreApi.interceptors.request.use((config) => {
-    const token = localStorage.getItem('theatre_token');
+    const current_user = localStorage.getItem('current_user_type')
+    const token = localStorage.getItem(`${current_user}_token`)
     if (token) {
         config.headers.Authorization = `Bearer ${token}`
     }

@@ -5,10 +5,10 @@ const seatsApi = axios.create({
 })  
 
 seatsApi.interceptors.request.use((config) => {
-    const token = localStorage.getItem('theatre_token')
+    const current_user = localStorage.getItem('current_user_type')
+    const token = localStorage.getItem(`${current_user}_token`)
     if (token) {
         config.headers.Authorization = `Bearer ${token}`
-
     }
     return config
     },
@@ -18,7 +18,7 @@ seatsApi.interceptors.request.use((config) => {
     }
 )
 
-const getRefreshToken = () => localStorage.getItem('refresh_token')
+const getRefreshToken = () => localStorage.getItem(`${current_user}_token_refresh`)
 seatsApi.interceptors.response.use(
     response => response,
     async (error) => {

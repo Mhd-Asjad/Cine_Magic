@@ -5,6 +5,7 @@ import { getCurrentUser } from '../userauth/AuthService'
 
 export const UserRoute = ({children}) => {
     const user = getCurrentUser()
+
     console.log(user)
     if (!user){
         return <Navigate to={'/'} />
@@ -23,7 +24,7 @@ export const UserRoute = ({children}) => {
 
 export const TheatreRoute = ({ children }) => {
     const user = getCurrentUser();
-    console.log('heding to this function')
+    console.log(!user)
     
     console.log('inside theatre route')
     if (!user) {

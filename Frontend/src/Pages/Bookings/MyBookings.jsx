@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux'
 import axios from 'axios'
 import notFound from '../../assets/no-booking.png'
 import { useNavigate } from 'react-router-dom'
+import apiBooking from '@/Axios/Bookingapi'
+
 function MyBookings() {
     const userId = useSelector((state) => state.user.id)
     const [bookings, setBookings] = useState([]);
@@ -19,7 +21,7 @@ function MyBookings() {
         
             console.log('api calling in orders')
             try {
-                const res = await axios.get(`http://localhost:8000/booking/my-bookings/${userId}/`);
+                const res = await apiBooking.get(`my-bookings/${userId}/`);
                 setBookings(res.data.bookings);
                 setLoading(false);
             } catch(e) {
@@ -61,7 +63,7 @@ function MyBookings() {
                             <p className="text-red-500">{error}</p>
                         </div>
                     ) : bookings.length > 0 ? (
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
                             {bookings.map((booking, idx) => (
                                 <div key={idx} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
                                     <div className="bg-blue-50 px-4 py-2">
@@ -98,7 +100,7 @@ function MyBookings() {
                       
 
                                             <div className="pt-2 text-xs text-gray-500 border-t border-gray-100">
-                                                <div className='flex justify-end mb-2 ' >
+                                                <div className='flex mt-2 justify-center mb-2 ' >
 
                                                 <button 
                                                     className='outline outline-2 px-2 py-2 text-black rounded-md outline-blue-200' 

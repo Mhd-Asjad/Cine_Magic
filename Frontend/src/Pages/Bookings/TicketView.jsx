@@ -1,11 +1,17 @@
 import Footer from '@/Components/Footer/Footer';
 import Nav from '@/Components/Navbar/Nav';
 import axios from 'axios';
-import { format } from 'date-fns';
+import { CloudDownload, Ticket, Tickets } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { AlertDialog, AlertDialogTrigger, AlertDialogCancel , AlertDialogAction , AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { useToast } from '@/hooks/use-toast';
+import ShowRefundStatus from './ShowRefundStatus';
+import apiBooking from '@/Axios/Bookingapi';
+
 function TicketView() {
   const { id } = useParams();
   const [ticketData, setTicketData] = useState([]);
@@ -13,12 +19,26 @@ function TicketView() {
   const [seats, setSeats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [ refundInfo , setRefundInfo ] = useState(null);
+  const [ open , setOpen ] = useState(false)
+  const {toast} = useToast();
 
   useEffect(() => {
+      const fetchRefundInfo = async() => {
+
+        try {
+          const res = await apiBooking.get(`refund-info/${id}/`)
+          setRefundInfo(res.data.refund_data)
+
+        }catch(e){
+          console.log(e , 'error while fetching cancel refund')
+        }
+      }
     const fetchQrCode = async() => {
       setLoading(true);
       try {
-        const res = await axios.get(`http://localhost:8000/booking/ticket/${id}/`);
+        const res = await apiBooking.get(`ticket/${id}/`);
+        
         const { ticket_data, movie_details, seats } = res.data;
         setTicketData(ticket_data);
         setShowDetails(movie_details);
@@ -30,8 +50,12 @@ function TicketView() {
         setLoading(false);
       }
     };
+    
+    fetchRefundInfo()
     fetchQrCode();
-  }, [id]);
+    
+    }, [id]);
+    console.log(refundInfo , 'refund info')
 
   const convertMinutes = (minutes) => {
     const hours = Math.floor(minutes / 60)
@@ -44,18 +68,68 @@ function TicketView() {
   const handleDownload = () => {
     const ticket = document.getElementById('ticket-section')
 
-    html2canvas(ticket).then((canvas) => {
+    html2canvas(ticket, { allowTaint: true, useCORS: true }).then((canvas) => {
       const imgData = canvas.toDataURL("image/png")
+      const qrCanvas = document.createElement('canvas');
       const pdf = new jsPDF();
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-      pdf.addImage(imgData , "png" , 0 , 0 , pdfWidth , pdfHeight);
-      pdf.save('ticket.pdf')
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      let yOffset = pdfHeight + 10;
+      const qrDataUrl = qrCanvas.toDataURL('image/png');
+      if (ticketData.qrcode_img) {
+        const qrImage = new Image();
+        qrImage.crossOrigin = 'anonymous'; 
+        qrImage.src = ticketData.qrcode_img;
+  
+        qrImage.onload = () => {
+          qrCanvas.width = qrImage.width;
+          qrCanvas.height = qrImage.height;
+          const ctx = qrCanvas.getContext('2d');
+          ctx.drawImage(qrImage, 0, 0);
+  
+  
+          if (yOffset + 80 > pdf.internal.pageSize.getHeight()) {
+            pdf.addPage();
+            yOffset = 20;
+          }
+          
+        }
+      }
+
+      pdf.addImage(qrDataUrl, 'PNG', 10, yOffset + 50, 80, 80);
+      
+      pdf.save('ticket-screenshot.pdf')
+
+
     });
   };
 
+
+  const handleCancelTicket = async(e) => {
+    e.preventDefault()
+
+    try {
+      const res = await apiBooking.post(`cancel-ticket/${id}/`,
+        {
+          'refund_amount' : refundInfo.refund_amount
+        }
+      );
+      toast({title : res.data.message})
+      setOpen(false)
+    }catch(e){
+      toast({title : e?.response?.data?.error,
+        variant : 'destructive'
+
+
+      })
+    }
+
+    
+  }
+  console.log(ticketData.refund_status , 'ticket status')
   if (loading) {
     return (
       <div>
@@ -78,6 +152,7 @@ function TicketView() {
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
             <div className="text-center">
+
               <div className="w-16 h-16 text-red-500 mx-auto mb-2 flex items-center justify-center">
                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -98,8 +173,74 @@ function TicketView() {
       <Nav/>
       <div className="min-h-screen py-12 bg-gradient-to-b from-gray-100 to-gray-200 flex justify-center items-center px-4">
         <div className="max-w-xl w-full mx-auto">
-          <h3 className="text-center text-2xl font-bold text-gray-800 mb-8">Your Movie Ticket</h3>
-          
+          <h3 className="text-center text-2xl font-bold text-gray-800 mb-8">Your Movie Ticket  </h3>
+            <div className='flex justify-end' >
+      
+            { !['cancelled', 'completed' , 'pending' , 'not_applicable'].includes(ticketData.refund_status) ? (
+              <AlertDialog open={open} onOpenChange={setOpen}>
+                  <AlertDialogTrigger asChild>
+                      <button className='p-4 text-red-500 cursor-pointer' onClick={() => setOpen(true)}>
+                          Would you like to cancel ticket?
+                      </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                      <AlertDialogHeader>
+                          <AlertDialogTitle>Confirm Cancellation</AlertDialogTitle>
+                          <AlertDialogDescription className='mb-2'>
+                              <div>
+                                  <p className='text text-center text-red-500 font-bold'>⚠ Cancellation Policy</p>
+                                  <p className='text-sm text-gray-500'>◉ Cancellation is only possible 2 hours before the showtime.</p>
+                                  <p className='text-sm font-semibold'>Booking cancellation before show time 24hr</p>
+                                  <p className='text-sm'>◉ 98% of the ticket amount will be refunded.</p>
+                                  <p className='text-sm font-semibold'>Booking before show time gap between (24hr to 12hr)</p>
+                                  <p className='text-sm'>◉ 75% of the ticket amount will be refunded.</p>
+                                  <p className='text-sm font-semibold'>Booking before show time gap between (12hr to 2hr)</p>
+                                  <p className='text-sm'>◉ 50% of the ticket amount will be refunded.</p>
+                                  <p className='text-sm'>◉ No refund is applicable if the cancellation is made after the showtime.</p>
+                              </div>
+                              {refundInfo && (
+                                  <>
+                                      <p className="text-sm text-center font-bold text-gray-500 mt-2">Booking Details:</p>
+                                      <p><strong>Booking ID:</strong> {refundInfo.booking_id}</p>
+                                      <p><strong>Booking Amount:</strong> ₹{refundInfo.amount}</p>
+                                      <p><strong>Refund %:</strong> {refundInfo.refund_percentage}</p>
+                                      <p><strong>Refund Amount:</strong> ₹{refundInfo.refund_amount}</p>
+                                      <p><strong>{refundInfo.hour_diff > 0 ? 'Hours Before Show' : 'Hours Passed After Show'}:</strong> {refundInfo.hour_diff > 0 ? `${refundInfo.hour_diff} hours` : `${Math.abs(refundInfo.hour_diff)} hrs`}</p>
+                                      {refundInfo.refund_percentage === 0 && <p className="text-red-500 mt-2">⚠ No refund is applicable as per refund policy.</p>}
+                                  </>
+                              )}
+                          </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                          <div className='flex gap-2'>
+                              <AlertDialogCancel className="outline">Close</AlertDialogCancel>
+                              <Button className='bg-red-500 hover:bg-red-600' variant='destructive' onClick={handleCancelTicket}>
+                                  Confirm
+                              </Button>
+                          </div>
+                      </AlertDialogFooter>
+                  </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+
+              <div className='flex items-center gap-2' >
+              <div>
+                <button className='text-green-600 w-60 h-12' onClick={() => setOpen(prev => !prev)}>
+                    Click to show Refund Status <Ticket className='inline' />
+
+
+                </button>
+              <div className='mx-auto mb-5' >
+                {open &&
+                  <ShowRefundStatus refundId={refundInfo.id} />                    
+                }
+                
+              </div>
+            </div>
+            </div>
+            )}
+
+            </div>
           <div className="relative bg-white shadow-2xl rounded-lg overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-3 bg-white flex">
               {[...Array(40)].map((_, i) => (
@@ -109,7 +250,6 @@ function TicketView() {
               ))}
             </div>
 
-          <div id='ticket-section'>
             
             <div className="pt-4 pb-4 px-8 border-b border-dashed border-gray-300">
               <div className="flex justify-between items-start">
@@ -141,6 +281,7 @@ function TicketView() {
               </div>
             </div>
             
+          <div id='ticket-section'>
             <div className="py-4 px-8 border-b border-dashed border-gray-300">
               <div className="flex justify-between">
                 <div>
@@ -164,6 +305,7 @@ function TicketView() {
                 <img 
                   src={ticketData.qrcode_img}
                   alt="Ticket QR Code"
+                  crossOrigin="anonymous"
                   className="w-48 h-48 object-contain"
                 />
               </div>
@@ -183,14 +325,14 @@ function TicketView() {
               ))}
             </div>
           </div>
-          <div className='flex justify-end' >
+          <div className='flex mb-3 p-3 justify-center' >
 
-          {/* <button
+          <button
             onClick={handleDownload}
-            className="px-4  py-2 bg-blue-500 text-white rounded"
-          >
-            Download Ticket
-          </button> */}
+            className="border-dashed rounded-md border-2 border-gray-200 text-md py-2 px-2"
+            >
+            <CloudDownload size={18} className='inline' />  Download Ticket
+          </button>
 
           </div>
           </div>

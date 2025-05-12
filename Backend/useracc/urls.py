@@ -5,8 +5,6 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView
 )
 
-# from rest_framework
-
 
 urlpatterns = [
     path('token/',TokenObtainPairView.as_view(),name="token_obtain_pair"),
@@ -15,5 +13,6 @@ urlpatterns = [
     path('verify_otp/' , VerifyOtpView.as_view(), name="verify_otp"),
     path('userlogin/', UserLoginView.as_view() , name="userlogin"),
     path('edit-user/<int:userId>/' , editUser.as_view() , name='edit-user'),
-    path('google-auth/',GoogleAuthView.as_view(),name='google-auth')
+    path('google-auth/',GoogleAuthView.as_view(),name='google-auth'),
+    path('get-usertype/', checkUserType.as_view(), name='get-usertype'),
 ]

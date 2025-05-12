@@ -7,23 +7,22 @@ import { updateOwnershipStatus } from "@/Redux/Features/Theatreownerslice";
 function PendingTheatres() {
   const [pendingTheatres, setPendingTheatres] = useState([]);
   const [verifiedTheatres, setVerifiedTheatres] = useState([]);
+  const owner_id = useSelector((state) => state.theatreOwner.theatreId)
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchPendingTheatres();
-  }, []); // Fetch only once when the component mounts
-
+  }, []); 
   const fetchPendingTheatres = async () => {
     try {
-      const res = await TheatreApi.get("/pending-theatre/");
+      const res = await TheatreApi.get(`/pending-theatre/${owner_id}/`);
       const pending = res.data.filter((theatre) => !theatre.is_confirmed);
       const verified = res.data.filter((theatre) => theatre.is_confirmed);
 
       setPendingTheatres(pending);
       setVerifiedTheatres(verified);
       
-      // Update ownership status if no pending theatres
       if (pending.length === 0) {
         dispatch(updateOwnershipStatus("All theatres are verified"));
       }
@@ -31,6 +30,7 @@ function PendingTheatres() {
       console.error("Error fetching theatres:", e.response?.data || e.message);
     }
   };
+  console.log(pendingTheatres , verifiedTheatres)
 
   return (
     <div className="mt-10 flex flex-wrap justify-center gap-10">
@@ -73,7 +73,6 @@ function PendingTheatres() {
         )}
       </div>
 
-      {/* Verified Theatres Section */}
       <div className="rounded-lg shadow-lg bg-white py-6 px-8 w-[400px]">
         <h1 className="text-green-500 text-2xl font-bold mb-6 text-center">
           Verified Theatres

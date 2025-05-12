@@ -4,3 +4,4 @@ from .models import *
 admin.site.register(Tag)
 admin.site.register(Post)
 admin.site.register(PostImage)
+admin.site.register(PostReaction)

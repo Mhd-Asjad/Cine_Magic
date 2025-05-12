@@ -5,6 +5,7 @@ import axios from 'axios'
 import Footer from '../../Components/Footer/footer'
 import CastCards from './CastCards'
 import Upcomingmovies from '@/Components/MovieCards/Upcomingmovies'
+import apiMovies from '@/Axios/Moviesapi'
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w780';
 
 function MovieSpecification( ) {
@@ -16,7 +17,7 @@ function MovieSpecification( ) {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/movies/movie_details/${id}/`);
+        const response = await apiMovies.get(`/movie_details/${id}/`);
         console.log(response.data)
         setMovies(response.data)
 

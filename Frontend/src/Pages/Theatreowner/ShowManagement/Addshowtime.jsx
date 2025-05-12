@@ -68,7 +68,7 @@ function Addshowtime() {
     }else{
       setShowAddForm(false)
       toast({
-        title : 'no access until theatre approval',
+        title : 'no access until screen approval',
         variant : 'destructive'
       })
     }

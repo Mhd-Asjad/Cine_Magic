@@ -6,4 +6,5 @@ urlpatterns = [
     path('movie_details/<int:id>/', DetailedMovieView.as_view(), name='movie_details'),
     path('showtimes/<int:id>/' ,movie_showtime.as_view() , name='movie-showtime'),
     path('show-detail/<int:show_id>/' , Show_Details.as_view() , name='show-detail')
+    
 ]

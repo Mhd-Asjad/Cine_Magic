@@ -3,8 +3,7 @@ from theatres.models import ShowTime
 import qrcode
 import io
 from django.core.files.base import ContentFile
-
-# Create your models here.
+from datetime import datetime
 
 class Booking(models.Model):
     STATUS_CHOICES = (
@@ -12,6 +11,13 @@ class Booking(models.Model):
         ('payment_initiated' , 'payment Initiated'),
         ('confirmed' , 'Confirmed'),
         ('cancelled' , 'Cancelled')
+    )
+    
+    REFUND_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('not_applicable', 'Not Applicable'),
     )
     
     booking_id = models.CharField(max_length=20 , unique=True )
@@ -23,11 +29,15 @@ class Booking(models.Model):
     booking_time = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20 , choices=STATUS_CHOICES , default='pending')
     payment_id = models.CharField(max_length=100 , null=True , blank=True)
-    amount = models.DecimalField(max_digits=10 , decimal_places=2 )
+    amount = models.DecimalField(max_digits=10 , decimal_places=2)
     
+    cancelled_at = models.DateField(null=True , blank=True)
+    refund_amount = models.DecimalField(max_digits=10 , decimal_places=2 ,null=True , blank=True)
+    refunt_status = models.CharField(max_length=20 , choices=REFUND_STATUS_CHOICES , default='not-applicable' )
     def generate_qrcode(self) :
         if self.status == 'confirmed' and not self.qr_code :
-            qr_data = f'ID{self.booking_id} \nMovie : {self.show.movie.title}\nDate{self.show.show_date.strftime('%Y:%m:%d')}\nShowTime{self.show.slot.start_time.strftime('%H:%M')}'
+            formatted_time = self.show.slot.start_time.strftime('%I:%M %p')
+            qr_data = f'ID{self.booking_id} \nMovie : {self.show.movie.title}\nDate{self.show.show_date.strftime('%Y:%m:%d')}\nShowTime{formatted_time}'
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.ERROR_CORRECT_L,
@@ -63,16 +73,24 @@ class Booking(models.Model):
         
     def __str__(self):
         id = str(self.id)
-        return id
+        return f'{id} - {self.status}'
         
 class BookingSeat(models.Model) :
+    
+    SEAT_STATUS_CHOISES = (
+        ('booked' , 'Booked'),
+        ('cancelled' , 'Cancelled'),
+    )
     booking = models.ForeignKey(Booking , on_delete=models.CASCADE , related_name='bookingseats')
     seat = models.ForeignKey('seats.seats', on_delete=models.CASCADE)
+    status = models.CharField(max_length=20,choices=SEAT_STATUS_CHOISES , default='booked')
     price = models.DecimalField(max_digits=8, decimal_places=2)
     
     class Meta : 
         unique_together = ('booking' , 'seat')
-        
+    
+    def __str__(self) :
+        return f'{self.seat} - {self.status}'
         
 class Payment(models.Model):
     booking  =  models.OneToOneField(Booking , on_delete=models.CASCADE,related_name='payment')
@@ -82,14 +100,15 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=10 , decimal_places=2)
     currency = models.CharField(max_length=4 , default='USD')
     payment_date = models.DateTimeField(auto_now_add=True)
-
+    capture_id = models.CharField(max_length=100 , null=True , blank=True)
+    
 class SeatLock(models.Model) :
     seat = models.ForeignKey('seats.seats' , on_delete=models.CASCADE)
     show = models.ForeignKey('theatres.ShowTime' , on_delete=models.CASCADE)
     user = models.CharField(max_length=100) 
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-    
+      
     def is_expired(self ):
         from django.utils import timezone
         return timezone.now() > self.expires_at

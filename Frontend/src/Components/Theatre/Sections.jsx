@@ -13,11 +13,12 @@ import LayoutCards from '@/Pages/Theatreowner/SeatManagement/LayoutCards';
 import Addshowtime from '@/Pages/Theatreowner/ShowManagement/Addshowtime';
 import EditShow from '@/Pages/Theatreowner/ShowManagement/EditShow';
 import { TheatreRoute } from '@/Pages/Routes/ProtectedRoute';
+import ShowBookings from '@/Pages/Theatreowner/BookingManagement/ShowBookings';
 function Sections() {
     return (
         <div>
             <Routes>
-                <Route path="dashboard" element={<TheatreRoute> <TheatreDashboard/></TheatreRoute>}/>
+                <Route path="dashboard" element={<TheatreDashboard/>}/>
                 <Route path="add-theatre" element={<TheatreRoute> <AddTheatre/> </TheatreRoute>} />
                 <Route path="theatre-confimation" element={<TheatreRoute><PendingTheatres/></TheatreRoute>} />
                 <Route path=":id/add-screen" element={<TheatreRoute><AddScreen/></TheatreRoute>}/>
@@ -29,6 +30,8 @@ function Sections() {
                 <Route path=':id/edit-theatre' element={<TheatreRoute><EditTheatre/></TheatreRoute>} />
                 <Route path="seats-layout" element={<TheatreRoute><SeatHome/></TheatreRoute>} />
                 <Route path="cards/" element={<TheatreRoute><LayoutCards/></TheatreRoute>} />
+                <Route path='theatres/bookings' element={<TheatreRoute><ShowBookings/></TheatreRoute>} />
+
             </Routes>
 
         </div>

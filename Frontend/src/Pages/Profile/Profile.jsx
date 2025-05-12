@@ -19,6 +19,19 @@ import 'leaflet/dist/leaflet.css';
 import { postAdded } from "@/Redux/Features/BlogSlice";
 import { useNavigate } from "react-router-dom";
 import apiBlogs from "@/Axios/Blogapi";
+import {
+  AlertDialog , 
+  AlertDialogTrigger , 
+  AlertDialogContent , 
+  AlertDialogHeader , 
+  AlertDialogCancel , 
+  AlertDialogTitle , 
+  AlertDialogDescription , 
+  AlertDialogFooter 
+} 
+from "@/Components/ui/alert-dialog";
+import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
+import { set } from "date-fns";
 const Profile = () => {
 
   toastr.options = {
@@ -56,6 +69,7 @@ const Profile = () => {
   const [ editBlog , setEditBlog] = useState(null);
   const [imagePreview , setImagePreview] = useState([]);
   const [ imageError , setImageError] = useState('');
+  const [ confirmDelete , setConfirmDelete] = useState(false);
   const {toast} = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -109,7 +123,6 @@ const Profile = () => {
     if (!validateFields()) return
 
     try {
-
       const response = await axios.post('http://127.0.0.1:8000/theatre_owner/create_profile/', {
         'user' : user.id ,
         'owner_photo' : ownerImage,
@@ -120,38 +133,34 @@ const Profile = () => {
         'state' : state , 
         'pincode' : pincode,
         'user_message' : text
-     },
+      },
      {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: { 'Content-Type': 'multipart/form-data'        
+      },
     });
-      
 
       handleSuccess(response.data.message)
 
-      
     }catch(e) {
 
       const error = e.response?.data?.user || e.response.data.error;
-      console.log(error)
-      toastr.warning(error)
-
+      console.log(error);
+      toastr.warning(error);
     }
   };
-
   useEffect(() => {
-    const fetchBlogs = async() => {
-
-      try {
-          const res = await apiBlogs.get(`get-posts/${user.id}/`)
-          setBlogs(res.data)
-      }catch(error){
-        console.log(error?.response)        
-      }
-  
-    }
     fetchBlogs()
   },[])
+  const fetchBlogs = async() => {
 
+    try {
+        const res = await apiBlogs.get(`get-posts/${user.id}/`)
+        setBlogs(res.data)
+    }catch(error){
+      console.log(error?.response)        
+    }
+
+  }
 
   const handleEditBlog = (blog_id) => {
     const blogToEdit = blogs.filter(blog => blog.id === blog_id)
@@ -159,36 +168,54 @@ const Profile = () => {
     setIsEditing(true)
   }
 
-  useEffect(()=> {
-    const createPreview = () => {
-      const file = editBlog?.images[0]?.image
-      console.log(file)
-      setImagePreview(file)
-    }
-    createPreview()
-
-  },[editBlog])
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0] || null ;
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      console.log(previewUrl)
-      // setEditBlog(prev => ({
-      //   ...prev , 
-      //   images: [{ image: previewUrl }]
-
-      // }));
-      setImagePreview(previewUrl);
-      setImageError('');
-    } else {
-      setImagePreview(null);
-      setImageError('Please add a media file.');
+  const handleDeleteBlog = async(blog_id) => {
+    try {
+      const res = await apiBlogs.delete(`delete-post/${blog_id}/`)
+      if (res.status === 204) {
+        setBlogs(blogs.filter(blog => blog.id !== blog_id))
+        toast({
+          title : 'post deleted successfully'
+        })
+      }
+    }catch(e) {
+      console.log('error while deleting blog' , e)
     }
   }
 
+  // useEffect(()=> {
+  //   const createPreview = () => {
+  //     const file = editBlog?.images[0]?.image
+  //     console.log(file)
+  //     setImagePreview(file)
+  //   }
+  //   createPreview()
+
+  // },[editBlog])
+              
+  const handleImageChange = (e) => {
+    const file = e.currentTarget.files[0] || null;
+    if (file) {
+      setImageError('');
+      const filePath = URL.createObjectURL(file);
+      setEditBlog((prev) => ({
+        ...prev,
+        images: [{ file: file , preview : filePath }],
+      }));
+
+    } else {
+      setImageError('Please add a media file.');
+    };
+    console.log(editBlog,'adfaksjl')
+  };
   const handleRemoveTag = (removedTag) => {
     const filteredTags = editBlog.tags.filter((tag) => tag !== removedTag)
+    console.log(editBlog)
+    const tagCount = editBlog.tags[0].length
+  
+    console.log(tagCount)
+    if (tagCount === 0) {
+      alert('atleast one tag is required')
+    }
     console.log(filteredTags , 'fltered tags')
     setEditBlog(prev => ({
       ...prev , 
@@ -211,8 +238,8 @@ const Profile = () => {
         title : 'user updated successfully'
       })
       handleToggleForm1()
-      
-    }catch(e){
+  
+      }catch(e){
       console.log(e)
 
     }
@@ -224,27 +251,37 @@ const Profile = () => {
   }
   const handleEditTask = async(e , blog_id) => {
     e.preventDefault()
-    if (!imagePreview) return;
+    console.log(blog_id , 'blog id')
     const formData = new FormData();
     formData.append('title' ,editBlog.title)
     formData.append('content' , editBlog.content)
-    formData.append('image' , JSON.stringify(editBlog?.images[0]?.image))
+    console.log(editBlog.images[0].file , 'image file')
+    if (editBlog.images[0].file) {
+      console.log(editBlog.images[0].file , 'image file')
+      formData.append('images' , editBlog?.images[0]?.file)
+    }
     formData.append('tags', JSON.stringify(editBlog.tags));
     formData.append('author' , editBlog.author_name)
-
+    formData.append('user' , user.id)
+    console.log(formData , 'form data')
     try {
+
       const res = await apiBlogs.put(`edit-post/${blog_id}/`,formData, {
         headers : { 'Content-Type': 'multipart/form-data' }
       })
-      if (res.status === 200){
 
+      if (res.status === 200){
         alert('post is Editedd successfully')
         handleCrud()
+        fetchBlogs()
+        setEditBlog(null)
+
       }
     }catch(e) {
       console.log('error while updating blog ' , e)
-    }
-  }
+    };
+
+  };
 
   const handleLocationSelect = async(location) => {
     setLatitude(location[0] )
@@ -258,9 +295,7 @@ const Profile = () => {
         setPincode(data.address.postcode)
     }catch(e) {
       console.log('reserve geo coding failed' , e);
-      
     }
-    
   };
 
   const formatTime = (dateTime) => {
@@ -271,8 +306,17 @@ const Profile = () => {
     date.setHours(hours , minutes)
     const formattedTime = date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
     return dateString + ' ' + formattedTime
+
   }
-  console.log(editBlog ,'jfdsljla')
+
+  const handleImageDelete = (e) => {
+    e.preventDefault()
+    setEditBlog((prev) => ({
+      ...prev,
+      images: [],
+    }));
+  }
+  console.log(editBlog , 'edit blog preview')
   return (  
     <div>
 
@@ -472,23 +516,23 @@ const Profile = () => {
                               placeholder="Enter author name"
                               />
                               </div>
-                              {imagePreview &&
+
 
                               <div className="relative w-full h-full">
                                 <img
-                                  src={imagePreview}
+                                  src={editBlog?.images[0]?.preview || editBlog?.images[0]?.image}
                                   alt="Preview"
                                   className="w-full h-full object-cover rounded-lg"
                                 />
                                 <button
                                   className="absolute top-4 right-4 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:text-red-600"
-                                  // onClick={handleImageDelete}
+                                  onClick={handleImageDelete}
                                   type="button"
                                 >
                                   <DeleteIcon size={23} />
                                 </button>
                               </div>
-                              }
+                              
 
                           <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
                           <div className="flex gap-2 flex-wrap mb-2">
@@ -510,12 +554,10 @@ const Profile = () => {
                               </div>
                             )}
                           </div>
-
-                            
-
                           <div className="flex justify-center mb-4" >
 
-                            <button
+                            <button 
+                              className="bg-gray-200 text-gray-700 px-3 py-1 font-semibold rounded-md hover:bg-gray-300"
                               onClick={(e)=> handleEditTask( e ,editBlog.id)}
                             >
                               edit Post
@@ -527,11 +569,13 @@ const Profile = () => {
                         </div>
 
                       )}  
-                    <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                      {blogs.map((blog) => (
+                    <div className="p-5 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
+                    {!blogs?.message ? (
+                      
+                      blogs.map((blog) => (
                         <div key={blog.id} className="bg-white rounded-lg overflow-hidden shadow-md transition-transform duration-300 hover:shadow-lg hover:translate-y-px border border-gray-200">
                           <img
-                            src={blog.images[0].image}
+                            src={blog.images[0]?.image || blog.images[0]?.image}
                             alt={blog.title}
                             className="w-full h-48 object-cover"
                           />
@@ -545,12 +589,41 @@ const Profile = () => {
                                 >
                                   <Edit size={18} />
                                 </button>
-                                <button 
-                                  onClick={() => handleDeleteBlog(blog.id)}
-                                  className="text-red-500 hover:text-red-700 transition-colors duration-200"
-                                >
-                                  <Trash size={18} />
-                                </button>
+
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <button 
+                                      onClick={() => setConfirmDelete(true)}
+                                      className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                                      >
+                                      <Trash size={18} />
+                                    </button>
+                                  </AlertDialogTrigger>
+                                 
+                                {confirmDelete &&
+                                  <AlertDialogContent className="w-[400px]">
+
+                                    <AlertDialogHeader>
+
+                                      <AlertDialogTitle className="text-center text-lg font-semibold">Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription className="text-center text-gray-500">
+                                        This action cannot be undone. This will permanently delete your post.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter className="flex justify-center gap-4 mt-4">
+                                      <AlertDialogCancel className="bg-gray-200 text-gray-700 hover:bg-gray-300">
+                                        Cancel
+                                        
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction className="bg-red-500 py-2 px-2 rounded text-white hover:bg-red-600" onClick={() => handleDeleteBlog(blog.id)}>
+                                        Confirm
+                                        <Trash size={18} className="mb-1 gap-1 inline" />
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                }
+                                </AlertDialog>
+
                               </div> 
                             </div>
                             <p className="text-gray-600 mb-4 line-clamp-3">{blog.content}</p>
@@ -567,7 +640,30 @@ const Profile = () => {
                             </div>
                           </div>
                         </div>
-                      ))}
+                      ))
+                    ):(
+                       <div className="flex items-center justify-center h-64">
+                        <div className="flex flex-col items-center justify-center mx-auto text-gray-500">
+                          <svg
+                            className="w-16 h-16 mb-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M9.75 9.75L4.5 4.5m0 0L2.25 6.75m2.25-2.25v12a2.25 2.25 0 002.25 2.25h12a2.25 2.25 0 002.25-2.25v-12a2.25 2.25 0 00-2.25-2.25H6.75z"
+                            />
+                          </svg>
+                          <h2 className="text-lg font-semibold text-center">No Posts Found</h2>
+                          <p className="text-sm text-gray-400 mt-2 text-center max-w-xs">
+                            Looks like there are no posts available right now. Create a new one!
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     </div>
                 </div>
             </div>

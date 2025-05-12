@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 import { Formik, Field, Form } from 'formik';
 import { setUsername , setEmail, setUser_id } from '../../Redux/Features/UserSlice';
 import { useDispatch  } from 'react-redux';
+import userApi from '@/Axios/userApi';
 function OtpVerificationForm({ email, setMessage , closeModal }) {
 
   toastr.options = {
@@ -26,7 +26,7 @@ function OtpVerificationForm({ email, setMessage , closeModal }) {
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/user_api/verify_otp/', {
+      const response = await userApi.post('verify_otp/', {
         email: email,
         otp: values.otp,
       });

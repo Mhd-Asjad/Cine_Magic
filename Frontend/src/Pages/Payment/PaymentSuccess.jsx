@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card"
 import { Link, useParams } from "react-router-dom"
 import React , {useState , useEffect} from "react";
 import Nav from "@/Components/Navbar/Nav";
-import axios from "axios";
+import apiBooking from "@/Axios/Bookingapi";
 function PaymentSuccess() {
     const [isLoading, setIsLoading] = useState(true);
     const {booking_id} = useParams()
@@ -11,7 +11,7 @@ function PaymentSuccess() {
     useEffect(() => {
       const fetchBooking = async() => {
         try {
-          const res = await axios.get(`http://localhost:8000/booking/booking-info/${booking_id}/`)
+          const res = await apiBooking.get(`booking-info/${booking_id}/`)
           setBookingDetails(res.data)
         }catch(e){
           console.log(e , 'fetching Error')
@@ -53,7 +53,7 @@ function PaymentSuccess() {
           <CircleCheckIcon className="text-green-500 h-16 w-16" />
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-4">Payment Successful</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Thank you for your payment. Your order is being processed.
+            Thank you for your payment. Your booking is being processed.
           </p>
         </div>
 
@@ -61,7 +61,7 @@ function PaymentSuccess() {
         <div className="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
           <div className="flex justify-between">
             <span className="text-gray-500 dark:text-gray-400">Amount Paid:</span>
-            <span className="font-medium text-gray-900 dark:text-gray-50">${booking.amount}</span>
+            <span className="font-medium text-gray-900 dark:text-gray-50">  ₹ {booking.amount}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500 dark:text-gray-400">Payment Method:</span>

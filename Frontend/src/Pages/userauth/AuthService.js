@@ -104,7 +104,7 @@ export const clearAllTokens = () => {
         localStorage.removeItem(value)
         localStorage.removeItem(`${value}_refresh`)
     })
-    localStorage.removeItem('current_user_type')
+    // localStorage.removeItem('current_user_type')
 }
 
 export default login

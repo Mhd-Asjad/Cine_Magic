@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser_id , setUsername , setEmail } from '@/Redux/Features/UserSlice';
 import { useToast } from '@/hooks/use-toast';
+import userApi from '@/Axios/userApi';
+
 function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose }) {
     const [isRegister, setIsRegister] = useState(true);
     const [ isLogin , setIsLogin ] = useState(false)
@@ -26,7 +28,7 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose }) {
         console.log(decoded);
         const {email , name } = decoded
         try {
-            const res = await axios.post('http://127.0.0.1:8000/user_api/google-auth/',{
+            const res = await userApi.post('google-auth/',{
                 'email' : email , 
                 'username' : name
             })

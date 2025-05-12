@@ -35,14 +35,13 @@ class TimeSlot(models.Model):
         return f"screen  {self.screen.screen_number} - {self.start_time}"
     
         
-class ShowTime(models.Model) :
+class ShowTime(models.Model):
     screen = models.ForeignKey(Screen , on_delete=models.CASCADE , related_name='showtimes' )
     movie = models.ForeignKey('movies.Movie' , on_delete=models.CASCADE , related_name='showtimes')
     slot = models.ForeignKey(TimeSlot , on_delete=models.CASCADE ,blank=True , null=True, related_name='showtimes')
     end_time = models.TimeField(blank=True , null=True)
     show_date = models.DateField(blank=True , null=True)
     end_date = models.DateField(blank=True,null=True)
-    # status = models.CharField(max_length=10, choices=(('active', 'Active'), ('expired', 'Expired')), default='active')
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     

@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { lockseats } from '@/Redux/Features/selectedseats';
 import Checkout from '../userbooking/Checkout';
 import { useToast } from '@/hooks/use-toast';
+import apiMovies from '@/Axios/Moviesapi';
 function Seats() {
   const {screenId , showId } = useParams();
   const [seats , setSeats] = useState([])
@@ -26,7 +27,7 @@ function Seats() {
   useEffect(() =>{
     const fetchSeats = async() => {
       try{
-        const res = await axios.get(`http://127.0.0.1:8000/seats/screens/${screenId}/seats/?show_id=${showId}`)
+        const res = await seatsApi.get(`screens/${screenId}/seats/?show_id=${showId}`)
         console.log(res.data ,'values')
 
         const organizedData = organizeByRow(res.data) 
@@ -42,7 +43,7 @@ function Seats() {
     }
     const fetchShowDetails = async() => {
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/movies/show-detail/${showId}/`)
+        const res = await apiMovies.get(`/show-detail/${showId}/`)
         setShow(res.data)
       }catch(e){
         console.log(e?.response)
@@ -125,7 +126,7 @@ function Seats() {
       'seats_ids': selectedSeatsIds
     }
     try {
-      const res = await axios.post('http://127.0.0.1:8000/seats/lock-seats/', payload )
+      const res = await seatsApi.post('lock-seats/', payload )
       console.log(res.data , 'response from checkout')
       console.log(res.data.expires_at)
       if (res.status === 200) {
@@ -144,7 +145,7 @@ function Seats() {
     }catch(e) {
       toast({
         
-        title : e.response?.data?.error
+        title : e.response?.data?.error || 'error occur'
         
       })
     }

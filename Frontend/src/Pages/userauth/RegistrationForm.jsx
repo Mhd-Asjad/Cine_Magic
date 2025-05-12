@@ -4,6 +4,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
+import userApi from '@/Axios/userApi';
 
 function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
     
@@ -14,6 +15,7 @@ function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
         "positionClass": "toast-top-right", 
         "timeOut": "5000", 
     }
+    
     useEffect(() => {
         if (errors.username) {
             toastr.error(errors.username) 
@@ -43,7 +45,7 @@ function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
         onSubmit: async (values, { setSubmitting }) => {
             
             try {
-                const res = await axios.post('http://127.0.0.1:8000/user_api/register/', values);
+                const res = await userApi.post('user_api/register/',values);
                 toastr.success('Registration successful! Please check your email for OTP.');
                 setUserEmail(values.email);
                 setIsOtpSent(true);

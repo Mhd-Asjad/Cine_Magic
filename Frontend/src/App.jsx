@@ -13,21 +13,21 @@ import Seats from "./Pages/SeatSelection/seats";
 import Checkout from "./Pages/userbooking/Checkout";
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { Payment } from "@mui/icons-material";
 import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
 import MyBookings from "./Pages/Bookings/MyBookings";
 import TicketView from "./Pages/Bookings/TicketView";
 import BlogPosts from "./Pages/blogs/BlogPosts";
 import AddBlog from "./Pages/blogs/AddBlog";
-import PrivateRoute from "./Pages/Admin/PrivateRoute";
+import PrivateRoute from "./Pages/Routes/PrivateRoute";
 import { UserRoute } from "./Pages/Routes/ProtectedRoute";
+import BlogInfo from "./Pages/blogs/BlogInfo";
 function App() {
 
     return (
         <>
             <Router>
                 <Routes>
-                    <Route path="/" element={<PrivateRoute><Landingpage/></PrivateRoute>}/>
+                    <Route path="/" element={<UserRoute><Landingpage/></UserRoute>}/>
                     <Route path="/movie/:id/details" element={<PrivateRoute><MovieSpecification /></PrivateRoute>} />
                     <Route path="/profile" element={<Profile/>} />
                     <Route path={`/available-show-details/:id`} element={<PrivateRoute><AvailableShowDetails/></PrivateRoute>} />
@@ -46,6 +46,7 @@ function App() {
                     <Route path='booking/:id/ticket' element={<TicketView/>} />
                     <Route path='/blogs' element={<BlogPosts/>} />
                     <Route path='/blogs/add' element={<AddBlog/>} />
+                    <Route path="/posts/details/:id" element={<BlogInfo/>}/>
 
                     {/* adminpages */}
                     <Route path="/admin/login" element={<AdminLogin />} />

@@ -7,6 +7,8 @@ import Paypalcomponet from './Paypalcomponet';
 import CountDownTimer from '../SeatSelection/CountDownTimer';
 import seatsApi from '@/Axios/seatsaApi';
 import { useLocation, useNavigate } from 'react-router-dom';
+import apiBooking from '@/Axios/Bookingapi';
+
 
 function Checkout() {
   const [checkoutItems , setCheckoutItems] = useState({});
@@ -18,15 +20,18 @@ function Checkout() {
   const navigate = useNavigate()
   const location = useLocation();
   const TAX_RATE = 0.1;
-  
+  const cleanedExpairyTime = lockExpiry.replace(/\.\d{6}/, '')
+  const lockExpiryTime = new Date(cleanedExpairyTime)
+  const now = new Date()
+
   const params = new URLSearchParams();
   selectedSeats.forEach(id => params.append('selectedseats' , id))
   params.append('show_id' , showId)
 
-  console.log(selectedSeats)
-
+  
   const from = location;
-  console.log('redirected from ' , from)
+
+  
   useEffect(() => {
     const checkout = async() => {
       
@@ -34,9 +39,7 @@ function Checkout() {
         console.log('inside useEffect')
         console.log(selectedSeats)
         
-        const res = await axios.get(`http://localhost:8000/booking/checkout/${userId}/?${params.toString()}`,
-        {withCredentials : true}
-      )
+        const res = await apiBooking.get(`checkout/${userId}/?${params.toString()}`)
         console.log(res.data)
         setCheckoutItems(res.data)
       }catch(e) {
@@ -57,14 +60,13 @@ function Checkout() {
     category = ''
   } = checkoutItems; 
 
-  
- 
   const formatDate = (dateStr) => {
     console.log(dateStr)
     const date = new Date(dateStr);
     const options = { weekday: 'short', day: 'numeric', month: 'short' };
     return date.toLocaleDateString('en-US', options);
-  };  
+  };
+    
   console.log(show_time.time)
   function formatTime(timeStr) {  
     if (!timeStr)return
@@ -79,7 +81,7 @@ function Checkout() {
     console.log('entered into booking creation ') 
     console.log('paymentdet' ,paymentDetails)
     try {
-      const res = await axios.post('http://localhost:8000/booking/create-booking/',{
+      const res = await apiBooking.post('create-booking/',{
         user_id : userId ,
         show_id : showId ,
         selected_seats : selectedSeats,
@@ -96,29 +98,33 @@ function Checkout() {
       console.log(e)
       console.log(e?.response?.data || 'error occurs')
     }
-      
   }
   const handleSessionExpiry = async() => {
 
     try {
-      const res = await seatsApi.post('/unlock-seats/' ,{
+      const res = await seatsApi.post('/unlock-seats/',{
         'selected_seats' : selectedSeats ,
         'show_id' : showId,
       })
-      console.log(res.data.message)
-      navigate(`/movie/${show_det.id}/details`)
+      const {movie_id} = res.data
+      console.log('expaired session.....!')
+      navigate(`/movie/${movie_id}/details`)
 
     }catch(e){
       console.log(e.response?.data?.error)
     }
     
   }
+
+  if (now > lockExpiryTime){
+    const isExpired = handleSessionExpiry()
+    console.log(isExpired)
+  }
   console.log(selectedSeats , 'selected seatss')
   useEffect(() => {
     const checkIsPaymentDone = async() => {
-      // console.log('hello world')
       try{
-        const res = await axios.get('http://localhost:8000/booking/verify/', {
+        const res = await apiBooking.get('verify/', {
           params:{
             'show_id': showId , 
             'selected_seats' : selectedSeats
@@ -133,6 +139,7 @@ function Checkout() {
       }
     }
     checkIsPaymentDone()
+
   },[])
 
   console.log(checkoutItems)
@@ -167,7 +174,7 @@ function Checkout() {
                   <p className="font-bold text-sm">{formattedDate}, {formattedTime}</p>
                   <p className="text-xs text-gray-600 mt-1">{screen.screen_type}&nbsp;, screen : {screen.screen_number}&nbsp;&nbsp;</p>
                 </div>
-                <div className="text-center bg-gray-100 px-4 py-2 rounded">
+                <div className="text-center bg-gray-100 px-4 ml-8 py-2 rounded">
                   <div className="text-lg font-bold">{seat_data.length}</div>
                   <div className="text-xs">{ seat_data.length === 1 ? 'TICKET' : 'TICKETS'}</div>
                 </div>

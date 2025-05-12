@@ -1,21 +1,11 @@
 from django.urls import path
 from .views import *
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView ,
-    TokenRefreshView
-)
 
 
 urlpatterns = [
-    
-    path('token/',TokenObtainPairView.as_view(),name="token_obtain_pair"),
-    path('token/refresh/', TokenRefreshView.as_view(),name='token_refresh'),
-    path('admin/login/', AdminLoginView.as_view(), name='admin_login'),
+
     path('users/', UserListView.as_view(), name='users'),
     path('users/<int:pk>/status/',UserStatusUpdate.as_view() , name='user_update'),
-    path('create_city/',CreateCity.as_view(),name='create_city'),
-    # path('city/<int:city_id>/delete',DeleteCity.as_view() , name='city_delete'),
-    path('cities/<int:city_id>/theatres'  , CityTheatreView.as_view() , name='city_theatres'),  
     path('listmovies/' ,ListMovies.as_view() , name='listmovies'),
     path('movies/', CreateMovieView.as_view() , name="create_movie"),
     path('movies/<int:movie_id>/update/', update_movie.as_view(), name='update_movie'),
@@ -25,4 +15,5 @@ urlpatterns = [
     path('verified-theatres/',Verified_Theatres , name='verified_theatres'),
     path('handle-screen/<int:screen_id>/',verify_screen.as_view(),name='handle-screen'),
     path('cancel-show/<int:show_id>/',Cancel_Show , name='cancel-show'),
+    path('get-cancelled_booking/', PendingCancelledShows.as_view() , name='get-cancelled_booking')
 ]

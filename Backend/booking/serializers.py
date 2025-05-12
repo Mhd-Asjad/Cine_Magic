@@ -4,6 +4,7 @@ from .models import *
 class BookingSerializer(serializers.ModelSerializer):
     show_date = serializers.CharField(source='show.show_date',read_only=True)
     show_time = serializers.CharField(source='show.slot.start_time',read_only=True)
+    theatre_name = serializers.CharField(source='show.screen.theatre.name')
     class Meta :
         model = Booking
-        fields = ['id' ,'booking_id' , 'show' , 'customer_name' , 'show_date' , 'show_time' ,'customer_email' , 'status' , 'amount']
+        fields = ['id' ,'booking_id' , 'show' , 'theatre_name' ,  'customer_name' , 'show_date' , 'show_time' ,'customer_email' , 'status' , 'amount' , 'refund_amount' , 'refunt_status']    

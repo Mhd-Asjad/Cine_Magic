@@ -1,7 +1,7 @@
 import React from 'react'
 import { PayPalButtons , usePayPalScriptReducer } from '@paypal/react-paypal-js'
 import axios from 'axios';
-
+import apiBooking from '@/Axios/Bookingapi';
 function Paypalcomponet({ amount , onPaymentSuccess }) {
     const styles = {
         color : 'blue'
@@ -17,7 +17,7 @@ function Paypalcomponet({ amount , onPaymentSuccess }) {
         }}  
         onApprove={(data , actions) => {
             return actions.order.capture().then(function(details){
-                return axios.post('http://localhost:8000/booking/process-payment/', {
+                return apiBooking.post('process-payment/', {
                     'orderId' : data.orderID,
                     'payerId' : data.payerID,
                     'paymentDetails' : details

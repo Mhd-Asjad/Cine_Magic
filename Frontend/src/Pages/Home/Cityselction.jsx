@@ -12,7 +12,7 @@ function Cityselction({ oncityselect }) {
         try {
             const response = await axios.get('http://127.0.0.1:8000/movies/list_cities/');
             
-            console.log(response.data.cities)
+            console.log(response.data.cities ,'cities data')
             setCities(response.data.cities)
         }catch(error){
             console.log("Error fetching cities :",error)

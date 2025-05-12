@@ -29,7 +29,6 @@ function Loginpage() {
 
     try {
       const res = await login( dispatch , formData.username , formData.password , formData.user_type)
-      console.log(res , 'owner log fetch')
       navigate('/theatre-owner/dashboard')
     } catch (e) {
       console.log(e)

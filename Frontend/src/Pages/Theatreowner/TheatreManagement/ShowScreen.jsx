@@ -111,18 +111,19 @@ function ShowScreen() {
                 const res = await TheatreApi.get(`/get_time-slots/?screen_id=${selectedScreen.id}`);
 
 
-                const sortedShowtimes = [...response.data].sort((a, b) => {
+                const sortedShowtimes = [...res.data.data].sort((a,b) => {
                     const timeA = a.start_time ?? '';
                     const timeB = b.start_time ?? '';
                     return timeA.localeCompare(timeB);
                   });
+
+                  console.log(sortedShowtimes , 'values')
                   
-                  console.log(sortedShowtimes);
                   
-                setShowTime(sortedShowDetails);
+                setShowTime(sortedShowtimes);
                     
             }catch(e) {
-                console.log(e.response , 'error while fetching show time')
+                console.log(e , 'error while fetching show time')
             }
 
         }
@@ -180,12 +181,8 @@ function ShowScreen() {
             }
     }
 
-    // const sortedShows = showTimes.sort((a , b) => {
-    //     return a.start_time.localeCompare(b.start_time) 
-    // })
-    
-    // console.log(sortedShows)
-    console.log(selectedShowTime , 'new')
+     console.log(selectedShowTime , 'new')
+
     const fetchShowtime = async() => {
         try{
             const res = await TheatreApi.get(`/showtime/${id}/`);
@@ -257,7 +254,7 @@ function ShowScreen() {
                                     <th className='p-3 text-left' >Status</th>
                                 
 
-                                    <th className='p-3 text-center'>Action</th>
+                                    <th className='p-3 text-end'>Action</th>
     
                                 </tr>
                             </thead>
@@ -282,7 +279,103 @@ function ShowScreen() {
                                                 </button>
                                             </td>
 
-                                            </div> 
+                                            </div>
+
+                                            <td className='' >
+                                            <Dialog>
+
+                                                <DialogTrigger asChild >
+                                                    <Button 
+                                                        onClick={() => {
+
+                                                         fetchSeatLayout(screen.id);
+                                                        
+                                                        }}
+                                                    >
+                                                    
+                                                    Seat Layout
+
+                                                    </Button>
+
+
+                                                </DialogTrigger>
+
+                                                <DialogContent>
+ 
+                                                    <div className='p-4' >
+
+                                                        <DialogTitle className="text-xl font-bold mb-10 text-center" >
+                                                            seat Layout
+                                                        </DialogTitle>
+
+                                                        <div className='mt-5'>
+                                                    <div className='flex flex-wrap gap-2'>
+                                                    {Object.entries(seats).map(([row, rowSeats]) => {
+                                
+
+                                                        return (
+                                                        <div
+                                                            key={row}
+                                                            className='flex justify-center w-full mb-4'
+                                                        >
+                                                            <button
+                                                            className={`w-6 h-6 font-bold mr-2 rounded cursor-not-allowed`}
+                                                            >
+                                                            {row}
+                                                            </button>
+
+                                                            <div className='flex space-x-1'>
+                                                            {rowSeats.map((seat) => (
+                                                                seat?.label ? (
+
+
+                                                                <button
+                                                                    type='button'
+                                                                    key={seat.id}
+                                                                    disabled={true }
+                                                                    title={`${seat.category_name || 'No Category'} - ₹${seat.price}`}
+                                                           
+                                                                
+                                                                    className={`w-6 h-6 rounded-sm  flex items-center justify-center text-xs ${getSeatClass(
+                                                                    seat
+                                                                    )}`}
+                                                                >
+                                                                    {seat.number}
+                                                                </button>
+
+                                                                ):(
+
+                                                                <div key={seat.id} className="w-6 h-6"/>
+                                                                )
+                                                            ))}
+                                                            </div>
+                                                        </div>
+                                                        )
+                                                    })}
+                                                    <div className="relative mb-8 pb-28 z-0">
+                                                    <div className="flex justify-center ">
+                                                        <img src={screenimg} className='w-[80%] mt-3' alt="screen image" ></img>
+                                                    </div>
+                                                    </div>
+                                                    </div>
+
+                                                    
+                                                </div>
+
+
+
+
+                                                    </div>
+
+
+                                                </DialogContent>
+                                            </Dialog>
+
+                                            </td>
+ 
+                                            <div>
+
+                                            </div>
                                             <td className='p-4'> 
                                                 <div className='flex space-x-2'>
 
@@ -379,8 +472,8 @@ function ShowScreen() {
                                                     ) : null
 
                                                 }
-                                                    <DialogContent className="sm:max-w-3xl max-h-screen overflow-y-auto bg-white">
-                                                        <DialogTitle className="text-xl font-bold mb-4 text-center" >
+                                                    <DialogContent className="sm:max-w-2xl max-h-screen overflow-y-auto bg-white">
+                                                        <DialogTitle className="text-xl w-fit font-bold mb-4" >
                                                         Select a Movie
 
                                                         </DialogTitle>
