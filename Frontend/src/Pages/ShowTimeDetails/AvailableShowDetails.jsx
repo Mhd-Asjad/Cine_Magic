@@ -75,7 +75,7 @@ const AvailableShowDetails = () => {
   console.log(movie)
   const fetchMovie = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/movies/movie_details/${id}/`);
+      const res = await apiMovies.get(`/movie_details/${id}/`);
       setMovie(res.data);
     } catch (error) {
       console.log(error.response || error);

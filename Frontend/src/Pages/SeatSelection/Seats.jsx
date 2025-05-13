@@ -143,9 +143,9 @@ function Seats() {
         navigate(`/seat-layout/${selectedCity}`)
       }
     }catch(e) {
+      console.log(e?.response?.data)
       toast({
-        
-        title : e.response?.data?.error || 'error occur'
+        title : e?.response?.data?.details || 'error occur'
         
       })
     }

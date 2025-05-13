@@ -10,13 +10,12 @@ function BlogInfo() {
     const [comment , setComment] = useState('');
     const [ allComments , setAllComments ] = useState([])
     const [ loading , setLoading] = useState(true)
-    const [ liked , isLiked ] = useState(null)
+    const [reaction , setReaction] = useState(null)
     const {id} = useParams();
     const userId = useSelector((state) => state.user.id)
 
     
     useEffect(( ) => {
-        
         const fetchPostDetails = async() => {
             try{
                 const res = await apiBlogs.get(`get-postdetails/${id}/`)
@@ -28,7 +27,7 @@ function BlogInfo() {
             };
         };
         fetchPostDetails();
-    },[liked])
+    },[reaction])
     
     const getComments = async() => {
         try {
@@ -40,9 +39,7 @@ function BlogInfo() {
     }
     useEffect(() => {
         getComments()
-
-    },[setComment])
-
+    },[])
 
     const handleComment = async() => {
         try{
@@ -53,6 +50,7 @@ function BlogInfo() {
             })
             console.log(res.data?.message)
             setComment('')
+            getComments()
         }catch(e){
             console.error('error while comment posting' , e)
         }
@@ -62,8 +60,6 @@ function BlogInfo() {
         return <div className='flex justify-center items-center h-screen'>Loading...</div>
     }
 
-
-    console.log(liked)
     return(
         <div>
             <Nav/>
@@ -73,7 +69,6 @@ function BlogInfo() {
 
                 <div className="w-2/3 bg-gray-300 bg-gradient-to-b from-transparent via-gray-100 to-black flex flex-col items-center">
                     <h2 className="text-lg font-bold text-gray-900">{postDetails.title}</h2>
-                    {/* Post Image */}
                     {postDetails?.images?.length > 0 && (
                         <  >
                         <img
@@ -104,14 +99,19 @@ function BlogInfo() {
                         </p>
                         <div className='mt-2' >
 
-                            {/* <LikeDislikeButton postId={postDetails.id} like_count={postDetails.like_count} unlike_count={postDetails.unlike_count} isLiked={isLiked} /> */}
+                            <LikeDislikeButton 
+                                postId={postDetails.id} 
+                                like_count={postDetails.like_count} 
+                                unlike_count={postDetails.unlike_count} 
+                                onChangeReactions={(value) => setReaction(value)}
+
+                            />
                         </div>
                     </div>
                 </div>
 
                 {/* Right side: Comment Section */}
                 <div className="w-1/2 flex flex-col border-l">
-
                     <div className="flex-1 p-4 overflow-y-auto">
                         <h3 className="font-semibold text-center text-xl mb-4"> {allComments.length} Comments....</h3>
         

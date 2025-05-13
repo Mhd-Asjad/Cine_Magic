@@ -17,6 +17,7 @@ import ShowBookings from '@/Pages/Theatreowner/BookingManagement/ShowBookings';
 function Sections() {
     return (
         <div>
+            
             <Routes>
                 <Route path="dashboard" element={<TheatreDashboard/>}/>
                 <Route path="add-theatre" element={<TheatreRoute> <AddTheatre/> </TheatreRoute>} />

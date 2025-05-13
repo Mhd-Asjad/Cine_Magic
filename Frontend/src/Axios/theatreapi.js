@@ -20,7 +20,6 @@ TheatreApi.interceptors.request.use((config) => {
         console.error("Request Interceptor Error:", error);
         return Promise.reject(error);
     }
-    
 );
 
 const getRefreshToken = () => localStorage.getItem('refresh_token')

@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
+from rest_framework.decorators import permission_classes
 from .models import *
 from .serializers import *
 from rest_framework.response import Response
@@ -158,10 +159,11 @@ class update_seats_category(APIView):
         seats.objects.filter(id__in = seats_ids).update(category_id=category_id)
         return Response({'message' : 'seats category updated successfully'})
     
-
+    
+@permission_classes([permissions.AllowAny])
 class Lock_seats(APIView):
-    permission_classes = [permissions.IsAuthenticated]
     def post(self , request):
+        print('entering to seatlockk')
         data = request.data
         seats_ids = data.get('seats_ids')
         show_id = data.get('show_id')

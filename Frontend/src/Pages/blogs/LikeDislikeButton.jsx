@@ -2,57 +2,64 @@ import React, { useEffect, useState } from 'react';
 import { AiFillLike, AiOutlineLike, AiFillDislike, AiOutlineDislike } from 'react-icons/ai';
 import {motion} from 'framer-motion'
 import apiBlogs from '@/Axios/Blogapi';
-import { useSelector } from 'react-redux';
-const LikeDislikeButton = ({ postId , like_count , unlike_count , isLiked }) => {
-  const [liked, setLiked] = useState(null);
-  const userId = useSelector((state) => state.user.id)
+
+function LikeDislikeButton({ postId, like_count, unlike_count, onChangeReactions }) {
+  const [liked, setLiked] = useState(false);
+  const [disliked, setDisliked] = useState(false);
+  const [likeCount, setLikeCount] = useState(like_count);
+  const [unlikeCount, setUnlikeCount] = useState(unlike_count);
 
   useEffect(() => {
-    const fetchPostReaction = async() =>{
-      try{
-        console.log(userId)
-        const res = await apiBlogs.get(`post-reaction/${postId}/`)
-        const {is_like} = res.data;
-        console.log(is_like , 'post reaction status')
-        setLiked(is_like)
-      }catch(e){
-        console.log('reaction fetch err' , e)
+    const fetchPostReaction = async () => {
+      try {
+        const res = await apiBlogs.get(`post-reaction/${postId}/`);
+        const { is_like } = res.data;
+        if (is_like === true){
+          setLiked(true)
+        }else if (is_like === false){
+          setDisliked(true)
+        }
+      } catch (e) {
+        console.log('reaction fetch err', e);
       }
-    }
-    fetchPostReaction()
+    };
+    fetchPostReaction();
+  }, []);
 
-  },[ ])  
-
-  const handleLike = async() => {
+  const handleLike = async () => {
     if (disliked) {
       setDisliked(false);
-      isLiked(false)
+      setUnlikeCount((prev) => Math.max(0, prev - 1));
     }
-    isLiked(!liked)
-    setLiked(!liked);
+
+    const newLiked = !liked;
+    setLiked(newLiked);
+    setLikeCount((prev) => newLiked ? prev + 1 : Math.max(0, prev - 1));
+    onChangeReactions?.(newLiked);
+
     try {
-        const res = await apiBlogs.post(`handle-like/${postId}/like/`,)
-        console.log(res.data.message)
-    }catch(e){
-        console.log(e?.response)
+      await apiBlogs.post(`handle-like/${postId}/like/`);
+    } catch (e) {
+      console.log(e?.response);
     }
   };
 
-
-  const handleDislike = async() => {
-    try {
-        const res = await apiBlogs.post(`handle-like/${postId}/dislike/`)
-        console.log(res.data)
-    }catch(e){
-        console.log(e?.response)
-    }
+  const handleDislike = async () => {
     if (liked) {
       setLiked(false);
-      isLiked(false)
+      setLikeCount((prev) => Math.max(0, prev - 1));
     }
-    isLiked(disliked)
-    setDisliked(!disliked);
-    
+
+    const newDisliked = !disliked;
+    setDisliked(newDisliked);
+    setUnlikeCount((prev) => newDisliked ? prev + 1 : Math.max(0, prev - 1));
+    onChangeReactions?.(newDisliked);
+
+    try {
+      await apiBlogs.post(`handle-like/${postId}/dislike/`);
+    } catch (e) {
+      console.log(e?.response);
+    }
   };
 
   return (
@@ -60,26 +67,23 @@ const LikeDislikeButton = ({ postId , like_count , unlike_count , isLiked }) => 
       <motion.button
         whileTap={{ scale: 1.2 }}
         onClick={handleLike}
-        className={`flex items-center gap-1 text-xl transition-colors duration-300 ${
-          liked ? 'text-blue-500' : 'text-gray-500 hover:text-blue-400'
-        }`}
+        className={`flex items-center gap-1 text-xl transition-colors duration-300 ${liked ? 'text-blue-500' : 'text-gray-500 hover:text-blue-400'}`}
       >
         {liked ? <AiFillLike /> : <AiOutlineLike />}
-        <span>{like_count}</span>
+        <span>{likeCount}</span>
+
       </motion.button>
 
       <motion.button
         whileTap={{ scale: 1.2 }}
         onClick={handleDislike}
-        className={`flex items-center gap-1 text-xl transition-colors duration-300 ${
-          disliked ? 'text-red-500' : 'text-gray-500 hover:text-red-400'
-        }`}
+        className={`flex items-center gap-1 text-xl transition-colors duration-300 ${disliked ? 'text-red-500' : 'text-gray-500 hover:text-red-400'}`}
       >
         {disliked ? <AiFillDislike /> : <AiOutlineDislike />}
-        <span>{ unlike_count}</span>
+        <span>{unlikeCount}</span>
       </motion.button>
     </div>
   );
 };
 
-export default LikeDislikeButton;
+export default LikeDislikeButton

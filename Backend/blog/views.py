@@ -1,14 +1,18 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status,permissions
+from rest_framework import status,permissions , generics
 from .models import *
 from django.shortcuts import get_object_or_404
 from useracc.models import User
 import json
 from .serializers import *
+from rest_framework.pagination import PageNumberPagination
 # Create your views here.
 
+class CustomPagination(PageNumberPagination):
+    page_size=4
+    page_query_param = 'page'
 
 class CreatePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -31,8 +35,6 @@ class CreatePostView(APIView):
                     'error' : 'post already exist'
                 },status=status.HTTP_400_BAD_REQUEST)
                 
-
-            
             try:
                 tag_list = json.loads(tags)
                 
@@ -153,13 +155,18 @@ class DeletePost(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-class GetAllPosts(APIView):
-    def get(self , request):
+class GetAllPosts(generics.ListAPIView):
+    queryset = Post.objects.all()
+    permission_classes = [permissions.AllowAny]
+    pagination_class = CustomPagination
+    serializer_class = PostSerializer
+    def list(self , request):
         print(request.user)
-        posts = Post.objects.all()
-        serializer = PostSerializer(posts , many=True , context={'request':request})
-        return Response(serializer.data , status=status.HTTP_200_OK) 
-    
+        queryset = self.get_queryset()
+        paginated_queryset = self.paginate_queryset(queryset)
+        serializer = PostSerializer(paginated_queryset , many=True , context={'request':request})
+        return self.get_paginated_response(serializer.data)
+
 # get particular post detailsss
 class GetPostDetail(APIView):
     def get(self , request , id):
@@ -184,6 +191,7 @@ class PostComment(APIView):
             return Response({'message':'comment posted'},status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
     def get(self , request , post_id):
         try:
             post = Post.objects.get(id=post_id)
@@ -194,7 +202,7 @@ class PostComment(APIView):
         data = post.comments.all()
         serializer = CommentSerializer(data , many=True)
         return Response(serializer.data , status=status.HTTP_200_OK)
-    
+
 class toggle_like(APIView):
     permission_classes = [permissions.AllowAny]
     def post(self , request , post_id ):
@@ -223,7 +231,6 @@ class toggle_like(APIView):
         
         return Response({'message' : 'post liked' },status=status.HTTP_200_OK)
     
-    
 class toggle_dislike(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -251,14 +258,13 @@ class toggle_dislike(APIView):
         reaction.save()
         post.save()
             
-            
         return Response({'message':'post disliked'} ,status=status.HTTP_200_OK)
-    
+
 class get_post_reaction(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     def get(self , request , post_id):
-        print(request.user)
         user =  request.user
+        
         try:
             post_reaction = PostReaction.objects.get(user=user,post=post_id)
             print(post_reaction.user.username)

@@ -28,7 +28,7 @@ function App() {
             <Router>
                 <Routes>
                     <Route path="/" element={<UserRoute><Landingpage/></UserRoute>}/>
-                    <Route path="/movie/:id/details" element={<PrivateRoute><MovieSpecification /></PrivateRoute>} />
+                    <Route path="/movie/:id/details" element={<UserRoute><MovieSpecification /></UserRoute>} />
                     <Route path="/profile" element={<Profile/>} />
                     <Route path={`/available-show-details/:id`} element={<PrivateRoute><AvailableShowDetails/></PrivateRoute>} />
                     <Route path={'/available-show-details/:screenId/:showId/seats'} element={<PrivateRoute><Seats/></PrivateRoute>} />

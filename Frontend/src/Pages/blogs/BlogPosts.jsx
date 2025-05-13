@@ -4,22 +4,49 @@ import { Clock, User } from 'lucide-react';
 import apiBlogs from '@/Axios/Blogapi'
 import Nav from '@/Components/Navbar/Nav'
 import { useNavigate } from 'react-router-dom';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+import { Pages } from '@mui/icons-material';
+
 function BlogPosts() {
   const [blogs , setBlogs] = useState([])
   const [loading , setLoading] = useState(false)
+  const [ prev , setPrev] = useState(null)
+  const [ next , setNext ] = useState(null)
+  const [ page , setPage ] = useState(1);
+  const [totalPages , setTotalPages] = useState(1)
+
   const navigate = useNavigate();
   const fetchBlogs = async () => {
     setLoading(true)
+    console.log('fetching data from page :' , page)
     try {
-      const response = await apiBlogs.get('get-post/')
-      setBlogs(response.data)
+      const response = await apiBlogs.get(`get-post/?page=${page}`)
+      const data = response.data;
+      console.log(data)
+      setBlogs(data.results)
+      setPrev(data.previous)
+      setNext(data.next)
+      if (data.count) {
+        const page_size = 4;
+        setTotalPages(Math.ceil(data.count / page_size))
+      }
+      
     } catch (error) {
+      
       console.error('Error fetching blogs:', error)
     } finally {
       setLoading(false)
     }
-  }
-
+    }
+    console.log('total pages :',totalPages)
    const formatTime = (dateTime) => {
     const dateString = dateTime.split('T')[0]
     const timeString = dateTime.split('T')[1]
@@ -30,10 +57,9 @@ function BlogPosts() {
     return dateString + ' ' + formattedTime
   }
 
-
   useEffect(() => {
-    fetchBlogs()
-  }, [])
+    fetchBlogs(page)
+  }, [page])
 
   console.log(blogs)
 
@@ -45,35 +71,30 @@ function BlogPosts() {
     if (text.length <= maxLength) return text;
     return text.substr(0, maxLength) + '...';
   };
+  console.log(next)
 
   return (
 
-    <div>
+    <div className='bg-gray-50 min-h-screen' >
       <Nav/>
-      <div className="max-w-6xl mx-auto  px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Cine Talks </h2>
         
-        <div className="grid grid-rows-2 md:grid-cols-2 mt-[7%] gap-8">
+        <div className="grid grid-rows-2 md:grid-cols-1 mt-[4%] gap-8"
+
+>
+
           {blogs.map((blog, index) => (
-            <div key={blog.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className="relative">
-                <img 
-                  src={blog.images[0]?.image || blog_bg} 
-                  alt={blog.title} 
-                  onClick={() => navigate(`/posts/details/${blog.id}`)}
-                  className="w-full min-h-52 h-60 object-cover"
-                />
-                {blog.tags.map((tag) => (
-                  
-                <div className="absolute top-4 left-4">
-                  <span className="bg-blue-300 text-white px-3 py-1 text-xs font-semibold rounded">
-                    {tag}
-                  </span>
-                </div>
-                ))}
-              </div>
-              
-              <div className="p-6">
+            <div 
+              key={blog.id} 
+              className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg hover:bg-gray-50 transition-shadow duration-300"
+              onClick={() => navigate(`/posts/details/${blog.id}`)}
+
+            >
+            
+              <div
+                className="p-6 cursor-pointer"
+              >
                 <h3 className="text-xl font-bold mb-3 text-gray-800">{blog.title}</h3>
                 <p className="text-gray-600 mb-4">{truncateText(blog.content, 50)}</p>
                 
@@ -94,6 +115,44 @@ function BlogPosts() {
               </div>
             </div>
           ))}
+            <div  >
+            <Pagination className='flex justify-center items-center' >
+
+              <PaginationContent>
+                <PaginationItem >
+                  <PaginationPrevious
+                    className={ prev ? 'cursor-pointer' : 'cursor-not-allowed'}
+                    onClick={() => setPage(prev => Math.max( prev - 1 , 1 ))}
+                    disable={prev === null}
+                  />
+
+                </PaginationItem>
+              
+                {[...Array(totalPages)].map((_, i) => (
+                  <PaginationItem key={i} className="cursor-pointer" >
+                    <PaginationLink isActive={page === i + 1} onClick={() => setPage(i + 1)}>
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
+             
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+
+                  <PaginationNext 
+                    className={ next ? `cursor-pointer`:'cursor-not-allowed'}
+                    onClick={() => setPage(prev => prev + 1 )}
+                    disable={next === null}
+
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+
+           </div>
         </div>
       </div>
     </div>

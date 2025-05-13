@@ -8,7 +8,7 @@ export const UserRoute = ({children}) => {
 
     console.log(user)
     if (!user){
-        return <Navigate to={'/'} />
+        return children
     }
 
     if (user.userType === 'user' || user.userType === 'theatre') {
