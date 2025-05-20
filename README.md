@@ -60,8 +60,73 @@ Registers and manages one or more theatres.
 
 - # follow these instruction to setup CineMagic in your local mechine
 
-  ## Clone Git Repository
 
+## Clone Git Repository
+
+<pre lang="markdown"> ```
+git clone https://github.com/Mhd-Asjad/Cine_Magic.git
+cd backend
+ ``` </pre>
+ 
+## Set Up Environment Variables
+
+Backend (.env file in movie_ticket/Backend)
+
+# PostgreSQL Database
+
+<pre lang="markdown"> ```
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_HOST=localhost
+DB_PORT=5432 ``` </pre>
+
+# Google Social Login (Allauth)
+
+<pre lang="markdown">
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=your_google_client_id
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=your_google_client_secret
+ </pre>
+# PayPal
+
+<pre lang="markdown">
   
+PAYPAL_CLIENT_ID=your_paypal_client_id
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret
+PALPAL_API_URL=https://api-m.sandbox.paypal.com  
+</pre>
+
+Frontend (.env file in movie_ticket/Frontend )
+<pre lang="markdown"> ```
+VITE_API_KEY = /api/
+VITE_TMDB_API_KEY = Your_TMDB_API_KEY
+
+ ``` </pre>
+
+# Access the Application
+- Once the containers are running, you can access the application at:
+
+http://localhost (or your domain if deployed)
+
+## 🧪 Development Setup
+For local development without Docker:
+
+## Backend Setup
+<pre lang="markdown">
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+</pre>
+## Frontend Setup
+<pre lang="markdown"> 
+cd frontend
+npm install
+npm run dev
+</pre>
+
   
 
