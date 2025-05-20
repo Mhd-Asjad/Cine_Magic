@@ -58,7 +58,7 @@ Registers and manages one or more theatres.
 
 ## 📋 Prerequisites
 
-- # follow these instruction to setup CineMagic in your local mechine
+follow these instruction to setup CineMagic in your local mechine
 
 
 ## Clone Git Repository
