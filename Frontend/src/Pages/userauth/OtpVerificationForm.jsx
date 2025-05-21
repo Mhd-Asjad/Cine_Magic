@@ -1,96 +1,113 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
-import { Formik, Field, Form } from 'formik';
-import { setUsername , setEmail, setUser_id } from '../../Redux/Features/UserSlice';
-import { useDispatch  } from 'react-redux';
+import { Formik, Form } from 'formik';
+import { setUsername, setEmail, setUser_id } from '../../Redux/Features/UserSlice';
+import { useDispatch } from 'react-redux';
 import userApi from '@/Axios/userApi';
-function OtpVerificationForm({ email, setMessage , closeModal }) {
 
-  toastr.options = {
-    "closeButton": true,
-    "progressBar": true,
-    "positionClass": "toast-top-right",
-    "timeOut": "5000",
-  };
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+} from "@/components/ui/input-otp";
+import CountDownTimer from '../SeatSelection/CountDownTimer';
 
+function OtpVerificationForm({ email, setMessage, closeModal }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const now = new Date();
+  const twoMinutesLater = new Date(now.getTime() + 2 * 60 * 1000);
 
   const handleOtpSubmit = async (values, { setSubmitting, setErrors }) => {
-    if (!values.otp) {
-      toastr.warning('Please enter your OTP');
+    if (!/^\d{6}$/.test(values.otp)) {
+      toastr.warning('OTP must be contain valid numbers');
       setSubmitting(false);
       return;
     }
 
     try {
       const response = await userApi.post('verify_otp/', {
-        email: email,
+        email,
         otp: values.otp,
       });
+      console.log('otp' , response )
 
       setMessage(response.data.message);
-      dispatch(setUser_id(response.data.user.id))
-      dispatch(setUsername(response.data.user.username))
-      dispatch(setEmail(response.data.user.email))
+      dispatch(setUser_id(response.data.user.id));
+      dispatch(setUsername(response.data.user.username));
+      dispatch(setEmail(response.data.user.email));
       toastr.success(response.data.message);
-      closeModal()
+      closeModal();
       navigate('/');
-      
     } catch (error) {
-      const errorMessage = error.response?.data?.errors.error 
-      console.log(errorMessage);
-      setErrors({ otp : errorMessage });
+      const errorMessage = error.response?.data?.errors?.error || "OTP verification failed";
+      setErrors({ otp: errorMessage });
     }
 
     setSubmitting(false);
   };
 
-
   return (
     <div>
-      <h2 className="flex justify-center text-xl font-semibold mb-4">Verify OTP</h2>
+      <h2 className="flex justify-center mt-[10%] text-xl font-semibold mb-4">Verify OTP</h2>
+        {/* <div className='flex bg-black justify-center ml-10' >
+
+          <CountDownTimer onExpiresAT={twoMinutesLater} onExpire={handleOtpSubmit} />
+        </div> */}
 
       <Formik
         initialValues={{ otp: '' }}
-        validateOnBlur={false}
         validate={(values) => {
           const errors = {};
-          if (!values.otp) {
-            errors.otp = 'OTP is required';
-          } else if (!/^\d{6}$/.test(values.otp)) {
+          if (!/^\d{6}$/.test(values.otp)) {
+            errors.otp = 'OTP Not Contains Any Letters';
+          }
+          if (!values.otp || values.otp.length !== 6) {
             errors.otp = 'OTP must be exactly 6 digits';
           }
+
           return errors;
         }}
         onSubmit={handleOtpSubmit}
       >
-        {({ isSubmitting, errors }) => (
-          <Form>
-            <div>
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
-                OTP:
-              </label>
+        {({ values, setFieldValue, errors, isSubmitting }) => (
+          <div className="flex justify-center">
 
-              <Field
-                type="text"
-                name="otp"
-                placeholder="Enter OTP"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              {errors.otp && <div className="text-red-600 mt-1">{errors.otp}</div>}
-            </div>
+          <Form className="space-y-4">
+            <InputOTP
+              maxLength={6}
+              value={values.otp}
+              onChange={(val) => setFieldValue('otp', val)}
+            >
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+              </InputOTPGroup>
+              <InputOTPSeparator />
+              <InputOTPGroup>
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+
+            {errors.otp && (
+              <div className="text-red-600 text-sm text-center">{errors.otp}</div>
+            )}
 
             <button
               type="submit"
-              className="flex mx-auto mt-6 py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
+              className="flex mx-auto mt-4 py-2 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
+              disabled={isSubmitting}
             >
               {isSubmitting ? 'Verifying...' : 'Verify OTP'}
             </button>
-            
           </Form>
+        </div>
         )}
       </Formik>
     </div>

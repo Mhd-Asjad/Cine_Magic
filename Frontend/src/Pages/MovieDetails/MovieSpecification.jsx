@@ -12,6 +12,7 @@ function MovieSpecification( ) {
   const {id} = useParams()
   const [movie , setMovies] = useState(null);
   const [error , setError] = useState('') ;
+  const [castLength , setCastLength] = useState(0)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,7 +32,7 @@ function MovieSpecification( ) {
   const handleChange = () => {
     navigate(`/available-show-details/${id}`)
   }
-  console.log(movie)
+  console.log(castLength)
 
   if (!movie) {
     return(
@@ -101,12 +102,31 @@ function MovieSpecification( ) {
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">About the Movie</h2>
             <p className="text-gray-700 leading-relaxed">{movie.description}</p>
           </div>
-  
-          <div className="mt-10">
-            <CastCards movie_id={movie.movie_id} />
-          </div>
+
+
+
         </div>
+        
       )}
+      {/* {castLength > 0 ?( */}
+
+
+      <div className="max-w-7xl mx-auto px-4 mt-10">
+
+        <div className="mt-10">
+          <CastCards castLength={setCastLength} movie_id={movie.movie_id} />
+        </div>
+
+      </div>
+
+      {/* // ):(
+      //   <div className='flex justify-center' >
+
+      //     <p>no cast found</p>
+
+      //   </div>
+
+      // )} */}
       <Upcomingmovies/>
   
       <Footer />

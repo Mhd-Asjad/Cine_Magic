@@ -17,6 +17,9 @@ function AddBlog() {
   const [titleError, setTitleError] = useState('');
   const [imageError, setImageError] = useState('');
   const [tagError , setTagError] = useState('');
+  const [ showAnimation , setShowAnimation] = useState(false)
+  const [animationType, setAnimationType] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
   const maxTitleLength = 200;
   const userId = useSelector((state) => state.user.id);
   const { toast } = useToast();
@@ -36,6 +39,14 @@ function AddBlog() {
       setTagError('please fill out this field')
       return
     }
+    if (tags.length > 20) {
+      setTagError('Tag should be less than 20 characters');
+      return;
+    }
+    if (newTags.includes(tags.trim())) {
+      setTagError('Tag already exists');
+      return;
+    }
     if (!tags.trim()) return;
     setNewTags((prevItems) => [...prevItems, tags.trim()]);
     setTags(''); 
@@ -45,6 +56,13 @@ function AddBlog() {
     
   };
 
+  const handleImageClick = (url) => {
+    setSelectedImage(url);
+  }
+
+  const closeModal = () => {
+    setSelectedImage(null);
+  };
   const handleImageDelete = () => {
     setImage(null);
     setImagePreview(null);
@@ -109,6 +127,12 @@ function AddBlog() {
       });
       return;
     }
+   const triggerAnimation = (type) => {
+      setAnimationType(type)
+      setShowAnimation(true)
+      setTimeout(() => setShowAnimation(false), 3000);
+
+      }
 
     const formData = new FormData();
     formData.append('title', title);
@@ -124,16 +148,17 @@ function AddBlog() {
       });
 
       if (res.status === 201) {
-        toast({
-          title: res.data.message,
-          variant: 'success',
-        });
+        triggerAnimation('add')
         setTitle('');
         setDescription('');
         setNewTags([]);
         setImage(null);
         setImagePreview(null);
-        navigate('/profile')
+        setTimeout(() => {
+
+          navigate('/profile')
+
+        },3000)
       }
     } catch (error) {
       console.error('Error:', error);
@@ -144,11 +169,35 @@ function AddBlog() {
     }
   };
 
+  const styles = {
+    overlay: {
+      position: 'fixed',
+      top: 0, left: 0,
+      width: '100vw', height: '100vh',
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      display: 'flex', justifyContent: 'center', alignItems: 'center',
+      zIndex: 1000
+    },
+    largeImage: {
+      maxWidth: '90%', maxHeight: '90%', borderRadius: '10px'
+    }
+  };
+
   return (
     <div>
       <Nav />
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-transparent max-w-lg w-full mx-auto rounded-xl p-6">
+            {showAnimation && (
+              <div className="fixed top-[13%] right-7 z-50 flex items-center gap-2 px-4 py-3 rounded-lg bg-white shadow-lg transform animate-bounce">
+                {animationType === 'add' && (
+                  <>
+                    <CheckCircle className="text-green-500" size={24} />
+                    <span className="font-medium">Post added successfully!</span>
+                  </>
+                )}
+              </div>
+            )}
           <div className="mb-5 text-center">
             <h2>Add Post</h2>
           </div>
@@ -227,7 +276,8 @@ function AddBlog() {
                     <img
                       src={imagePreview}
                       alt="Preview"
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full cursor-pointer object-cover rounded-lg"
+                      onClick={() => handleImageClick(imagePreview)}
                     />
                     <button
                       className="absolute top-4 right-4 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:text-red-600"
@@ -282,6 +332,18 @@ function AddBlog() {
           </form>
         </div>
       </div>
+
+      {selectedImage && (
+        <div style={styles.overlay} onClick={closeModal}>
+          <img
+            src={selectedImage}
+            alt="Large View"
+            style={styles.largeImage}
+            onClick={(e) => e.stopPropagation()} 
+          />
+        </div>
+      )}
+
     </div>
   );
 }

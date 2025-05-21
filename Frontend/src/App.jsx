@@ -9,7 +9,7 @@ import Admin_Pages from "./Components/Admin/Admin_Pages";
 import Loginpage from "./Pages/Theatreowner/Loginpage";
 import TheatreOwner from "./Components/Theatre/TheatreOwner";
 import AvailableShowDetails from "./Pages/ShowTimeDetails/AvailableShowDetails";
-import Seats from "./Pages/SeatSelection/seats";
+import Seats from "./Pages/SeatSelection/Seats";
 import Checkout from "./Pages/userbooking/Checkout";
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
@@ -21,40 +21,45 @@ import AddBlog from "./Pages/blogs/AddBlog";
 import PrivateRoute from "./Pages/Routes/PrivateRoute";
 import { UserRoute } from "./Pages/Routes/ProtectedRoute";
 import BlogInfo from "./Pages/blogs/BlogInfo";
+import VerifiedTicket from "./Pages/Bookings/VerifiedTicket";
 function App() {
 
     return (
         <>
             <Router>
                 <Routes>
-                    <Route path="/" element={<UserRoute><Landingpage/></UserRoute>}/>
-                    <Route path="/movie/:id/details" element={<UserRoute><MovieSpecification /></UserRoute>} />
+                    <Route path="/" element={<Landingpage/> }/>
+                    <Route path="/movie/:id/details" element={<MovieSpecification />} />
                     <Route path="/profile" element={<Profile/>} />
-                    <Route path={`/available-show-details/:id`} element={<PrivateRoute><AvailableShowDetails/></PrivateRoute>} />
-                    <Route path={'/available-show-details/:screenId/:showId/seats'} element={<PrivateRoute><Seats/></PrivateRoute>} />
+                    <Route path={`/available-show-details/:id`} element={<AvailableShowDetails/>} />
+                    <Route path={'/available-show-details/:screenId/:showId/seats'} element={<Seats/>} />
+
                     <Route path="seat-layout/:location" element={
-                        <PayPalScriptProvider options={{
-                            "clientId" : PAYPAL_CLIENT_ID,
-                            currency : 'USD'
-                        }}>
-                            <Checkout/>
-                        </PayPalScriptProvider>
-                        } />
+                        <UserRoute>
+                            <PayPalScriptProvider options={{
+                                "clientId" : PAYPAL_CLIENT_ID,
+                                currency : 'USD'
+                            }}>
+                                <Checkout/>
+                            </PayPalScriptProvider>
+                        </UserRoute>
+                            } />
                         
-                    <Route path="payment/:booking_id/success" element={<PrivateRoute><PaymentSuccess/></PrivateRoute>} />
-                    <Route path='movies/my-orders' element={<PrivateRoute><MyBookings/></PrivateRoute>} />
+                    <Route path="payment/:booking_id/success" element={<PaymentSuccess/>} />
+                    <Route path='movies/my-orders' element={<MyBookings/>} />
                     <Route path='booking/:id/ticket' element={<TicketView/>} />
-                    <Route path='/blogs' element={<BlogPosts/>} />
+                    <Route path='verify-ticket/:id' element={<VerifiedTicket/>} />
+                    <Route path='/blogs' element={<PrivateRoute allowedTypes='user' ><BlogPosts/></PrivateRoute>} />
                     <Route path='/blogs/add' element={<AddBlog/>} />
                     <Route path="/posts/details/:id" element={<BlogInfo/>}/>
 
                     {/* adminpages */}
                     <Route path="/admin/login" element={<AdminLogin />} />
-                    <Route path="/admin/*" element={<PrivateRoute><Admin_Pages/></PrivateRoute>}/>
+                    <Route path="/admin/*" element={<PrivateRoute allowedTypes='admin' ><Admin_Pages/></PrivateRoute>}/>
 
                     {/* theatre owner */}
                     <Route path="/theatre/login" element={<Loginpage />} />
-                    <Route path="/theatre-owner/*" element={<PrivateRoute><TheatreOwner/></PrivateRoute>} />
+                    <Route path="/theatre-owner/*" element={<PrivateRoute allowedTypes='theatre' ><TheatreOwner/></PrivateRoute>} />
 
                 </Routes>
             </Router>

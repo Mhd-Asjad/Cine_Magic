@@ -3,7 +3,7 @@ import Nav from '@/Components/Navbar/Nav';
 import axios from 'axios';
 import { CloudDownload, Ticket, Tickets } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { AlertDialog, AlertDialogTrigger, AlertDialogCancel , AlertDialogAction , AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
@@ -22,7 +22,8 @@ function TicketView() {
   const [ refundInfo , setRefundInfo ] = useState(null);
   const [ open , setOpen ] = useState(false)
   const {toast} = useToast();
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
       const fetchRefundInfo = async() => {
 
@@ -36,21 +37,22 @@ function TicketView() {
       }
     const fetchQrCode = async() => {
       setLoading(true);
+
       try {
         const res = await apiBooking.get(`ticket/${id}/`);
-        
         const { ticket_data, movie_details, seats } = res.data;
         setTicketData(ticket_data);
         setShowDetails(movie_details);
         setSeats(seats);
         setLoading(false);
+
       } catch(e) {
         console.log(e);
         setError(e?.response?.data?.error || 'An error occurred');
         setLoading(false);
       }
     };
-    
+
     fetchRefundInfo()
     fetchQrCode();
     
@@ -90,7 +92,6 @@ function TicketView() {
           const ctx = qrCanvas.getContext('2d');
           ctx.drawImage(qrImage, 0, 0);
   
-  
           if (yOffset + 80 > pdf.internal.pageSize.getHeight()) {
             pdf.addPage();
             yOffset = 20;
@@ -100,9 +101,11 @@ function TicketView() {
       }
 
       pdf.addImage(qrDataUrl, 'PNG', 10, yOffset + 50, 80, 80);
-      
-      pdf.save('ticket-screenshot.pdf')
+      const linkText = 'click this to show ticket validation'
+      const validationUrl = `http://localhost:5173/verify-ticket/${id}`
 
+      pdf.textWithLink(linkText , 60 , yOffset + 20 , { url : validationUrl })
+      pdf.save('ticket-screenshot.pdf')
 
     });
   };
@@ -324,7 +327,11 @@ function TicketView() {
                 </div>
               ))}
             </div>
+
+
           </div>
+
+
           <div className='flex mb-3 p-3 justify-center' >
 
           <button

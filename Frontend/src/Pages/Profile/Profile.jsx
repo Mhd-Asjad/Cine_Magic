@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Nav from "../../Components/Navbar/Nav";
 import Footer from "../../Components/Footer/footer";
 import { useSelector } from "react-redux";
@@ -7,17 +7,16 @@ import { TbLogout2 } from "react-icons/tb";
 import { FaAngellist } from "react-icons/fa6";
 import { FaPhone } from "react-icons/fa6";
 import { FaUserEdit } from "react-icons/fa";
-import axios from "axios";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import { useDispatch } from "react-redux";
 import { setUsername , setEmail } from "@/Redux/Features/UserSlice";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, CheckCircle, DeleteIcon,  User , CalendarRange , Trash, X } from 'lucide-react';
+import { Plus, Edit, CheckCircle, DeleteIcon,  User , CalendarRange , Trash, X , ShieldAlert } from 'lucide-react';
 import LocationPicker from "@/Components/Map/LocationPicker";
 import 'leaflet/dist/leaflet.css';
 import { postAdded } from "@/Redux/Features/BlogSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import apiBlogs from "@/Axios/Blogapi";
 import {
   AlertDialog , 
@@ -32,6 +31,8 @@ import {
 from "@/Components/ui/alert-dialog";
 import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
 import { set } from "date-fns";
+import userApi from "@/Axios/userApi";
+import TheatreApi from "@/Axios/theatreapi";
 const Profile = () => {
 
   toastr.options = {
@@ -67,9 +68,11 @@ const Profile = () => {
   const [newEmail , setNewEmail ] = useState('');
   const [ isEditing , setIsEditing] = useState(false);
   const [ editBlog , setEditBlog] = useState(null);
-  const [imagePreview , setImagePreview] = useState([]);
   const [ imageError , setImageError] = useState('');
+  const [ showAnimation , setShowAnimation] = useState(false)
+  const [animationType, setAnimationType] = useState('');
   const [ confirmDelete , setConfirmDelete] = useState(false);
+  const [ fieldError , setFieldError] = useState('');
   const {toast} = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -78,8 +81,8 @@ const Profile = () => {
   };
   const handleToggleForm1 = () => {
     setShowEditForm(!showEditForm)
-    setNewUsername(username)
-    setNewEmail(email)
+    setNewUsername(user.username)
+    setNewEmail(user.email)
   }
 
   const handlePostForm = () => {
@@ -123,7 +126,7 @@ const Profile = () => {
     if (!validateFields()) return
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/theatre_owner/create_profile/', {
+      const response = await TheatreApi.post('/create_profile/', {
         'user' : user.id ,
         'owner_photo' : ownerImage,
         'theatre_name' : theatreName ,
@@ -150,7 +153,9 @@ const Profile = () => {
   };
   useEffect(() => {
     fetchBlogs()
-  },[])
+    setTimeout(() => setShowAnimation(false), 3000);
+
+  },[showAnimation])
   const fetchBlogs = async() => {
 
     try {
@@ -163,6 +168,10 @@ const Profile = () => {
   }
 
   const handleEditBlog = (blog_id) => {
+    const div = document.getElementById("edit-post")
+    if (div){
+      div.scrollIntoView({ behavior : 'smooth' })
+    }
     const blogToEdit = blogs.filter(blog => blog.id === blog_id)
     setEditBlog(...blogToEdit);
     setIsEditing(true)
@@ -173,24 +182,19 @@ const Profile = () => {
       const res = await apiBlogs.delete(`delete-post/${blog_id}/`)
       if (res.status === 204) {
         setBlogs(blogs.filter(blog => blog.id !== blog_id))
-        toast({
-          title : 'post deleted successfully'
-        })
+        triggerAnimation('delete')
       }
     }catch(e) {
       console.log('error while deleting blog' , e)
     }
   }
 
-  // useEffect(()=> {
-  //   const createPreview = () => {
-  //     const file = editBlog?.images[0]?.image
-  //     console.log(file)
-  //     setImagePreview(file)
-  //   }
-  //   createPreview()
+  const triggerAnimation = (type) => {
+    setAnimationType(type)
+    setShowAnimation(true)
+    setTimeout(() => setShowAnimation(false), 3000);
 
-  // },[editBlog])
+  }
               
   const handleImageChange = (e) => {
     const file = e.currentTarget.files[0] || null;
@@ -205,8 +209,9 @@ const Profile = () => {
     } else {
       setImageError('Please add a media file.');
     };
-    console.log(editBlog,'adfaksjl')
   };
+
+  console.log(imageError , 'image error')
   const handleRemoveTag = (removedTag) => {
     const filteredTags = editBlog.tags.filter((tag) => tag !== removedTag)
     console.log(editBlog)
@@ -227,7 +232,7 @@ const Profile = () => {
   const handleUserEdit = async(e) => {
     e.preventDefault()
     try {
-      const res = await axios.put(`http://127.0.0.1:8000/user_api/edit-user/${user.id}/`,{
+      const res = await userApi.put(`edit-user/${user.id}/`,{
         'username' : newUsername,
         'email' : newEmail
       })
@@ -251,6 +256,12 @@ const Profile = () => {
   }
   const handleEditTask = async(e , blog_id) => {
     e.preventDefault()
+    console.log(!editBlog.title , 'edit blog')
+    if (!editBlog.title || !editBlog.content || !editBlog.images[0]?.file) {
+      setFieldError('Please fill all the fields');
+      setShowAnimation(true);
+      setAnimationType('editError')
+    }
     console.log(blog_id , 'blog id')
     const formData = new FormData();
     formData.append('title' ,editBlog.title)
@@ -271,7 +282,7 @@ const Profile = () => {
       })
 
       if (res.status === 200){
-        alert('post is Editedd successfully')
+        triggerAnimation('edit')
         handleCrud()
         fetchBlogs()
         setEditBlog(null)
@@ -315,6 +326,7 @@ const Profile = () => {
       ...prev,
       images: [],
     }));
+    setImageError('please add a media file')
   }
   console.log(editBlog , 'edit blog preview')
   return (  
@@ -462,17 +474,42 @@ const Profile = () => {
                         </button>
                       </div>
 
+                        {showAnimation && (
+                          <div className="fixed top-[20%] right-4 z-50 flex  items-center gap-2 px-4 py-3 rounded-lg bg-white shadow-lg transform animate-bounce">
+                           
+                            {animationType === 'edit' && (
+                              <>
+                                <CheckCircle className="text-blue-500" size={24} />
+                                <span className="font-medium">Post updated successfully!</span>
+                              </>
+                            )}
+                            {animationType === 'delete' && (
+                              <>
+                                <CheckCircle className="text-red-500" size={24} />
+                                <span className="font-medium">Post deleted successfully!</span>
+                              </>
+                            )}
+
+                            {animationType === 'editError' && (
+                              <>
+                                <ShieldAlert className="text-red-500" size={24} />
+                                <span className="font-medium">{fieldError}</span>
+                              </>
+
+                            )}
+                          </div>
+                        )}
+
 
                       {isEditing && (
 
-                        <div className="bg-white mx-auto rounded-lg p-6 mb-8 border border-gray-200" >
+                        <div id="edit-post" className="bg-white mx-auto rounded-lg p-6 mb-8 border border-gray-200" >
 
                           <div className="flex justify-between items-center" >
                               <h2 
                                 className="text-lg text-gray-800 font-semibold"
                               >
 
-                        
                               </h2>
                               <button
                                 onClick={() => handleCrud()}
@@ -517,21 +554,28 @@ const Profile = () => {
                               />
                               </div>
 
+                              {imageError && (
+                                <div className="flex items-center mt-1 text-red-500 text-xs">
+                                  <span className="mr-1">⚠</span> {imageError}
+                                </div>
+                              )}
+                              {editBlog?.images[0]?.preview &&
 
                               <div className="relative w-full h-full">
                                 <img
                                   src={editBlog?.images[0]?.preview || editBlog?.images[0]?.image}
-                                  alt="Preview"
                                   className="w-full h-full object-cover rounded-lg"
                                 />
                                 <button
-                                  className="absolute top-4 right-4 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:text-red-600"
+                                  className="absolute top-4 right-4 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:text-black-600"
                                   onClick={handleImageDelete}
                                   type="button"
                                 >
-                                  <DeleteIcon size={23} />
+                                  <DeleteIcon className="text-red-500" size={23} />
                                 </button>
                               </div>
+
+                            }
                               
 
                           <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
@@ -564,12 +608,12 @@ const Profile = () => {
                             </button>
                           </div>
 
-                        </div>
+                          </div>
                         
                         </div>
 
                       )}  
-                    <div className="p-5 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
+                    <div className="p-5 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6">
                     {!blogs?.message ? (
                       
                       blogs.map((blog) => (
@@ -635,8 +679,8 @@ const Profile = () => {
                               ))}
                             </div>
                             <div className="flex justify-between items-center text-sm text-gray-500">
-                              <span className="mt-3" > <User size={18} className="inline" /> {blog.author_name}</span>
-                              <span> <CalendarRange size={20} className="inline" /> {formatTime(blog.created_at)}</span>
+                              <span className="mt-3" > <User size={18} className="inline mb-2" /> {blog.author_name}</span>
+                              <span> <CalendarRange size={20} className="inline mb-2" /> {formatTime(blog.created_at)}</span>
                             </div>
                           </div>
                         </div>

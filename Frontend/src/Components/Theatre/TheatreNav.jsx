@@ -7,12 +7,13 @@ import {
 import axios from 'axios'
 import logo from '../../assets/logopic2.png'
 import Logout from '../Admin/Logout';
+import TheatreApi from '@/Axios/theatreapi';
 
 const TheatreNav = () => {
   const [ movies , setMovies ] = useState([]);
   const fetchMovies = async () => {
     try{
-      const res = await axios.get('http://127.0.0.1:8000/theatre_owner/fetchmovies/')
+      const res = await TheatreApi.get('/fetchmovies/')
       setMovies(res.data)
     }catch(e) {
       console.log(e.response)
@@ -27,7 +28,7 @@ const TheatreNav = () => {
             {/* <img src={logo} alt="Cinema Logo" className="h-20 w-auto" /> */}
           </div>
             <div className="hidden md:flex flex-1 justify-start px-40 space-x-10 font-bold">
-                <a className="text-black hover:text-red-600">
+                <a className="text-black cursor-pointer hover:text-red-600">
                   Home
                 </a>
     

@@ -51,7 +51,7 @@ function ShowScreen() {
     const [ showDate, setShowDate] = useState("");
     const [ endDate , setEndDate ] = useState("")
     const [ showTimes , setShowTime] = useState([])
-    const [selectedShowTime , setSelectedShowTime] = useState(null);
+    const [selectedShowTime , setSelectedShowTime] = useState([]);
     const [ showDetails , setShowDetails ] = useState([]);
     const [ isShowDialogOpen , setIsDialogOpen] = useState(false)
     const [ message , setMessage ] = useState('')
@@ -100,7 +100,7 @@ function ShowScreen() {
       }
 
       console.log(seats)
-    const getSeatClass = (seat) => {
+    const getSeatClass = () => {
     return 'bg-white text-blue cursor-not-allowed outline outline-1 outline-blue-600'
     }
 
@@ -110,7 +110,7 @@ function ShowScreen() {
 
                 const res = await TheatreApi.get(`/get_time-slots/?screen_id=${selectedScreen.id}`);
 
-
+                console.log(res.data.data , 'time slot')
                 const sortedShowtimes = [...res.data.data].sort((a,b) => {
                     const timeA = a.start_time ?? '';
                     const timeB = b.start_time ?? '';
@@ -139,7 +139,7 @@ function ShowScreen() {
         date.setHours(hours , minutes)
         return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
     }
-
+    
     const handleAddShowTime = async() => {
         if (!selectedMovie || !selectedScreen || !showDate ) {
             toast({
@@ -149,11 +149,11 @@ function ShowScreen() {
             return;
         }
         try{
-            const res = await TheatreApi.post('/add_show_time/', {
+            const res = await TheatreApi.post('/add-showtime/', {
                 "screen_number" : selectedScreen.screen_number,
                 "movie" : selectedMovie.id,
                 'screen' : selectedScreen.id,
-                'slot' : selectedShowTime.id,
+                'slot' : selectedShowTime,
                 'show_date' : showDate,
                 'end_date' : endDate
                 
@@ -173,6 +173,7 @@ function ShowScreen() {
             
             console.log(e.response.data.Error || 'something went wrong')
             console.log('went to the catch session')
+            console.log(e)
             toast({title : e.response.data?.Error ,
                 variant : "destructive",
                 action: <ToastAction className='flex border border-light font-semibold rounded py-1 pl-1 pr-1' altText="Try again">Try again</ToastAction>,
@@ -226,6 +227,26 @@ function ShowScreen() {
         }
         
     }
+
+    // Allow selecting multiple showtimes, toggling them in the array
+    const handleSelectedShowTime = (showtimeId) => {
+        setSelectedShowTime((prev) => {
+            if (Array.isArray(prev)) {
+                if (prev.includes(showtimeId)) {
+                    return prev.filter(id => id !== showtimeId);
+                } else {
+                    return [...prev, showtimeId];
+                }
+            } else if (prev) {
+                return [prev, showtimeId];
+            } else {
+                return [showtimeId];
+            }
+        });
+    }
+
+    console.log(selectedShowTime , 'selected show time')
+
     return (
         <div className='p-10 m-10'>
 
@@ -376,29 +397,12 @@ function ShowScreen() {
                                             <div>
 
                                             </div>
-                                            <td className='p-4'> 
-                                                <div className='flex space-x-2'>
+                                        <td className='p-4'> 
+                                            <div className='flex space-x-2'>
 
-                                                <Dialog
-                                                    open={isDialogOpen}
-                                                    onOpenChange={(open) => {
-                                                        setDialogOpen(open);
-                                                        if (!open) setSelectedMovie(null);
-                                                    }}
-                                                    >
-                                                    <DialogTrigger asChild>
-                                                        <Button 
-                                                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                                                        onClick={() => {
-                                                            setSelectedScreen(screen);
-                                                            setIsDialogOpen(true)
-                                                        }}
-                                                        >
-                                                        Add Show
-                                                        </Button>
-                                                    </DialogTrigger>
+                                              
 
-                                                    {sortedShowDetails.length > 0 ? (
+                                                {sortedShowDetails.length > 0 ? (
                                                     <Dialog>
                                                         <DialogTrigger>
                                                             <Button variant="outline" size="icon" 
@@ -470,13 +474,34 @@ function ShowScreen() {
                                                             </DialogContent>
                                                     </Dialog>
                                                     ) : null
-
-                                                }
-                                                    <DialogContent className="sm:max-w-2xl max-h-screen overflow-y-auto bg-white">
-                                                        <DialogTitle className="text-xl w-fit font-bold mb-4" >
+                                                }   
+                                                <Dialog
+                                                    open={isDialogOpen}
+                                                    onOpenChange={(open) => {
+                                                        setDialogOpen(open);
+                                                        if (!open) setSelectedMovie(null);
+                                                    }}
+                                                    >
+                                                    <DialogTrigger asChild>
+                                                        <Button 
+                                                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                                                        onClick={() => {
+                                                            setSelectedScreen(screen);
+                                                            setIsDialogOpen(true)
+                                                        }}
+                                                        >
+                                                        Add Show
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                
+                                                    <DialogContent className="max-w-none max-h-screen w-fit bg-white">
+                                                        <div className='flex justify-center' >
+                                                        <DialogTitle className=" text-xl w-fit font-bold mb-4" >
                                                         Select a Movie
 
                                                         </DialogTitle>
+
+                                                        </div>
                                                         <div className="p-4">
                                                         <Carousel className="w-full">
                                                             <CarouselContent>
@@ -560,13 +585,14 @@ function ShowScreen() {
                                                                             showTimes.map((showtime) => (
                                                                             <div
                                                                                 key={showtime.id}
-                                                                                onClick={() => setSelectedShowTime(showtime)}
+                                                                                onClick={() => handleSelectedShowTime(showtime.id)}
                                                                                 className={`cursor-pointer px-4 py-2 rounded-lg border ${
-                                                                                    selectedShowTime?.id === showtime.id
+                                                                                    selectedShowTime.includes(showtime.id)
                                                                                         ? 'bg-blue-500 text-white border-blue-500'
                                                                                         : 'bg-white text-gray-700 border-gray-300'
                                                                                 }`}
                                                                             >
+                                                                                
                                                                                 {formatTime(showtime.start_time)}
                                                                             </div>
                                                                             ))
@@ -591,7 +617,7 @@ function ShowScreen() {
                                                             </div>
                                                         )}
                                                         </div>
-                                                    </DialogContent>
+                                                        </DialogContent>
                                                     </Dialog>
                                                 </div> 
                                             </td>
@@ -679,9 +705,7 @@ function ShowScreen() {
                                                                     title={`${seat.category_name || 'No Category'} - ₹${seat.price}`}
                                                            
                                                                 
-                                                                    className={`w-6 h-6 rounded-sm  flex items-center justify-center text-xs ${getSeatClass(
-                                                                    seat
-                                                                    )}`}
+                                                                    className={`w-6 h-6 rounded-sm  flex items-center justify-center text-xs ${getSeatClass}`}
                                                                 >
                                                                     {seat.number}
                                                                 </button>

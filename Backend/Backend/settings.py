@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from decouple import config
 from corsheaders.defaults import default_headers
-
+from pythonjsonlogger import jsonlogger
 import os
 # import environ
 from datetime import timedelta
@@ -27,6 +27,41 @@ SECRET_KEY = 'django-insecure-w1yrvmroq#oen00ryywu_7^*sg9+1^vb=s4_o4d-_lxokw5(do
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters' : {
+        'json': {
+            '()': jsonlogger.JsonFormatter,
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s', 
+        }
+    },
+    
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'json',
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    
+    'loggers': {
+        'Backend.myapp.views    ': {
+            'handlers' : ['console'],
+            'level' : 'DEBUG',
+            'propagate' : False
+        }       
+    },
+    'django': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+        'propagate': False,
+    }
+}
 
 ALLOWED_HOSTS = []
 
@@ -59,6 +94,7 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 SITE_ID = 1
@@ -94,7 +130,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME" : timedelta(hours=1),
+    "ACCESS_TOKEN_LIFETIME" : timedelta(hours=2),
     "REFRESH_TOKEN_LIFETIME" : timedelta(days=1),
     "ROTATE_REFRESH_TOKENS" :True,
     "BLACKLIST_AFTER_ROTATION" : True

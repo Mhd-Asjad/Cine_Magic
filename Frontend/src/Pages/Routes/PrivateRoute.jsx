@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect , useState } from "react";
 import { Navigate , useNavigate } from 'react-router-dom'
-import { ACCESS_TOKEN , REFRESH_TOKEN } from "../../constants";
 import {jwtDecode} from 'jwt-decode'
+import Logout from "@/Components/Admin/Logout";
 import userApi from "@/Axios/userApi";
 
-function PrivateRoute({ children }) {
+function PrivateRoute({ children , allowedTypes }) {
     
     const [isAuthenticated , setIsAuthenticated ] = useState(false);
     const [loading , setLoading ] = useState(true)
@@ -12,7 +12,7 @@ function PrivateRoute({ children }) {
 
     const refreshToken = useCallback(async () => {
         const refreshToken = localStorage.getItem(`${currentRole}_token_refresh`);
-        
+        console.log('token refreshing')
         if (!refreshToken) {
           return false;
         }
@@ -32,29 +32,24 @@ function PrivateRoute({ children }) {
     }, [currentRole]);
     
     const check_auth = useCallback(async() => {
+        const refreshtok = localStorage.getItem(`${currentRole}_refresh_token`);
         const access_token = localStorage.getItem(`${currentRole}_token`)
-        console.log(access_token)
-        if (!access_token) {
-            console.log('no access token found')
+        console.log(refreshtok)
+        if (!refreshToken) {
+            console.log('no refresh token found')
             setIsAuthenticated(false)
             setLoading(false)
             return
         }
         try {
-            console.log(' access token is validating')
 
             const decode = jwtDecode(access_token)
             const tokenExpiration = decode.exp
-            console.log(tokenExpiration)
             const now = Date.now() / 1000
             if (tokenExpiration < now ){
                 const refreshSuccessful  = await refreshToken()
                 console.log(refreshSuccessful , 'token revalidation')
                 setIsAuthenticated(refreshSuccessful)
-                
-            // }else if (isExpiringSoon(access_token)){
-            //     refreshToken().catch(console.error)
-            //     setIsAuthenticated(true)
 
             }else {
                 console.log('token validateeddd')
@@ -75,20 +70,6 @@ function PrivateRoute({ children }) {
     
     useEffect(() => {
         check_auth().catch((e) => e.message)
-        // console.log('accessing every two minitues')
-        // console.log("PrivateRoute mounted with auth state:", { 
-        //     isAuthenticated, 
-        //     currentRole,
-        //     hasAccessToken: !!localStorage.getItem(`${currentRole}_token`)
-        //   });
-      
-        // const check_token_exp = setInterval(() => {
-        //     const access_token = localStorage.getItem(`${currentRole}_token`)
-        //     if (access_token && isExpiringSoon(access_token)) {
-        //         refreshToken().catch(console.error)
-        //     }
-
-        // },20000)
 
     //     return () => clearInterval(check_token_exp)
 
@@ -96,13 +77,13 @@ function PrivateRoute({ children }) {
     console.log(isAuthenticated)
     console.log(currentRole , 'before invalid token')
 
-    //  fix the token refreshing logic properly
-    const redirectPath = currentRole === 'user' ? '/' : `/${currentRole}/login`;
+
+    const redirectPath = allowedTypes === 'user' ? '/' : `/${allowedTypes}/login`;
     
     if (loading) {
         return <div className="flex justify-center text-center h-screen" >Loading.....</div>
     }
-
+    console.log(redirectPath)
     if(!isAuthenticated) {
         return <Navigate to={redirectPath} replace />;  
     }

@@ -37,7 +37,7 @@ class Booking(models.Model):
     def generate_qrcode(self) :
         if self.status == 'confirmed' and not self.qr_code :
             formatted_time = self.show.slot.start_time.strftime('%I:%M %p')
-            qr_data = f'ID{self.booking_id} \nMovie : {self.show.movie.title}\nDate{self.show.show_date.strftime('%Y:%m:%d')}\nShowTime{formatted_time}'
+            qr_data = f'http://127.0.0.1:8000/booking/ticket/{self.id}/'
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.ERROR_CORRECT_L,
@@ -81,7 +81,7 @@ class BookingSeat(models.Model) :
         ('booked' , 'Booked'),
         ('cancelled' , 'Cancelled'),
     )
-    booking = models.ForeignKey(Booking , on_delete=models.CASCADE , related_name='bookingseats')
+    booking = models.ForeignKey(Booking , on_delete=models.CASCADE , related_name='bookingseats')   
     seat = models.ForeignKey('seats.seats', on_delete=models.CASCADE)
     status = models.CharField(max_length=20,choices=SEAT_STATUS_CHOISES , default='booked')
     price = models.DecimalField(max_digits=8, decimal_places=2)

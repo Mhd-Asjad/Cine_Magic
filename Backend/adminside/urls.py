@@ -15,5 +15,6 @@ urlpatterns = [
     path('verified-theatres/',Verified_Theatres , name='verified_theatres'),
     path('handle-screen/<int:screen_id>/',verify_screen.as_view(),name='handle-screen'),
     path('cancel-show/<int:show_id>/',Cancel_Show , name='cancel-show'),
-    path('get-cancelled_booking/', PendingCancelledShows.as_view() , name='get-cancelled_booking')
+    path('get-cancelled_booking/', PendingCancelledShows.as_view() , name='get-cancelled_booking'),
+    path('ticket-sold/',Ticket_Sold.as_view(),name='total-tickets-sold')
 ]

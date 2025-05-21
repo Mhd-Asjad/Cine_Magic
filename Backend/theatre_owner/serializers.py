@@ -4,7 +4,13 @@ from movies.models import *
 from theatres.models import *
 from rest_framework.exceptions import ValidationError
 from seats.models import *
+from collections import Counter
+import logging
+
+logger = logging.getLogger(__name__)
+
 class TheatreOwnerSerialzers(serializers.ModelSerializer) :
+    
     class Meta :
         model = TheaterOwnerProfile
         fields = ['id' , 'user' , 'theatre_name' ,'owner_photo' , 'location' , 'state' , 'pincode' ,'latitude' , 'longitude' , 'user_message']
@@ -67,8 +73,17 @@ class CreateScreenSerializer(serializers.ModelSerializer):
             default_category = SeatCategory.objects.first()  
         except SeatCategory.DoesNotExist:
             raise serializers.ValidationError("No seat categories found. Please create categories first.")
-            
-            
+        
+        col_numbers = [seat[:1] for seat in gap_labels]
+        count = Counter(col_numbers)
+        print(gap_labels , count, 'unselected seats')
+        
+        for key , value in count.items():
+            if value == cols :
+                rows -= 1
+                print('row removed')
+        print(rows , 'rows')
+        
         for row_number in range(1 , rows + 1):
             row_letter = chr(64 + row_number)
             for seat_number in range(1 , cols+1):
@@ -109,11 +124,14 @@ class Createshowtimeserializers(serializers.ModelSerializer):
     def create(self , validated_data):  
         screen = validated_data['screen']
         movie = validated_data['movie']
-        slot = validated_data['slot']
+        slot = validated_data.get['slot']
         show_date = validated_data['show_date']
         end_date = validated_data.get('end_date') 
 
-
+        logger.info(f"recieved slot_id", slot)
+        
+        slot = TimeSlot.objects.filter(id__in = slot).first()
+        print(slot.start_time , 'start time')
         if not end_date:
             end_date = show_date
 
@@ -124,12 +142,14 @@ class Createshowtimeserializers(serializers.ModelSerializer):
 
         end_time = (start_dt + timedelta(minutes=movie.duration)).time()
 
+        
+        logger.debug(f"Start time: {start_time}, End time: {end_time}")
         showtime_list = [
             
             ShowTime(
                 screen=screen,
                 movie=movie,
-                slot=slot,
+                old_slot=slot,
                 show_date=date,
                 end_time=end_time,
                 end_date = end_date
@@ -137,6 +157,7 @@ class Createshowtimeserializers(serializers.ModelSerializer):
             
             for date in date_list
         ]
+        logger.info(f"Creating showtimes for movie: {movie}, screen: {screen}, dates: {date_list}")
 
         ShowTime.objects.bulk_create(showtime_list)
         return showtime_list[0]

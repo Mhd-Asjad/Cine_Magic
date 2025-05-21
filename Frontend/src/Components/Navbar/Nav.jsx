@@ -7,7 +7,7 @@ import Cityselction from '../../Pages/Home/Cityselction';
 import axios from 'axios'
 import { useDispatch , useSelector } from 'react-redux';
 import { setMovies } from '../../Redux/Features/MovieSlice';
-import { setLocation, setSelectedCity } from '../../Redux/Features/Location.slice';
+import { setLocation, setSelectedCity , clearLocation } from '../../Redux/Features/Location.slice';
 import { HiUser } from "react-icons/hi2";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { resetUser } from '../../Redux/Features/UserSlice';
@@ -36,8 +36,6 @@ function Nav() {
     setIsOtpSent(false);
     setMessage('');
   }
-
-
   useEffect(() => {
     handleCitySelect()
   },[])
@@ -52,13 +50,22 @@ function Nav() {
       console.log(cityid , ' fetch city id')
       const response = await apiMovies.get(`/fetch_movies/${id}/`)
       const { movies , city_id , location } = response.data;
-      console.log(movies)
-      dispatch(setMovies(movies))
-      dispatch(setLocation({
-        cityId : city_id,
-        location : location
-      }))
-      dispatch(setSelectedCity(location))
+      if (movies.length > 0) {
+        console.log('inside if state');
+        
+        dispatch(setMovies(movies))
+        dispatch(setLocation({
+          cityId : city_id,
+          location : location
+        }))
+        dispatch(setSelectedCity(location))
+
+      }else{
+        console.log('inside else block in Nav ')
+        dispatch(clearLocation())
+      }
+      console.log(selectedcity)
+
       
     }catch(error){
       console.log(error.response)

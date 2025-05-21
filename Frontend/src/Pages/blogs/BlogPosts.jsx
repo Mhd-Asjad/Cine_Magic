@@ -4,6 +4,8 @@ import { Clock, User } from 'lucide-react';
 import apiBlogs from '@/Axios/Blogapi'
 import Nav from '@/Components/Navbar/Nav'
 import { useNavigate } from 'react-router-dom';
+
+
 import {
   Pagination,
   PaginationContent,
@@ -134,6 +136,7 @@ function BlogPosts() {
                       {i + 1}
                     </PaginationLink>
                   </PaginationItem>
+                // not working expectedd
                 ))}
 
              
@@ -146,7 +149,7 @@ function BlogPosts() {
                     className={ next ? `cursor-pointer`:'cursor-not-allowed'}
                     onClick={() => setPage(prev => prev + 1 )}
                     disable={next === null}
-
+                  // not done when page back to it loads from first page   
                   />
                 </PaginationItem>
               </PaginationContent>

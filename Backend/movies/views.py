@@ -40,7 +40,6 @@ class CityBasedMovies(APIView) :
             today = datetime.now()
             city = City.objects.get(id = city_id)
             showtimes = ShowTime.objects.filter(screen__theatre__city = city_id ,show_date__gte = today).select_related('movie').distinct()
-                        
             movies = {showtime.movie for showtime in showtimes}
             
         except City.DoesNotExist:
@@ -65,6 +64,8 @@ class CityBasedMovies(APIView) :
         return Response({ 'movies' :movie_data , 'city_id' : city.id , 'location' : city.name} , status=status.HTTP_200_OK)
 
 class DetailedMovieView(APIView) :
+    
+    permission_classes = [permissions.AllowAny]
     def get(self , request  , id ) :
         print('inside views')
         print(id , 'got the id hrere')
@@ -141,6 +142,7 @@ def get_showtime_label(start_time):
 
 
 class movie_showtime(APIView):
+    permission_classes = [permissions.AllowAny]
     def get(self , request  , id):
         cityid = request.GET.get('city_id')
         try:
@@ -179,7 +181,7 @@ class movie_showtime(APIView):
             
             for cat in unique_prices :
                 price_range = SeatCategory.objects.get(id=cat['category_id'])
-                prices.append(price_range.price)
+                prices.append(price_range.price)    
             label = get_showtime_label(show.slot.start_time)
             theatre_data[theatre_name]['shows'].append({
                     'show_id' : show.id,
@@ -212,6 +214,7 @@ class movie_showtime(APIView):
         return JsonResponse({'movie_title' : movie.title , 'theatres' : list(theatre_data.values()),  'movies' : movie_data},safe=True)     
 
 class Show_Details(APIView):
+    permission_classes = [permissions.AllowAny]
     def get(self , request , show_id ):
         try :
             show = ShowTime.objects.get(id = show_id)
@@ -219,4 +222,5 @@ class Show_Details(APIView):
             return Response({'error' : 'show not found'} , status=status.HTTP_404_NOT_FOUND)
         serializer = FechShowSerializer(show)
         return Response(serializer.data , status=status.HTTP_200_OK)
+    
         

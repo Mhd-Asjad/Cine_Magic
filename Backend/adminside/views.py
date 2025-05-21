@@ -14,6 +14,7 @@ from theatre_owner.models import *
 from rest_framework.decorators import api_view
 from booking.models import *
 from booking.serializers import BookingSerializer
+from django.utils import timezone
 # Create your views here.
 
 # customer listed views
@@ -272,9 +273,8 @@ def Cancel_Show(request , show_id) :
     return Response({'message' : f'{movie} on screen {screen_number} was successfully cancelled'})
 
 # pending cancelled shows view
-# @permission_classes([IsAdminUser])
+@permission_classes([IsAdminUser])
 class PendingCancelledShows(APIView):
-    
     def get(self , request) :
         try : 
             bookings = Booking.objects.all().exclude(status='not-applicable').filter(status='cancelled').order_by('-booking_time')
@@ -285,4 +285,15 @@ class PendingCancelledShows(APIView):
         
         serializer = BookingSerializer(bookings , many=True)
         return Response(serializer.data , status=status.HTTP_200_OK)
-        
+
+class Ticket_Sold(APIView):
+    permission_classes = [permissions.AllowAny]
+    def get(self , request) :
+        today = timezone.now()
+        try:
+            bookings = Booking.objects.filter(status='confirmed' , show__slot__start_time__gt = today )
+            total_booking = len(bookings)
+            total_amount = sum([booking.amount for booking in bookings])
+            return Response({'bookings' : total_booking , 'total_amount':total_amount}, status=status.HTTP_200_OK)
+        except Exception as Err:
+            return Response({'error':str(Err)},status=status.HTTP_400_BAD_REQUEST)

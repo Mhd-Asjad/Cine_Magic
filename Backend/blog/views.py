@@ -8,10 +8,13 @@ from useracc.models import User
 import json
 from .serializers import *
 from rest_framework.pagination import PageNumberPagination
+import logging
 # Create your views here.
 
+logger = logging.getLogger(__name__)
+
 class CustomPagination(PageNumberPagination):
-    page_size=4
+    page_size= 5
     page_query_param = 'page'
 
 class CreatePostView(APIView):
@@ -101,8 +104,7 @@ class GetUserPostsView(APIView):
 class EditPost(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def put(self , request , post_id):
-        print(request.data , 'request data')
-        print(post_id)
+
         try:
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
@@ -117,7 +119,6 @@ class EditPost(APIView):
         tag_ids = []
         errors = []
         for tag_name in tags :
-            print(tag_name)
             try :
                 tag , created =  Tag.objects.get_or_create(name = tag_name)
                 tag_ids.append(tag.id)
@@ -130,17 +131,15 @@ class EditPost(APIView):
         form_data = request.data.copy()
         form_data.pop('tags', None)
         if request.FILES:
-            print(request.FILES.get('image'))
+            logger.info('request files are here:',request.FILES)
             form_data['image'] = request.FILES.get('image')
         form_data.setlist('tags', tag_ids)
-        print('tag type is here:',type(form_data.get('tags')))
         
         serializer = EditPostSerializer(instance=post , data = form_data , partial = True)
         if serializer.is_valid() :
             serializer.save()
             return Response(serializer.data , status=status.HTTP_200_OK)
-        print(serializer.errors)
-        print(serializer.data)
+        
         return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
     
 class DeletePost(APIView):
@@ -161,7 +160,6 @@ class GetAllPosts(generics.ListAPIView):
     pagination_class = CustomPagination
     serializer_class = PostSerializer
     def list(self , request):
-        print(request.user)
         queryset = self.get_queryset()
         paginated_queryset = self.paginate_queryset(queryset)
         serializer = PostSerializer(paginated_queryset , many=True , context={'request':request})

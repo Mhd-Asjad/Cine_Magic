@@ -38,7 +38,8 @@ class TimeSlot(models.Model):
 class ShowTime(models.Model):
     screen = models.ForeignKey(Screen , on_delete=models.CASCADE , related_name='showtimes' )
     movie = models.ForeignKey('movies.Movie' , on_delete=models.CASCADE , related_name='showtimes')
-    slot = models.ForeignKey(TimeSlot , on_delete=models.CASCADE ,blank=True , null=True, related_name='showtimes')
+    old_slot = models.ManyToManyField(TimeSlot , blank=True , related_name='showtimes')
+    slot = models.ForeignKey(TimeSlot , on_delete=models.CASCADE , blank=True , null=True , related_name='showtime') # related_name='showtimes'
     end_time = models.TimeField(blank=True , null=True)
     show_date = models.DateField(blank=True , null=True)
     end_date = models.DateField(blank=True,null=True)

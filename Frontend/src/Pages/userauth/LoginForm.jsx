@@ -16,11 +16,10 @@ import Button from '@mui/material/Button';
 import login from './AuthService';
 import userApi from '@/Axios/userApi';
 
-function LoginForm( { isModalClose }) {
+function LoginForm( { isModalClose  }) {
     const [showpassword , setShowPassword ] = useState(false);
-    const dispatch = useDispatch();
     const handleClickShowPassword = () => setShowPassword((show) => !show)
-
+    const dispatch = useDispatch();
 
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
@@ -30,7 +29,6 @@ function LoginForm( { isModalClose }) {
         event.preventDefault();
     };
     
-
     const initialValues = {
         username : '' ,
         password : '' ,

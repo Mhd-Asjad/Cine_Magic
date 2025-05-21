@@ -7,4 +7,12 @@ class BookingSerializer(serializers.ModelSerializer):
     theatre_name = serializers.CharField(source='show.screen.theatre.name')
     class Meta :
         model = Booking
-        fields = ['id' ,'booking_id' , 'show' , 'theatre_name' ,  'customer_name' , 'show_date' , 'show_time' ,'customer_email' , 'status' , 'amount' , 'refund_amount' , 'refunt_status']    
+        fields = ['id' ,'booking_id' , 'show' , 'theatre_name' ,  'customer_name' , 'show_date' , 'show_time' ,'customer_email' , 'status' , 'amount' , 'refund_amount' , 'refunt_status']
+        
+        
+class TicketViewSerializer(serializers.ModelSerializer):
+    show_name = serializers.CharField(source='show.movie.title')
+    class Meta :
+        
+        model = Booking
+        fields = [ 'booking_id' , 'status' , 'show' , 'show_name' , 'customer_email' , 'amount' , 'refund_amount','refunt_status']

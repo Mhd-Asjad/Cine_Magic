@@ -4,6 +4,7 @@ import re
 import random
 from django.core.mail import send_mail
 from django.core.cache import cache
+import datetime
 
 
 class RegisterSerializers(serializers.ModelSerializer):
@@ -23,14 +24,16 @@ class RegisterSerializers(serializers.ModelSerializer):
 
     def create(self , validated_data ):
         otp = str(random.randint(100000 , 999999))
+        expire_at = datetime.datetime.now() + datetime.timedelta(minutes=2)
 
         print(otp,'new otp found')
         cache.set(
 
             f'otp_{validated_data['email']}',
             {"otp" : otp , "username"  : validated_data['username'] , 'email' : validated_data['email'] , "password" : validated_data['password']},
-            timeout=600
+            timeout=120
         )
+        
         send_mail(
             'Your OTP for Registration',
             f'Your OTP is: {otp}',
@@ -38,7 +41,7 @@ class RegisterSerializers(serializers.ModelSerializer):
             [validated_data['email']],
             fail_silently=False,
         )
-        return {"message": "OTP sent to your email."}    
+        return {"message": "OTP sent to your email.", 'expireAt' : expire_at }    
 
 
 class UserSerializer(serializers.ModelSerializer) :
@@ -61,7 +64,7 @@ class OtpVerificationSerializer(serializers.Serializer):
     def validate( self , data ):
 
         cached_data = cache.get(f'otp_{data['email']}')
-        
+        print(cached_data)
         if not cached_data :
             raise serializers.ValidationError({"error": "OTP is expired.....! "})
 

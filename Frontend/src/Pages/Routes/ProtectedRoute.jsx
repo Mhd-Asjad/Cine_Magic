@@ -8,17 +8,12 @@ export const UserRoute = ({children}) => {
 
     console.log(user)
     if (!user){
-        return children
+        return <Navigate to={'/'} />
     }
 
-    if (user.userType === 'user' || user.userType === 'theatre') {
+    if (user.userType === 'user' || user.userType === 'theatre' || user.userType === 'admin' ){
         return children
     }
-
-    if (user.userType === 'admin') {
-        return <Navigate to={'/admin/login'}/>
-    }
-    return <Navigate to={'/'} />
 }
 
 
@@ -46,7 +41,7 @@ export const AdminRoute = ({ children }) => {
     if (!user) {
         return <Navigate to="/admin/login" />;
     }
-    
+
     if (user.userType === 'admin') {
         return children;
     }

@@ -17,9 +17,13 @@ const locationSlice = createSlice({
         },  
         setSelectedCity : (state , action ) => {
             state.selectedCity = action.payload
+        },
+        clearLocation : (state , action) => {
+            state.selectedCity = ''
         }
+
     }
 })
 export const selectCityId  = (state) => state.location.cityId;
-export const { setLocation , setSelectedCity } = locationSlice.actions;
+export const { setLocation , setSelectedCity , clearLocation } = locationSlice.actions;
 export default locationSlice.reducer;

@@ -30,7 +30,7 @@ function Checkout() {
 
   
   const from = location;
-
+  console.log(userId)
   
   useEffect(() => {
     const checkout = async() => {

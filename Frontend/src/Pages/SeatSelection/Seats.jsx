@@ -10,6 +10,9 @@ import { lockseats } from '@/Redux/Features/selectedseats';
 import Checkout from '../userbooking/Checkout';
 import { useToast } from '@/hooks/use-toast';
 import apiMovies from '@/Axios/Moviesapi';
+import Modal from '@/Components/Modals/Modal';
+import LoginForm from '../userauth/LoginForm';
+import AuthContainer from '../userauth/AuthContainer';
 function Seats() {
   const {screenId , showId } = useParams();
   const [seats , setSeats] = useState([])
@@ -18,6 +21,9 @@ function Seats() {
   const [loading , setLoading ] = useState(true);
   const [error , setError ] = useState(null)
   const [totalPrice , setTotalPrice] = useState(0);
+  const [isModalOpen , setIsModalOpen] = useState(false);
+  const [isLogin , setIsLogin] = useState(false);
+
   const dispatch = useDispatch();
   const {toast} = useToast();
   const username1 = useSelector((state) => state.user.username)
@@ -114,10 +120,16 @@ function Seats() {
 
   },[selectedSeats])
 
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = ()  => {
+    setIsModalOpen(false);
+  }
   const proceedToCheckout = async() => {
     if (!username1) {
-      toast({title : 'please login and checkout'})
+      setIsLogin(true)
+      openModal()
       return;
+
     }
     const selectedSeatsIds = selectedSeats.map(seat => seat.id , [])
     console.log(selectedSeatsIds , 'selected seats ids')
@@ -274,6 +286,13 @@ function Seats() {
       </div>
     </div>
       )}
+
+
+      <Modal isOpen={isModalOpen} closeModal={closeModal}  >
+
+        <AuthContainer isModalClose={closeModal} Logined={isLogin} />
+        
+      </Modal>
     </div>
   )
 }

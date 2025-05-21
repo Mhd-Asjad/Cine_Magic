@@ -42,21 +42,17 @@ class EditPostSerializer(serializers.ModelSerializer):
         title = validated_data.get('title' , instance.title)
         content = validated_data.get('content' , instance.content)
         tags = validated_data.get('tags' , None)
-        print(tags, 'tags in serializer')
-        print(type(tags) , 'type of tags')
         if tags is not None and isinstance(tags, str):
             tags = json.loads(tags[0])
             print(tags , 'tags in serializer')
         instance.title = title
         instance.content = content
-        print(tags , 'tags in serializer')
         if tags is not None :
             instance.tags.set(tags)
-            
+
         instance.save()
         
         images = validated_data.get('images', None)
-        print(images, 'images in serialize') 
         if images is not None and len(images) > 0:
             post_image = PostImage.objects.filter(post=instance).first()
             if post_image:

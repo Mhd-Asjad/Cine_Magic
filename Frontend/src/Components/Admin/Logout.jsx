@@ -4,7 +4,7 @@ import { CiLogout } from "react-icons/ci";
 import { logout } from '@/Pages/userauth/AuthService';
 import { useDispatch  } from 'react-redux';
 import { resetUser } from '@/Redux/Features/UserSlice';
-function Logout({ role }) {
+function Logout() {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();

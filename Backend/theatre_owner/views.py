@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status , permissions
 from django.contrib.auth import authenticate
 from .models import TheaterOwnerProfile
 from .serializers import TheatreOwnerSerialzers , FetchMovieSerializer , CreateScreenSerializer , Createshowtimeserializers , TimeSlotSerializer , UpdateTheatreOwnerSeriailizer
@@ -19,6 +19,9 @@ from django.db.models import Count
 from seats.models import *
 from booking.models import Booking
 import string
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 class CreateOwnershipProfile(APIView) :
@@ -362,16 +365,27 @@ class create_timeslot(APIView):
         
 # adding show time for the screen
 class Add_Show_Time(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def post(self , request):
         data = request.data
-        print(data)
-        timeslot_id = data.get('slot')
+        slot_ids = data.get('slot',[])
         screen_id = data.get('screen')
         show_date = data.get('show_date')
         end_date = data.get('end_date')
-        timeslot = TimeSlot.objects.get(id = timeslot_id)
-        date_time = show_date + ' ' + str(timeslot.start_time)
-        print(type(show_date) , end_date)
+        
+        logger.info(f"Received slot IDs: {slot_ids}")
+        timeslot = TimeSlot.objects.filter(id__in = slot_ids)
+        logger.info(f"Filtered timeslot: {timeslot}")
+        try :
+            if timeslot.count() != len(slot_ids):
+                return Response({'Error' : 'invalid time slot id'} , status=status.HTTP_400_BAD_REQUEST)
+            
+        except:
+            return Response({'Error' : ' time slot does not exist'} , status=status.HTTP_400_BAD_REQUEST)
+        
+        each_slot = timeslot.first()
+        date_time = show_date + ' ' + str(each_slot.start_time)
+        
         try:
             start_time = datetime.strptime(date_time , "%Y-%m-%d %H:%M:%S")
             start_time = timezone.make_aware(start_time)
@@ -388,14 +402,14 @@ class Add_Show_Time(APIView):
                 return Response({'Erorr' : 'to date is required'} , status=status.HTTP_400_BAD_REQUEST)
             
             if to_date <= from_date :
-                return Response({'Error' : 'to date must be greater that start date'})
-            
+                print('not validd')
+                return Response({'Error' : 'to date must be greater that start date'} , status=status.HTTP_400_BAD_REQUEST)
             if from_date < today : 
                 return Response({'Error':'from date canot be in the past'},status=status.HTTP_400_BAD_REQUEST)
             
-            if start_time <= timezone.now():
+            # if start_time <= timezone.now():
                 
-                return Response({'Error':'show time must be in the future'},status=status.HTTP_400_BAD_REQUEST)
+            #     return Response({'Error':'show time must be in the future'},status=status.HTTP_400_BAD_REQUEST)
             
             
             try:
@@ -404,15 +418,19 @@ class Add_Show_Time(APIView):
                 return Response({'Error': 'Invalid screen ID'}, status=status.HTTP_400_BAD_REQUEST)
             
             # checking overlaping show time
-            overlapping_shows = ShowTime.objects.filter(
-                screen=screen ,
-                slot = timeslot_id,
-                show_date = show_date,
-            )
+            
+            for slot_id in slot_ids:
+                if ShowTime.objects.filter(screen=screen , slot_id=slot_id , show_date=show_date).exists():
+                    return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
+            # overlapping_shows = ShowTime.objects.filter(
+            #     screen=screen ,
+            #     slot = timeslot_id,
+            #     show_date = show_date,
+            # )
 
-            if overlapping_shows.exists():
-                print('there is overlapping showww')    
-                return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
+            # if overlapping_shows.exists():
+            #     print('there is overlapping showww')    
+            #     return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
 
        
             serializers = Createshowtimeserializers(data=data)
@@ -423,7 +441,7 @@ class Add_Show_Time(APIView):
             return Response({'Error' : serializers.errors} , status=status.HTTP_400_BAD_REQUEST)
                 
         except ValueError as e :
-            return Response({'Error': f'Invalid date format: {str(e)}'}, status=400)
+            return Response({'Error': f'Invalid date format: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 # add theatres
 class AddTheatre(APIView) :
     def post(self , request , city_id ) :

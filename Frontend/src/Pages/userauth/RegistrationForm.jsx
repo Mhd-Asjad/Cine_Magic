@@ -6,7 +6,7 @@ import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 import userApi from '@/Axios/userApi';
 
-function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
+function RegistrationForm({ setMessage, setUserPrevillage ,  setIsOtpSent, setUserEmail }) {
     
     const [ errors , setErrors ] = useState('')
     toastr.options = {
@@ -45,10 +45,15 @@ function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
         onSubmit: async (values, { setSubmitting }) => {
             
             try {
-                const res = await userApi.post('user_api/register/',values);
+                const res = await userApi.post('register/',values);
                 toastr.success('Registration successful! Please check your email for OTP.');
                 setUserEmail(values.email);
                 setIsOtpSent(true);
+                setUserPrevillage({
+                    is_approved : false ,
+                    is_admin : false ,
+                    is_theatre : false 
+                })
                 
             } catch (error) {
                 if (error.response && error.response.data) {
@@ -139,7 +144,7 @@ function RegistrationForm({ setMessage, setIsOtpSent, setUserEmail }) {
 
                 <button
                     type="submit"
-                    className="mx-auto flex justify-center w-[17%] py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
+                    className="mx-auto flex justify-center w-[17%] py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg ho :bg-blue-700"
                     disabled={formik.isSubmitting}
                 >
                     {formik.isSubmitting ? 'Registering...' : 'Register'}

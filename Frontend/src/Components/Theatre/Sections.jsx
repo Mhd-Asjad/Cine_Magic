@@ -19,7 +19,7 @@ function Sections() {
         <div>
             
             <Routes>
-                <Route path="dashboard" element={<TheatreDashboard/>}/>
+                <Route path="dashboard" element={<TheatreRoute><TheatreDashboard/></TheatreRoute>}/>
                 <Route path="add-theatre" element={<TheatreRoute> <AddTheatre/> </TheatreRoute>} />
                 <Route path="theatre-confimation" element={<TheatreRoute><PendingTheatres/></TheatreRoute>} />
                 <Route path=":id/add-screen" element={<TheatreRoute><AddScreen/></TheatreRoute>}/>

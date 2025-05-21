@@ -5,6 +5,10 @@ import Nav from '@/Components/Navbar/Nav';
 import { User , Tag  } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import LikeDislikeButton from './LikeDislikeButton';
+import { Avatar } from '@mui/material';
+import {Stack} from '@mui/material';
+import { deepOrange } from '@mui/material/colors';
+import { Send , Clock1 } from 'lucide-react';
 function BlogInfo() {
     const [postDetails , setPostDetails] = useState(null);
     const [comment , setComment] = useState('');
@@ -13,7 +17,7 @@ function BlogInfo() {
     const [reaction , setReaction] = useState(null)
     const {id} = useParams();
     const userId = useSelector((state) => state.user.id)
-
+    
     
     useEffect(( ) => {
         const fetchPostDetails = async() => {
@@ -56,6 +60,20 @@ function BlogInfo() {
         }
     }
 
+    const timeAgo = (timeStamp) => {
+
+        const now = new Date()
+        const past = new Date(timeStamp)
+        const diff = Math.floor((now - past) / 1000 )
+
+        if (diff < 60) return `${diff} seconds ago`;
+        if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+        return `${Math.floor(diff / 86400)} days ago`;
+
+
+    }
+
     if (loading) {
         return <div className='flex justify-center items-center h-screen'>Loading...</div>
     }
@@ -68,25 +86,23 @@ function BlogInfo() {
             <div className="flex w-[80%] h-[90%] bg-white shadow-lg rounded-lg overflow-hidden">
 
                 <div className="w-2/3 bg-gray-300 bg-gradient-to-b from-transparent via-gray-100 to-black flex flex-col items-center">
-                    <h2 className="text-lg font-bold text-gray-900">{postDetails.title}</h2>
                     {postDetails?.images?.length > 0 && (
                         <  >
                         <img
                             src={postDetails.images[0].image}
                             alt={postDetails.title}
-                            className="w-[99%] h-[70%] p-2 rounded-lg object-cover"
+                            className="w-[99%] h-[71%] p-2 rounded-lg object-cover"
                         />
                         </>
                     )}
 
-                    {/* Tags, Title & Description */}
+                    <h2 className="text-lg font-small text-gray-900">{postDetails.title}</h2>
                     <div className="w-full p-4 bg-white h-[30%] overflow-y-auto">
-                        {/* Author & Title */}
+.
                         <div className="mb-2">
                             <p className="text-sm text-gray-500">by <User className='inline' size={18} /> {postDetails.author_name}</p>
                         </div>
 
-                        {/* Tags */}
                         <div className="mb-2 text-blue-500 flex flex-wrap gap-2">
                             {postDetails.tags.map((tag, index) => (
                                 <span key={index} className="text-sm"><Tag className='inline' size={18} />{tag}</span>
@@ -107,21 +123,36 @@ function BlogInfo() {
 
                             />
                         </div>
+
+
                     </div>
                 </div>
-
-                {/* Right side: Comment Section */}
                 <div className="w-1/2 flex flex-col border-l">
                     <div className="flex-1 p-4 overflow-y-auto">
                         <h3 className="font-semibold text-center text-xl mb-4"> {allComments.length} Comments....</h3>
         
                         {allComments.length > 0 ? (
                             allComments.map((comment)=> (
+                                <div className="mb-3 ">
+                                    <div className='flex gap-2 justify-between border py-2 px-2' >
+                                        <div className='flex gap-2 items-center'>
+                                        <Stack>
+                                            <Avatar sx={{ fontSize : '15px' , height : '30px' , width : '30px' }}>{comment.username[0].toUpperCase()}</Avatar>
 
-                                <div className="mb-3">
-                                    <p className="text-sm">
-                                        <span className="font-semibold">{comment.username}:</span> {comment.name}
-                                    </p>
+                                        </Stack>
+
+
+                                        <p className="text-sm mt-1">
+                                            <span className="font-semibold">{comment.username}:</span> {comment.name}
+                                            
+                                        </p>
+
+                                        </div>
+                                        
+                                    <div className='mt-1' >
+                                        <span className='text-[12px]' > <Clock1 size={17} className='inline' /> {timeAgo(comment.created_at)}</span>
+                                    </div>
+                                    </div>
                                 </div>
                             ))
                     
@@ -159,13 +190,14 @@ function BlogInfo() {
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                             placeholder="Add a comment..."
-                            className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none"
+                            className="flex-1 border border-gray-300 rounded-full w-full md:text-sm md:w-1/2 md:p-2 px-4 py-2 text-sm focus:outline-none"
                         />
                         <button 
-                            className="ml-2 text-blue-500 font-semibold"
+                            className="ml-2 text-gray-600 font-semibold"
                             onClick={handleComment}
-                        >Post</button>
+                        ><Send  /></button>
                     </div>
+
                 </div>
             </div>
         </div>

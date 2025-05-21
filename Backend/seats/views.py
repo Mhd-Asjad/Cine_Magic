@@ -81,12 +81,13 @@ class get_theatre_screenlayout(APIView):
         return Response(data, status=200)
         
 class get_screen_seats(APIView):
+    permission_classes = [permissions.AllowAny]
     def get(self , request , screen_id):
         try :
             show_id = request.query_params.get('show_id')
             seatss = seats.objects.filter(screen = screen_id , is_active = True).order_by('row' , 'number')
             
-            inactive_seats = seatss.filter(is_seat=False).count() 
+            inactive_seats = seatss.filter(is_seat=False).count()
             total_active = seatss.count()
             print(inactive_seats , total_active)
             seat_data = []
@@ -138,7 +139,6 @@ class get_theatre_screens(APIView):
         
 class get_seats_category(APIView):
     permission_classes = [IsAuthenticatedUser]
-    print('user is authenticated')    
     def get(self , request):
         cat = SeatCategory.objects.all()
         serializer = All_SeatCategory(cat , many=True)

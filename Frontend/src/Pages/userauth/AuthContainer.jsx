@@ -7,22 +7,26 @@ import { GoogleOAuthProvider , GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { setUser_id , setUsername , setEmail } from '@/Redux/Features/UserSlice';
+import { setUser_id , setUsername , setPrevilage , setEmail } from '@/Redux/Features/UserSlice';
 import { useToast } from '@/hooks/use-toast';
 import userApi from '@/Axios/userApi';
 
-function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose }) {
-    const [isRegister, setIsRegister] = useState(true);
-    const [ isLogin , setIsLogin ] = useState(false)
+function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined }) {
+    const [ isLogin , setIsLogin ] = useState(true)
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const {toast} = useToast();
     const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID  
-    console.log(GOOGLE_CLIENT_ID)
     const toggleForm = () => {
-        setIsRegister((prev) => !prev);
+        
+        setIsLogin(prev => (!prev))
     };
-
+    useState(() => {
+        if (Logined){
+            console.log('is logined')
+            setIsLogin(true)
+        }
+    },[])
     const handleGoogleSuccess = async (credentialresponse) => {
         const decoded = jwtDecode(credentialresponse.credential)
         console.log(decoded);
@@ -32,12 +36,16 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose }) {
                 'email' : email , 
                 'username' : name
             })
-            const {id , userEmail , username } = res.data.user
-            console.log(userEmail)
-
+            const { refresh_token , access_token , id , userEmail , username } = res.data.user
+            console.log(refresh_token , access_token)
+            localStorage.setItem('user_token' , access_token)
+            localStorage.setItem('user_refresh_token',refresh_token)
+            localStorage.setItem('current_user_type' , 'user')
             dispatch(setUser_id(id))
             dispatch(setEmail(userEmail))
             dispatch(setUsername(username))
+
+
 
             console.log("Google Auth Response:", res.data);
             if (res.data.success) {
@@ -56,17 +64,18 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose }) {
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
 
             <div className="container mx-auto p-6">
-                {isRegister ? (
+                {isLogin ? (
+                    <LoginForm isModalClose={isModalClose} />
+                ) :  (
                     <RegistrationForm
                         setMessage={() => {}}
                         setIsOtpSent={setIsOtpSent}
                         setUserEmail={setUserEmail}
+                        setUserPrevillage={setPrevilage}
                     />
-                ) : (
-                    <LoginForm isModalClose={isModalClose} />
                 )}
                 <p className="text-center mt-4">
-                    {isRegister ? (
+                    {!isLogin ? (
 
                         <>
                             Already have an account?{' '}

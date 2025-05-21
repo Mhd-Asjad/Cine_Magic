@@ -14,8 +14,10 @@ from django.contrib.auth import login
 from django.views import View
 from allauth.socialaccount.models import SocialAccount
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from theatre_owner.serializers import TheatreOwnerSerialzers
 from theatre_owner.models import TheaterOwnerProfile
+
 class UserRegisterView(APIView) :
     permission_classes = [permissions.AllowAny]
     def post(self , request ):
@@ -37,14 +39,15 @@ class VerifyOtpView(APIView) :
         serializer = OtpVerificationSerializer(data = request.data)
         if serializer.is_valid():
             user = serializer.save()
-
+            data = serializer.validated_data
+            
             user_data = {
                 'id' : user.id ,
                 'username' : user.username , 
                 'email' : user.email
             }
             print(user_data)
-            return Response({'user' : user_data ,"message" : "OTP Verified Successfully "}, status=status.HTTP_200_OK )
+            return Response({'user' : user_data , "message" : "OTP Verified Successfully "}, status=status.HTTP_200_OK )
         print(serializer.errors)
         return Response({'errors' : serializer.errors} , status=status.HTTP_400_BAD_REQUEST)
 
@@ -113,7 +116,18 @@ class UserLoginView(APIView) :
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self , request):
+        try :
+            refresh_token = request.data['refresh']
+            print(refresh_token)
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"detail": "Token blacklisted"}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
 @method_decorator(csrf_exempt , name='dispatch')
 class GoogleAuthView(View):
     permission_classes = [permissions.AllowAny]
@@ -126,14 +140,14 @@ class GoogleAuthView(View):
             
             username = data.get('username') or email.split('@')[0]           
             user , created = User.objects.get_or_create(email=email,defaults={
-                
+
                 'username' : username,
-                'password' : None, 
                 
                 }
             )
             if created :
                 print('already exist')
+                user.set_password()
                 SocialAccount.objects.create(
                     user=user,
                     provider='google',
@@ -144,10 +158,13 @@ class GoogleAuthView(View):
                 user.username = username
                 user.save()
             login(request , user, backend='django.contrib.auth.backends.ModelBackend')
-                
+            refresh = RefreshToken.for_user(user)
+            
             return JsonResponse({
                 'success' : True,
                 'user' :{
+                    'access_token' : str(refresh.access_token) ,
+                    'refresh_token' : str(refresh), 
                     'id' : user.id,
                     'userEmail' : user.email,
                     'username' : user.username
@@ -175,12 +192,10 @@ class editUser(APIView):
     
 class checkUserType(APIView):
     permission_classes = [permissions.AllowAny]
-
     def post(self , request ):
         data = request.data
         username = data.get('username')
         password = data.get('password')
-        print(username , password)
         user = authenticate(request , username=username , password=password)
         if user is None :
             return Response({'error' : 'not a valid user'},status=status.HTTP_401_UNAUTHORIZED)
@@ -191,7 +206,6 @@ class checkUserType(APIView):
             user_type = 'theatre'
         else :
             user_type = 'user'
-            
         print(user_type)
             
         return Response({'user_type' : user_type} , status=status.HTTP_200_OK)

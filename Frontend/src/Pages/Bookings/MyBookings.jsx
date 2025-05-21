@@ -30,7 +30,7 @@ function MyBookings() {
                 setLoading(false);
             }
         };
-        
+
         fetchBookings();
     }, [userId]);
 

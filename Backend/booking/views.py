@@ -32,6 +32,7 @@ class Checkout(APIView) :
     permission_classes = [IsAuthenticatedUser]
     def get(self , request , user_id):
         print(request.user)
+
         try :
             user = User.objects.get(id=user_id)
             seats_ids = request.query_params.getlist('selectedseats')
@@ -165,7 +166,6 @@ class Create_Booking(APIView):
                         print(seat_lock, 'seat lock')
                     except SeatLock.DoesNotExist:
                         pass
-                    
 
                 Payment.objects.create(
                     booking = booking,
@@ -264,7 +264,6 @@ def Ticket_View( request , booking_id ):
             
         seat_det['seats'].append(f'{seat.seat.row}{seat.seat.number}')
         
-    print(type(seat_det))
     
     data = {
         'id' : booking.id,
@@ -278,7 +277,6 @@ def Ticket_View( request , booking_id ):
         'screen_type' : booking.show.screen.screen_type,
         'screen_number' : booking.show.screen.screen_number,
         'refund_status' : booking.refunt_status,
-
     }
 
     return Response({'ticket_data' : data , 'movie_details' : show.data , 'seats' : seat_det['seats'] },status=status.HTTP_200_OK)
@@ -417,3 +415,19 @@ class Get_Booking_Status(APIView):
             'refund_amount' : booking.refund_amount
         }
         return Response({'status' : status_data} , status=status.HTTP_200_OK)
+    
+
+class ticket_view(APIView): 
+    permission_classes = [permissions.AllowAny]
+    def get(self , request , id) :
+        try :
+            booking = Booking.objects.get(id=id)
+            
+            if booking.status == 'cancelled':
+                return Response({'error' : 'link is invalid'},status=status.HTTP_400_BAD_REQUEST)
+            
+            serializer = TicketViewSerializer(booking)
+            print(serializer.data)
+            return Response(serializer.data , status=status.HTTP_200_OK)
+        except Exception as e :
+            return Response({'error' : str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)

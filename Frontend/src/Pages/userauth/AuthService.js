@@ -2,7 +2,7 @@ import userApi from "@/Axios/userApi"
 import { setUsername , setEmail , setUser_id , setPrevilage } from "@/Redux/Features/UserSlice"
 import { setTheatreOwner } from '../../Redux/Features/Theatreownerslice';
 import {jwtDecode} from 'jwt-decode';
- 
+
 const TOKEN_KEYS = {
     user: 'user_token',
     admin: 'admin_token',
@@ -57,12 +57,25 @@ export const login  = async ( dispatch ,  username , password , loginType ) => {
     }
 }
 
-export const logout = () => {
+export const logout = async() => {
+
     const userType = localStorage.getItem('current_user_type');
+    console.log(userType)
+    const refreshToken = localStorage.getItem(`${userType}_refresh_token`);
+    try {
+        const res = await userApi.post('userlogout/',{
+            'refresh' : refreshToken
+        })
+        console.log(res.data)
+    }catch(e){
+        console.log('error on logout',e.response?.data || 'error occurs' )
+    }finally{
+       
+    }
     if (userType) {
         localStorage.removeItem(TOKEN_KEYS[userType]);
         localStorage.removeItem(`${TOKEN_KEYS[userType]}_refresh`);
-        // localStorage.removeItem('current_user_type');
+        localStorage.removeItem('current_user_type');
     } else {
         clearAllTokens();
     }
@@ -104,7 +117,7 @@ export const clearAllTokens = () => {
         localStorage.removeItem(value)
         localStorage.removeItem(`${value}_refresh`)
     })
-    // localStorage.removeItem('current_user_type')
+    localStorage.removeItem('current_user_type')
 }
 
 export default login

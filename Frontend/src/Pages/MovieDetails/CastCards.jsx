@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 
-function CastCards({movie_id}) {
+function CastCards({movie_id , castLength=0}) {
     const [ casts , setCasts ] = useState([]);
     useEffect(() => {
         const getCredits = async() => {
@@ -21,10 +21,15 @@ function CastCards({movie_id}) {
             }catch(e){
                 console.log(e)
             }
+
         };
         if (movie_id) {
 
             getCredits()
+        }
+        console.log(casts)
+        if (casts.length > 0){
+          castLength(casts.length)
         }
         
     },[movie_id])

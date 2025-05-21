@@ -63,6 +63,8 @@ function LikeDislikeButton({ postId, like_count, unlike_count, onChangeReactions
   };
 
   return (
+    <div>
+
     <div className="flex gap-3 items-center">
       <motion.button
         whileTap={{ scale: 1.2 }}
@@ -74,6 +76,7 @@ function LikeDislikeButton({ postId, like_count, unlike_count, onChangeReactions
 
       </motion.button>
 
+
       <motion.button
         whileTap={{ scale: 1.2 }}
         onClick={handleDislike}
@@ -82,6 +85,15 @@ function LikeDislikeButton({ postId, like_count, unlike_count, onChangeReactions
         {disliked ? <AiFillDislike /> : <AiOutlineDislike />}
         <span>{unlikeCount}</span>
       </motion.button>
+
+    </div>
+      {liked &&
+
+        <div className='p-1' >
+            <p className='text-md font-semibold'> Liked by You { likeCount > 1 ? `and ${likeCount-1} others` : '' }</p>
+        </div>
+
+      }
     </div>
   );
 };
