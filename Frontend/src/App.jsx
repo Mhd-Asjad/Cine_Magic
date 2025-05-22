@@ -49,7 +49,7 @@ function App() {
                     <Route path='movies/my-orders' element={<MyBookings/>} />
                     <Route path='booking/:id/ticket' element={<TicketView/>} />
                     <Route path='verify-ticket/:id' element={<VerifiedTicket/>} />
-                    <Route path='/blogs' element={<PrivateRoute allowedTypes='user' ><BlogPosts/></PrivateRoute>} />
+                    <Route path='/blogs' element={<BlogPosts/>} />
                     <Route path='/blogs/add' element={<AddBlog/>} />
                     <Route path="/posts/details/:id" element={<BlogInfo/>}/>
 

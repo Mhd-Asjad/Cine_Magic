@@ -67,6 +67,7 @@ function LoginForm( { isModalClose  }) {
 
         try {
             const res = await login( dispatch , username , password , userType)
+            console.log(res.data)
             isModalClose()
             
         }catch(e) {
@@ -142,10 +143,11 @@ function LoginForm( { isModalClose  }) {
                 
                 </div>
 
-                <div className="flex mx-auto w-[15%]">
+                <div className="flex mx-auto w-[25%]">
                 <Button 
                     variant="contained" disableElevation
-                    type="submit"
+                    type="submit"   
+                    className='w-full '
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? 'Logging in...' : 'Login'}

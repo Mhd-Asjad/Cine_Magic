@@ -7,7 +7,8 @@ import { useSelector } from 'react-redux';
 import LikeDislikeButton from './LikeDislikeButton';
 import { Avatar } from '@mui/material';
 import {Stack} from '@mui/material';
-import { deepOrange } from '@mui/material/colors';
+import Modal from '@/Components/Modals/Modal';
+import AuthContainer from '../userauth/AuthContainer';
 import { Send , Clock1 } from 'lucide-react';
 function BlogInfo() {
     const [postDetails , setPostDetails] = useState(null);
@@ -15,10 +16,15 @@ function BlogInfo() {
     const [ allComments , setAllComments ] = useState([])
     const [ loading , setLoading] = useState(true)
     const [reaction , setReaction] = useState(null)
+    const [isModalOpen , setIsModalOpen] = useState(false);
+    const [isLogin , setIsLogin] = useState(false);
     const {id} = useParams();
     const userId = useSelector((state) => state.user.id)
     
-    
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = ()  => {
+        setIsModalOpen(false);
+    }
     useEffect(( ) => {
         const fetchPostDetails = async() => {
             try{
@@ -46,6 +52,12 @@ function BlogInfo() {
     },[])
 
     const handleComment = async() => {
+        console.log('comment' , comment)
+        if (!userId) {
+            setIsLogin(true)
+            openModal()
+            return
+        }
         try{
             const res = await apiBlogs.post(`create-comment/${id}/`, {
                 'user' : userId,
@@ -201,6 +213,11 @@ function BlogInfo() {
                 </div>
             </div>
         </div>
+        <Modal isOpen={isModalOpen} closeModal={closeModal}  >
+
+            <AuthContainer isModalClose={closeModal} Logined={isLogin} />
+            
+        </Modal>
     </div>
     )}  
 

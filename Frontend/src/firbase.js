@@ -3,7 +3,7 @@
 // import { getFirestore } from "firebase/firestore";
 
 // const firebaseConfig = {
-//     apiKey: "AIzaSyDp0oSt3Mw-0hgGNh-dsofUQxH0YfFBW5g",
+
 //     authDomain: "blog-app-c3cc1.firebaseapp.com",
 //     projectId: "blog-app-c3cc1",
 //     storageBucket: "blog-app-c3cc1.firebasestorage.app",

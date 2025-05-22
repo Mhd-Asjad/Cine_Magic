@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const apiMovies = axios.create({
-    baseURL : 'http://127.0.0.1:8000/movies'
+    baseURL : import.meta.env.VITE_MOVIE_API,
 })
 
 apiMovies.interceptors.request.use((config) => {

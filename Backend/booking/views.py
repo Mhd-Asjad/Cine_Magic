@@ -19,13 +19,14 @@ from django.shortcuts import get_object_or_404
 from movies.models import Movie
 import paypalrestsdk
 from useracc.permissions import IsAuthenticatedUser
-
+import logging
 paypalrestsdk.configure({
     'mode' : 'sandbox',
     'client_id' : settings.PAYPAL_CLIENT_ID,
     'client_secret' : settings.PAYPAL_CLIENT_SECRET,
 })  
 
+logger = logging.getLogger(__name__)
 
 # provides checkout details
 class Checkout(APIView) :
@@ -227,7 +228,7 @@ class Show_Bookings(APIView):
                     'show': {
                     'movie' : booking.show.movie.title,
                     'show_date' : booking.show.show_date.strftime('%Y-%m-%d'),
-                    'start_time' : booking.show.slot.start_time.strftime("%H:%M"),
+                    # 'start_time' : booking.show.slot.start_time.strftime("%H:%M"),
                         
                     },                    
                     'seats' : seats ,
@@ -264,12 +265,15 @@ def Ticket_View( request , booking_id ):
             
         seat_det['seats'].append(f'{seat.seat.row}{seat.seat.number}')
         
-    
+    slot_det = booking.show.old_slot.all()
+    print(slot_det , 'slot details')
+    logger.info('slot details' , slot_det)
+
     data = {
         'id' : booking.id,
         'booking_id' : booking.booking_id,
         'email' : booking.customer_email,
-        'show_time' : booking.show.slot.start_time.strftime(' %H:%M'),
+        # 'show_time' : booking.show.slot.start_time.strftime(' %H:%M'),
         'booking_time' : booking.booking_time.strftime('%Y:%m:%d %H:%M'),   
         'qrcode_img' : request.build_absolute_uri(booking.qr_code.url) if booking.qr_code else None,
         'screen_number' : booking.show.screen.screen_number,

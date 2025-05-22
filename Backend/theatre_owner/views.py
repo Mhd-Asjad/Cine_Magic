@@ -195,7 +195,7 @@ class validateowner(APIView):
 class FetchAllMovies(APIView):
     def get(self , request):
         try :
-            Movies = Movie.objects.all()
+            Movies = Movie.objects.filter().order_by('-created_at')
             serializer = FetchMovieSerializer(Movies , many=True,context={'request':request})
             return Response(serializer.data)
         except Exception as e:
@@ -376,6 +376,9 @@ class Add_Show_Time(APIView):
         logger.info(f"Received slot IDs: {slot_ids}")
         timeslot = TimeSlot.objects.filter(id__in = slot_ids)
         logger.info(f"Filtered timeslot: {timeslot}")
+
+            
+        
         try :
             if timeslot.count() != len(slot_ids):
                 return Response({'Error' : 'invalid time slot id'} , status=status.HTTP_400_BAD_REQUEST)
@@ -432,7 +435,7 @@ class Add_Show_Time(APIView):
             #     print('there is overlapping showww')    
             #     return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
 
-       
+            logger.info(f"data before creating showtime serializer", data)
             serializers = Createshowtimeserializers(data=data)
             if serializers.is_valid():
                 serializers.save()

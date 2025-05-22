@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import RegistrationForm from './RegistrationForm';
 import LoginForm from './LoginForm';
 import { jwtDecode } from 'jwt-decode';
-import google from '../../assets/google_logo.png'
 import { GoogleOAuthProvider , GoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser_id , setUsername , setPrevilage , setEmail } from '@/Redux/Features/UserSlice';
@@ -39,7 +37,7 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined })
             const { refresh_token , access_token , id , userEmail , username } = res.data.user
             console.log(refresh_token , access_token)
             localStorage.setItem('user_token' , access_token)
-            localStorage.setItem('user_refresh_token',refresh_token)
+            localStorage.setItem('user_token_refresh',refresh_token)
             localStorage.setItem('current_user_type' , 'user')
             dispatch(setUser_id(id))
             dispatch(setEmail(userEmail))
@@ -74,7 +72,7 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined })
                         setUserPrevillage={setPrevilage}
                     />
                 )}
-                <p className="text-center mt-4">
+                <p className="text-center mt-2">
                     {!isLogin ? (
 
                         <>

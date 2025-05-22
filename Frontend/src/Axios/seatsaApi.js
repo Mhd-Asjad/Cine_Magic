@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const seatsApi = axios.create({
-    baseURL : 'http://127.0.0.1:8000/seats/'
+    baseURL : import.meta.env.VITE_SEATS_API,
 })  
 
 seatsApi.interceptors.request.use((config) => {

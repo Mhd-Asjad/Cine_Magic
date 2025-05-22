@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const apiBlogs = axios.create({
-    baseURL : 'http://127.0.0.1:8000/blog/',
+    baseURL : import.meta.env.VITE_BLOG_API,
 })
 apiBlogs.interceptors.request.use((config) => {
     const current_user = localStorage.getItem('current_user_type')

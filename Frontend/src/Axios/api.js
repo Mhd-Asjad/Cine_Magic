@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const apiAdmin = axios.create({
-    baseURL : 'http://127.0.0.1:8000/adminside/'
+    baseURL : import.meta.env.VITE_ADMIN_API
 });
 
 apiAdmin.interceptors.request.use((config) => {
@@ -12,6 +12,5 @@ apiAdmin.interceptors.request.use((config) => {
     }
     return config
 })
-
 
 export default apiAdmin

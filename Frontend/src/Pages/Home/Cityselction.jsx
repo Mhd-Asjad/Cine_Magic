@@ -1,5 +1,7 @@
 import React , {useEffect, useState} from 'react'
 import axios from 'axios'
+import { MapPin } from 'lucide-react';
+
 function Cityselction({ oncityselect }) {
     const [ cities , setCities ] = useState([]);
     const [ loading , setLoading] = useState(true)
@@ -26,29 +28,34 @@ function Cityselction({ oncityselect }) {
     }
 
     return (
-        <div  >
-            <h2 className='p-4 text-xl font-semibold gap- text-center'>Add Location</h2>
-                {cities.length > 0 ? (
-                    cities.map((city) => (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 z-40">
-                        <button
-                            key={city.id}
-                            onClick={()=> oncityselect(city.id)}
-                            className="px-4 py-2 rounded-md border bg-gray-50 mx-auto hover:bg-gray-100 "
-                            style={{ fontSize: 'clamp(0.6rem, 1.5vw, 1rem)' }}
-
-                        >
-                            {city.name}
-                        </button>
-                    </div>
-                    ))
-                ) : (
-                    <div className='flex justify-center' >
-
-                        <p className='text-center mt-[10%] text-red-500 font-bold'>No Cities Available</p>
-                    </div>
-                )}
+        <div >
+      <div className="flex items-center justify-center mb-6">
+        <MapPin className="text-indigo-600 mr-2" size={24} />
+        <h2 className="text-xl md:text-2xl font-semibold text-gray-800">Select Location</h2>
+      </div>
+      
+      {cities.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
+          {cities.map((city) => (
+            <div key={city.id} className="flex justify-center">
+              <button
+                onClick={() => oncityselect(city.id)}
+                className={`w-full px-3 py-2 rounded-lg border text-sm transition-all md:text-sm md:w-[200px] duration-200'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:border-gray-300`}
+              >
+                {city.name}
+              </button>
+            </div>
+          ))}
         </div>
+      ) : (
+        <div className="flex justify-center items-center py-12">
+          <div className="text-center">
+            <p className="text-red-500 font-semibold">No Cities Available</p>
+            <p className="text-gray-500 mt-2">Please try again later</p>
+          </div>
+        </div>
+      )}
+    </div>
     )
 }
 

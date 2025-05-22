@@ -38,6 +38,7 @@ export const login  = async ( dispatch ,  username , password , loginType ) => {
                   ownership_status : 'confirmed' ,
                 }));
             }
+            console.log(is_theatre_owner , is_admin,is_approved , 'from login')
             dispatch(setUser_id(id))
             dispatch(setUsername(username))
             dispatch(setEmail(email))
@@ -60,7 +61,6 @@ export const login  = async ( dispatch ,  username , password , loginType ) => {
 export const logout = async() => {
 
     const userType = localStorage.getItem('current_user_type');
-    console.log(userType)
     const refreshToken = localStorage.getItem(`${userType}_refresh_token`);
     try {
         const res = await userApi.post('userlogout/',{

@@ -167,6 +167,7 @@ class GetAllPosts(generics.ListAPIView):
 
 # get particular post detailsss
 class GetPostDetail(APIView):
+    permission_classes = [permissions.AllowAny]
     def get(self , request , id):
         try :
             post = Post.objects.get(id=id)
@@ -187,7 +188,7 @@ class PostComment(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response({'message':'comment posted'},status=status.HTTP_201_CREATED)
-        
+        print(serializer.errors)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
     def get(self , request , post_id):

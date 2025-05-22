@@ -5,8 +5,15 @@ import * as Yup from 'yup';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 import userApi from '@/Axios/userApi';
+import { Eye, EyeOff, User, Mail, Lock, CheckCircle } from 'lucide-react';
+
 
 function RegistrationForm({ setMessage, setUserPrevillage ,  setIsOtpSent, setUserEmail }) {
+    const [touched, setTouched] = useState({});
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [confirmPassword, setConfirmPassword] = useState('');
+
     
     const [ errors , setErrors ] = useState('')
     toastr.options = {
@@ -30,6 +37,9 @@ function RegistrationForm({ setMessage, setUserPrevillage ,  setIsOtpSent, setUs
             username: '',
             email: '',
             password: '',
+            confirmPassword: ''
+
+
         },
         validationSchema: Yup.object({
             username: Yup.string()
@@ -40,7 +50,10 @@ function RegistrationForm({ setMessage, setUserPrevillage ,  setIsOtpSent, setUs
                 .required('Email is required'),
             password: Yup.string()
                 .required('Password is required')
-                .min(6, 'Password must be at least 6 characters long')
+                .min(6, 'Password must be at least 6 characters long'),
+            confirmPassword: Yup.string()
+                .required('Confirm Password is required')
+                .oneOf([Yup.ref('password'), null], 'Passwords must match'),
         }),
         onSubmit: async (values, { setSubmitting }) => {
             
@@ -69,7 +82,7 @@ function RegistrationForm({ setMessage, setUserPrevillage ,  setIsOtpSent, setUs
     });
 
     return (
-        <div>
+        <div >
             <h2 className="text-xl font-semibold mb-4">Register User</h2>
             <form onSubmit={formik.handleSubmit} className="space-y-4">
                 <div>
@@ -84,7 +97,7 @@ function RegistrationForm({ setMessage, setUserPrevillage ,  setIsOtpSent, setUs
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         placeholder="Enter username"
-                        className={`mt-1 block w-full px-3 py-2 border ${
+                        className={`mt-1 block px-3 py-2 border w-full ${
                             formik.touched.username && formik.errors.username
                                 ? 'border-red-500'
                                 : 'border-gray-300'
@@ -119,36 +132,86 @@ function RegistrationForm({ setMessage, setUserPrevillage ,  setIsOtpSent, setUs
                     )}
                 </div>
 
-                <div>
+                <div className="relative"> 
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                         Password
                     </label>
                     <input
-                        type="password"
+                        type={showPassword ? 'text' : "password"}
                         id="password"
                         name="password"
                         value={formik.values.password}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         placeholder="Enter password"
-                        className={`mt-1 block w-full px-3 py-2 border ${
+                        className={`mt-1 block px-3 py-2 border w-full ${
                             formik.touched.password && formik.errors.password
                                 ? 'border-red-500'
                                 : 'border-gray-300'
                         } rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
                     />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 pt-5 flex items-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? (
+                        <EyeOff size={18} className="text-gray-400" />
+                        ) : (
+                        <Eye size={18} className="text-gray-400" />
+                        )}
+                    </button>
                     {formik.touched.password && formik.errors.password && (
                         <p className="text-red-500 text-sm">{formik.errors.password}</p>
                     )}
-            </div>
 
+
+             </div>
+
+             <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              Confirm Password
+            </label>
+            <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <CheckCircle size={18} className="text-gray-400" />
+                </div>
+                <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formik.values.confirmPassword}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    placeholder="Confirm your password"
+                    className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                    {showConfirmPassword ? (
+                    <EyeOff size={18} className="text-gray-400" />
+                    ) : (
+                    <Eye size={18} className="text-gray-400" />
+                    )}
+                </button>
+            </div>
+            {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+            <p className="mt-1 text-sm text-red-600">{ formik.errors.confirmPassword}</p>
+            )}
+        </div>
+            <div className="flex items-center justify-between mt-4">
                 <button
                     type="submit"
-                    className="mx-auto flex justify-center w-[17%] py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg ho :bg-blue-700"
+                    className="mx-auto font-medium w-1/2 py-2 rounded-md px-2 text-white bg-blue-500"
                     disabled={formik.isSubmitting}
                 >
                     {formik.isSubmitting ? 'Registering...' : 'Register'}
                 </button>
+
+            </div>
             </form>
         </div>
     );

@@ -294,6 +294,7 @@ const Profile = () => {
 
   };
 
+  console.log(user , 'user in profile')
   const handleLocationSelect = async(location) => {
     setLatitude(location[0] )
     setLongitude(location[1])
