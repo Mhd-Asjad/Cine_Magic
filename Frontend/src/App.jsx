@@ -29,7 +29,7 @@ function App() {
             <Router>
                 <Routes>
                     <Route path="/" element={<Landingpage/> }/>
-                    <Route path="/movie/:id/details" element={<PrivateRoute><MovieSpecification/></PrivateRoute>} />
+                    <Route path="/movie/:id/details" element={<MovieSpecification/>} />
                     <Route path="/profile" element={<Profile/>} />
                     <Route path={`/available-show-details/:id`} element={<AvailableShowDetails/>} />
                     <Route path={'/available-show-details/:screenId/:showId/seats'} element={<Seats/>} />
@@ -57,7 +57,7 @@ function App() {
 
                     {/* theatre owner */}
                     <Route path="/theatre/login" element={<Loginpage />} />
-                    <Route path="/theatre-owner/*" element={<TheatreOwner/>} />
+                    <Route path="/theatre-owner/*" element={<PrivateRoute allowedTypes='theatre' ><TheatreOwner/></PrivateRoute>} />
 
                 </Routes>
             </Router>

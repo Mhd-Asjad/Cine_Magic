@@ -142,7 +142,7 @@ const Profile = () => {
       },
     });
 
-      handleSuccess(response.data.message)
+      handleSuccess(response.data.message)  
 
     }catch(e) {
 

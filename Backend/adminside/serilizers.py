@@ -5,7 +5,6 @@ from theatres.models import *
 from theatre_owner.models import *
 from useracc.models import User
 from seats.models import seats
-from django.db.models import Case, When, Value, CharField, F, Func
 from django.db.models.functions import Concat
 
 

@@ -73,8 +73,8 @@ class UserLoginView(APIView) :
             if user_type == 'theatre':
       
 
-                if not user.is_theatre_owner:
-
+                if not user.is_theatre_owner and not user.is_approved :
+                    
                     return Response({
                         'error': 'User is not registered as a theatre owner'
                     }, status=status.HTTP_403_FORBIDDEN)

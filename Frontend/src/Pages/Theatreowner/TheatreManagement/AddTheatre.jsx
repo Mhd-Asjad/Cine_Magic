@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { ToastAction } from '@radix-ui/react-toast';
 import TheatreApi from '@/Axios/theatreapi';
 import { useNavigate } from 'react-router-dom';
+import apiMovies from '@/Axios/Moviesapi';
 
 function AddTheatre( ) {
     const [theatreName , setTheatreName] = useState('');
@@ -33,8 +34,8 @@ function AddTheatre( ) {
     const fetchCities = async() => {
         try{
 
-            const res = await axios.get('http://127.0.0.1:8000/movies/list_cities/');
-            setCities(res.data.cities)
+            const res = await apiMovies.get('fetchall-citys/');
+            setCities(res.data)
 
 
         }catch(e){

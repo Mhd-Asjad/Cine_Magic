@@ -35,7 +35,7 @@ class CreateOwnershipProfile(APIView) :
             if user.is_staff :
                 return Response({'error' : 'admin cant register as a theatre owner'},status=status.HTTP_400_BAD_REQUEST)
             if TheaterOwnerProfile.objects.filter(user=user.id ,theatres__is_confirmed=False).exists():
-                return Response({'error' : 'you have already registered for ownership verfy it for another one'},status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error' : 'you have already registered for ownership verify it for another one'},status=status.HTTP_400_BAD_REQUEST)
 
             serializer = TheatreOwnerSerialzers(data = data)    
             if serializer.is_valid():
@@ -70,7 +70,7 @@ class ConfirmTheatreOwner(APIView) :
     # getting unverified theatre enquries 
     def get(self , request ) :
         try :
-            unverified_theatre = TheaterOwnerProfile.objects.filter(ownership_status = 'confirmed' , user__is_theatre_owner = False)
+            unverified_theatre = TheaterOwnerProfile.objects.filter(ownership_status = 'confirmed' , user__is_theatre_owner = True)
             print(unverified_theatre)
             data = []
             for theatre in unverified_theatre :
@@ -137,6 +137,8 @@ class ConfirmTheatreOwner(APIView) :
                 Theatre.objects.get_or_create(
                     owner=theatre_owner,
                     name=theatre_owner.theatre_name,
+                    latitude = theatre_owner.latitude,
+                    longitude = theatre_owner.longitude,
                     city=city,
                     address=f"{theatre_owner.location}, {theatre_owner.state}"
                 )

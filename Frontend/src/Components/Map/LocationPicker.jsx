@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Circle,  useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
+import ZoomLocation from './ZoomLocation';
 
 const customIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/64/64113.png",
@@ -10,7 +11,13 @@ const customIcon = new L.Icon({
 function LocationMarker({ setSelectedLocation }) {
   useMapEvents({
     click(e) {
-      setSelectedLocation([e.latlng.lat, e.latlng.lng])
+      console.log(e)
+      const lat = e.latlng.lat
+      const lng = e.latlng.lng
+      console.log('YOu clicked place' ,lat , lng)
+      console.log(e , 'user selection location')
+      setSelectedLocation([lat , lng])
+
     }
   });
   return null
@@ -42,11 +49,25 @@ function LocationPicker({ onLocationSelect }) {
         console.log('Fetched theatres data:', data);
         const theatre_data = data.elements.filter(element => element.tags && element.tags.name);
         console.log('Filtered theatres data:', theatre_data);
-        const results = data.elements.map(element => ({
-          lat : element.center.lat,
-          lng : element.center.lon,
-          name : element.tags.name || 'Theatre',
-        }));
+        const results = data.elements
+          .filter(element => element.tags && element.tags.name)
+          .map(element => {
+            const lat = element.center?.lat ?? element.lat;
+            const lng = element.center?.lon ?? element.lon;
+            
+            if (lat == null || lng == null) return null;
+            return {
+              lat,
+              lng,
+              name: element.tags.name || 'Theatre',
+            };
+          })
+          .filter(Boolean);
+        // .map(element => ({
+        //   lat : element?.center.lat || element.lat ,
+        //   lng : element?.center.lon || element.lon,
+        //   name : element.tags.name || 'Theatre',
+        // }));
         console.log('Theatres:', results);  
         setTheatres(results);
 
@@ -72,17 +93,25 @@ function LocationPicker({ onLocationSelect }) {
         fetchTheatres(fallback[0], fallback[1])
       }
     );
-  }, [selectedLocation , onLocationSelect]);
+  }, []);
+
+
   useEffect(() => {
-    if (selectedLocation && onLocationSelect) {
-      onLocationSelect(selectedLocation)
+    if (selectedLocation) {
+
+      fetchTheatres(selectedLocation[0] , selectedLocation[1])
+      
+      if (onLocationSelect) {
+        onLocationSelect(selectedLocation)
+      }
     }
-  }, [selectedLocation , onLocationSelect])
-  console.log(theatres)
+
+  }, [selectedLocation])
+  console.log(selectedLocation)
   return (
     <>
       {currentLocation && (
-        <MapContainer center={currentLocation} zoom={13} style={{ height: '300px', width: '100%' }}>
+        <MapContainer center={currentLocation} zoom={10} style={{ height: '300px', width: '100%' }}>
           <TileLayer
             attribution='&copy; openStreetMap contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -91,8 +120,12 @@ function LocationPicker({ onLocationSelect }) {
             <Popup>You are here</Popup>
           </Marker>
         {selectedLocation && (
+          <>
+          
+          <Circle center={selectedLocation} radius={3000} color="blue" fillOpacity={0.1} />
+          <ZoomLocation location={selectedLocation} />
+          </>
 
-          <Circle center={selectedLocation} radius={1000} color="blue" fillOpacity={0.1} />
         )}
 
         {/* theatres */}
