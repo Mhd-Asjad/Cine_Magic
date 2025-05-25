@@ -30,17 +30,19 @@ logger = logging.getLogger(__name__)
 
 # provides checkout details
 class Checkout(APIView) :
-    permission_classes = [IsAuthenticatedUser]
-    def get(self , request , user_id):
-        print(request.user)
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self , request ):
+        user = request.user
 
         try :
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(id=user.id)
             seats_ids = request.query_params.getlist('selectedseats')
             show_id = request.query_params.get('show_id')
+            slot_id = request.query_params.get('booking_slot')
             session_id = request.session.session_key
 
             if not seats_ids or not show_id:
+                print('no seats or show id')
                 return Response({'seat_error' : 'no seats are locked'} , status=status.HTTP_400_BAD_REQUEST)
             
             expired = SeatLock.objects.filter(
@@ -56,7 +58,7 @@ class Checkout(APIView) :
             seatss = seats.objects.filter(id__in=seats_ids)
             category = seatss.values_list('category__name' , flat=True).first()
             seats_data = [ seat.row + str(seat.number) for seat in seatss ]
-            
+            show_slot = TimeSlot.objects.get(id=slot_id)
             show = ShowTime.objects.get(id=show_id)
             amount = sum( seat.category.price for seat in seatss)
             theatre =  show.screen.theatre
@@ -72,7 +74,7 @@ class Checkout(APIView) :
                 },
                 'show_time' : {
                     'date' : show.show_date,
-                    'time' : show.slot.start_time 
+                    'time' : show_slot.start_time.strftime('%H:%M'),
                 },
                 'theatre':{
                     'name' : theatre.name ,
@@ -89,12 +91,13 @@ class Checkout(APIView) :
             },status=status.HTTP_200_OK)
             
         except Exception as e:
+            print('error in checkout' , str(e))
             return Response({'error' : str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # payment callback handling
 @method_decorator(csrf_exempt , name='dispatch')
 class ProcessPayment(APIView):
-    permission_classes = [IsAuthenticatedUser]
+    permission_classes = [permissions.IsAuthenticated]
     def post(self , request):
         order_id = request.data.get('orderId')
         print(order_id,'orderidddd')
@@ -117,70 +120,72 @@ class Create_Booking(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self , request ):
         print('enters to the booking view')
+        data = request.data
+        
+        user = User.objects.get(id=data['user_id'])
+        show_id =  data['show_id']
+        slot_id = data['booking_slot']
+        seat_ids = data['selected_seats'] 
+        total_amount = data['total_amount']
+        paymentdet = data['payment_details']    
+        price = total_amount // len(seat_ids)
+        print(type(data)) 
         try:
-            data = request.data
-            
-            user = User.objects.get(id=data['user_id'])
-            show_id =  data['show_id']
-            seat_ids = data['selected_seats']
-            total_amount = data['total_amount']
-            paymentdet = data['payment_details']    
-            price = total_amount // len(seat_ids)
-            print(type(data)) 
-            try:
-                purchase_units  = paymentdet.get('purchase_units' , [])
-                if purchase_units :
-                    captures = purchase_units[0].get('payments' , {}).get('captures' , [])
-                    if captures :
-                        capture_id = captures[0].get('id')
-                        print(capture_id , 'capture id')
-                    else :
-                        print('No Capture found')
+            purchase_units  = paymentdet.get('purchase_units' , [])
+            if purchase_units :
+                captures = purchase_units[0].get('payments' , {}).get('captures' , [])
+                if captures :
+                    capture_id = captures[0].get('id')
+                    print(capture_id , 'capture id')
                 else :
-                    print('No purchase unit found')
-                    capture_id = None
-            except Exception as e:
-                print('Error in purchase unit' , str(e))
-            with transaction.atomic():
-                show = ShowTime.objects.get(id=show_id)
-                booking = Booking.objects.create(
-                    user=user ,
-                    show = show,
-                    customer_name = user.username,
-                    customer_email = user.email ,
-                    status = 'confirmed',
-                    payment_id = paymentdet['id'],
-                    amount = total_amount
-                )
-                
-                booking.generate_qrcode()
-                booking.save()
-                for seat_id in seat_ids:    
-                    seat = seats.objects.get(id=seat_id)
-                    BookingSeat.objects.create(
-                        booking=booking,
-                        seat=seat,
-                        price = price
-                    )
-                    try : 
-                        seat_lock = SeatLock.objects.filter(seat = seat).delete()
-                        print(seat_lock, 'seat lock')
-                    except SeatLock.DoesNotExist:
-                        pass
-
-                Payment.objects.create(
-                    booking = booking,
-                    order_id = booking.booking_id,
-                    payer_id = paymentdet['id'],
-                    amount = total_amount,
-                    capture_id = capture_id,
-                    payment_method = 'paypal',
-
-                )
-            return Response({'message': 'Booking created successfully' , 'booking_id' : booking.id }, status=status.HTTP_201_CREATED)
+                    print('No Capture found')
+            else :
+                print('No purchase unit found')
+                capture_id = None
         except Exception as e:
-            print('error in booking' , str(e))
-            return Response({'error' : str(e)},status=status.HTTP_400_BAD_REQUEST)
+            print('Error in purchase unit' , str(e))
+        with transaction.atomic():
+            show = ShowTime.objects.get(id=show_id)
+            slot = TimeSlot.objects.get(id=slot_id)
+            booking = Booking.objects.create(
+                user=user ,
+                show = show,
+                slot=slot,
+                customer_name = user.username,
+                customer_email = user.email ,
+                status = 'confirmed',
+                payment_id = paymentdet['id'],
+                amount = total_amount
+            )
+            
+            booking.generate_qrcode()
+            booking.save()
+            for seat_id in seat_ids:    
+                seat = seats.objects.get(id=seat_id)
+                BookingSeat.objects.create(
+                    booking=booking,
+                    seat=seat,
+                    price = price
+                )
+                try : 
+                    seat_lock = SeatLock.objects.filter(seat = seat).delete()
+                    print(seat_lock, 'seat lock')
+                except SeatLock.DoesNotExist:
+                    pass
+
+            Payment.objects.create(
+                booking = booking,
+                order_id = booking.booking_id,
+                payer_id = paymentdet['id'],
+                amount = total_amount,
+                capture_id = capture_id,
+                payment_method = 'paypal',
+
+            )
+        return Response({'message': 'Booking created successfully' , 'booking_id' : booking.id }, status=status.HTTP_201_CREATED)
+        # except Exception as e:
+        #     print('error in booking' , str(e))
+        #     return Response({'error' : str(e)},status=status.HTTP_400_BAD_REQUEST)
         
 # verifying the booking done by the user
 class Verify_Booking(APIView):
@@ -228,7 +233,7 @@ class Show_Bookings(APIView):
                     'show': {
                     'movie' : booking.show.movie.title,
                     'show_date' : booking.show.show_date.strftime('%Y-%m-%d'),
-                    # 'start_time' : booking.show.slot.start_time.strftime("%H:%M"),
+                    'start_time' : booking.slot.start_time.strftime("%H:%M"),
                         
                     },                    
                     'seats' : seats ,
@@ -265,9 +270,9 @@ def Ticket_View( request , booking_id ):
             
         seat_det['seats'].append(f'{seat.seat.row}{seat.seat.number}')
         
-    slot_det = booking.show.old_slot.all()
-    print(slot_det , 'slot details')
-    logger.info('slot details' , slot_det)
+    # slot_det = booking.show.old_slot.all()
+    # print(slot_det , 'slot details')
+    # logger.info('slot details' , slot_det)
 
     data = {
         'id' : booking.id,
@@ -298,7 +303,7 @@ class Calculate_Refund_amount(APIView):
         total = booking.amount
         booking_id = booking.booking_id
         show_date = booking.show.show_date
-        show_time =  booking.show.slot.start_time 
+        show_time =  booking.slot.start_time 
         
         show_date_time = datetime.combine(show_date , show_time)
         show_date_time = timezone.make_aware(show_date_time)

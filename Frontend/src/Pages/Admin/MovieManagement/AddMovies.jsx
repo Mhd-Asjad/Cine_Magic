@@ -75,7 +75,7 @@ function AddMovies() {
 
     return (
         
-        <div className="flex min-h-screen bg-gray-100">
+        <div className="w-full max-w-screen-xl mx-auto">
         
                 <div className="p-8 py-4">
                     <h2 className="text-center mb-7 pt-12 px-3 font-semibold text-3xl text-gray-500">

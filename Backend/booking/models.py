@@ -1,5 +1,5 @@
 from django.db import models
-from theatres.models import ShowTime
+from theatres.models import *
 import qrcode
 import io
 from django.core.files.base import ContentFile
@@ -22,8 +22,9 @@ class Booking(models.Model):
     
     booking_id = models.CharField(max_length=20 , unique=True )
     qr_code = models.ImageField(upload_to='qrcodes/' , blank=True , null=True)
-    user = models.ForeignKey('useracc.User' , on_delete=models.CASCADE , null=True , blank=True)
-    show = models.ForeignKey(ShowTime , on_delete=models.CASCADE)
+    user = models.ForeignKey('useracc.User' , on_delete=models.CASCADE , null=True , blank=True , related_name='booking')
+    show = models.ForeignKey(ShowTime , on_delete=models.CASCADE,blank=True , null=True)
+    slot = models.ForeignKey(TimeSlot , on_delete=models.CASCADE , blank=True , null=True)
     customer_name = models.CharField(max_length=100)
     customer_email = models.EmailField()
     booking_time = models.DateTimeField(auto_now_add=True)
@@ -36,7 +37,6 @@ class Booking(models.Model):
     refunt_status = models.CharField(max_length=20 , choices=REFUND_STATUS_CHOICES , default='not-applicable' )
     def generate_qrcode(self) :
         if self.status == 'confirmed' and not self.qr_code :
-            formatted_time = self.show.slot.start_time.strftime('%I:%M %p')
             qr_data = f'http://127.0.0.1:8000/booking/ticket/{self.id}/'
             qr = qrcode.QRCode(
                 version=1,

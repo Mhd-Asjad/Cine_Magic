@@ -29,20 +29,18 @@ function App() {
             <Router>
                 <Routes>
                     <Route path="/" element={<Landingpage/> }/>
-                    <Route path="/movie/:id/details" element={<MovieSpecification />} />
+                    <Route path="/movie/:id/details" element={<PrivateRoute><MovieSpecification/></PrivateRoute>} />
                     <Route path="/profile" element={<Profile/>} />
                     <Route path={`/available-show-details/:id`} element={<AvailableShowDetails/>} />
                     <Route path={'/available-show-details/:screenId/:showId/seats'} element={<Seats/>} />
 
-                    <Route path="seat-layout/:location" element={
-                        <UserRoute>
+                    <Route path="seat-layout/" element={
                             <PayPalScriptProvider options={{
                                 "clientId" : PAYPAL_CLIENT_ID,
                                 currency : 'USD'
                             }}>
                                 <Checkout/>
                             </PayPalScriptProvider>
-                        </UserRoute>
                             } />
                         
                     <Route path="payment/:booking_id/success" element={<PaymentSuccess/>} />
@@ -59,7 +57,7 @@ function App() {
 
                     {/* theatre owner */}
                     <Route path="/theatre/login" element={<Loginpage />} />
-                    <Route path="/theatre-owner/*" element={<PrivateRoute allowedTypes='theatre' ><TheatreOwner/></PrivateRoute>} />
+                    <Route path="/theatre-owner/*" element={<TheatreOwner/>} />
 
                 </Routes>
             </Router>

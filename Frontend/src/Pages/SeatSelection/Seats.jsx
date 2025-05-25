@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import axios from 'axios';
 import Nav from '@/Components/Navbar/Nav';
 import screenimg from '../../assets/screen.png'
@@ -29,6 +29,9 @@ function Seats() {
   const username1 = useSelector((state) => state.user.username)
   const selectedCity = useSelector((state) => state.location.location)
   const [priceCategories , setPriceCategories ] = useState([])
+  const [searchparams]  = useSearchParams()
+  const slotId = searchparams.get('slot_id') || null;
+  console.log(slotId , 'slot id from search params')
   const navigate = useNavigate();
   useEffect(() =>{
     const fetchSeats = async() => {
@@ -49,7 +52,11 @@ function Seats() {
     }
     const fetchShowDetails = async() => {
       try {
-        const res = await apiMovies.get(`/show-detail/${showId}/`)
+        const res = await apiMovies.get(`/show-detail/${showId}/`,{
+          params :{
+            'slot_id' : slotId
+          }
+        })
         setShow(res.data)
       }catch(e){
         console.log(e?.response)
@@ -62,6 +69,12 @@ function Seats() {
 
 
   const toggleSeatSelection = (seat) => {
+    if (selectedSeats.length >= 10 && !selectedSeats.some(s => s.id === seat.id)) {
+      toast({
+      title: 'You can select a maximum of 10 seats at a time!',
+      });
+      return;
+    }
     setSelectedSeats(prev => {
       const isSeatSelected = prev.some(s => s.id === seat.id);
       if (isSeatSelected) {
@@ -152,12 +165,12 @@ function Seats() {
 
         }));
         console.log('after dispatch');
-        navigate(`/seat-layout/${selectedCity}`)
+        navigate(`/seat-layout?booking_slot=${slotId}`)
       }
     }catch(e) {
       console.log(e?.response?.data)
       toast({
-        title : e?.response?.data?.details || 'error occur'
+        title : e?.response?.data?.error || 'error occur'
         
       })
     }
@@ -181,14 +194,14 @@ function Seats() {
     return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
   }
 
-  console.log(show)
+  console.log(show , 'show_details')
   return (
     <div className='min-h-screen w-full bg-gray-50'>
       <div className='bg-blue-50 w-full shadow-md p-8 '>
         <div className='' >
 
           <h2 className='ml-[12%] text-xl font-bold text-gray-800' >{show.movie_title}</h2>
-          < p className='font-medium ml-[12%] mt-3' >◉ {show.show_date} , {formatTime(show.start_time)}  { show.end_time ? `to ${formatTime(show.end_time)}`:''} {show.theatre_name} {show.theatre_details}</p>
+          < p className='font-medium ml-[12%] mt-3' >◉ {show.show_date} , {formatTime(show?.slot?.start_time)}  { show.slot.end_time ? `to ${formatTime(show.end_time)}`:''} {show.theatre_name} {show.theatre_details}</p>
 
         </div>
       <div className="flex justify-end px-10  space-x-8 pt-5 ">

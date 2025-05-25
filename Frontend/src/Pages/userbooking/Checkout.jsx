@@ -6,12 +6,14 @@ import { Info, ChevronDown, ChevronUp } from 'lucide-react';
 import Paypalcomponet from './Paypalcomponet';
 import CountDownTimer from '../SeatSelection/CountDownTimer';
 import seatsApi from '@/Axios/seatsaApi';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import apiBooking from '@/Axios/Bookingapi';
 
 
 function Checkout() {
   const [checkoutItems , setCheckoutItems] = useState({});
+  const [searchparams] = useSearchParams();
+  const slot_id = searchparams.get('booking_slot')
   const userId = useSelector((state) => state.user.id )
   const { selectedSeats , showId , lockExpiry } = useSelector((state) => state.selectedSeats);
   console.log(selectedSeats , showId , lockExpiry ,'from check comp')
@@ -27,7 +29,7 @@ function Checkout() {
   const params = new URLSearchParams();
   selectedSeats.forEach(id => params.append('selectedseats' , id))
   params.append('show_id' , showId)
-
+  params.append('booking_slot' , slot_id)
   
   const from = location;
   console.log(userId)
@@ -39,7 +41,7 @@ function Checkout() {
         console.log('inside useEffect')
         console.log(selectedSeats)
         
-        const res = await apiBooking.get(`checkout/${userId}/?${params.toString()}`)
+        const res = await apiBooking.get(`checkout/?${params.toString()}`)
         console.log(res.data)
         setCheckoutItems(res.data)
       }catch(e) {
@@ -84,6 +86,7 @@ function Checkout() {
       const res = await apiBooking.post('create-booking/',{
         user_id : userId ,
         show_id : showId ,
+        booking_slot : slot_id,
         selected_seats : selectedSeats,
         payment_details : paymentDetails ,
         total_amount: checkoutItems.total_amount ,

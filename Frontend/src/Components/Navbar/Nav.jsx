@@ -99,7 +99,7 @@ function Nav() {
               Home
             </a>
             <a href="#" className="text-black-300  hover:bg-blue-200 py-1 px-1 rounded-md">
-              movies
+              Theatres
             </a>
             <a href="/blogs" className="text-black-300 hover:bg-blue-200 py-1 px-1 rounded-md ">
               Blogs

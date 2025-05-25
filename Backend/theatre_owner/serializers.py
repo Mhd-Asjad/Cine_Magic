@@ -35,10 +35,10 @@ class FetchMovieSerializer(serializers.ModelSerializer) :
             return request.build_absolute_uri(obj.poster.url)
         return None
 class TimeSlotSerializer(serializers.ModelSerializer) :
-    end_time = serializers.SerializerMethodField() 
+    # end_time = serializers.SerializerMethodField() 
     class Meta :
         model = TimeSlot
-        fields= ['id' , 'start_time' , 'end_time']
+        fields= ['id' , 'start_time' ]
         
     def get_end_time(self , obj):
         showtime = ShowTime.objects.filter(slot = obj).first()
@@ -101,11 +101,30 @@ class FechShowSerializer(serializers.ModelSerializer):
     theatre_name = serializers.CharField(source='screen.theatre.name' ,read_only=True)
     theatre_details = serializers.CharField(source='screen.theatre.address' ,read_only=True)
     movie_title = serializers.CharField(source='movie.title' , read_only=True)
-    
+    slot = serializers.SerializerMethodField()
+      
     class Meta :
         model = ShowTime
         fields = ['screen' , 'movie' , 'movie_title' , 'theatre_name' ,'theatre_details' ,'slot' , 'show_date' , 'start_time' , 'end_time' ]
 
+    def get_slot(self, obj):
+        slot_id = self.context.get('slot_id')
+        show_id = self.context.get('show_id')
+        if not slot_id:
+            return None
+        try:
+            
+            showslot = ShowSlot.objects.filter(showtime=show_id , slot =slot_id).first()
+            return {
+                'id': showslot.id,
+                'start_time' : showslot.slot.start_time.strftime('%H:%M'),
+                'end_time':showslot.showtime.end_time.strftime('%H:%M') if showslot.showtime.end_time else None,
+            }
+            
+        except ShowSlot.DoesNotExist:
+            raise serializers.ValidationError("Invalid slot ID provided")     
+        
+        
 class Createshowtimeserializers(serializers.ModelSerializer):
     movie_name = serializers.CharField(source='movie.title',read_only = True)
     screen_number = serializers.CharField(source='screen.screen_number')
@@ -124,7 +143,6 @@ class Createshowtimeserializers(serializers.ModelSerializer):
             'screen_number' ,
             'screen' ,
             'movie' ,
-            'old_slot' ,
             'slot' ,
             'show_date' , 
             'end_date' , 
@@ -165,7 +183,6 @@ class Createshowtimeserializers(serializers.ModelSerializer):
             start_time = slot.start_time
             start_dt = datetime.combine(datetime.today(), start_time)
             end_time = (start_dt + timedelta(minutes=movie.duration)).time()
-
         
             logger.debug(f"Start time: {start_time}, End time: {end_time}")
             for date in date_list:
@@ -177,7 +194,7 @@ class Createshowtimeserializers(serializers.ModelSerializer):
                     end_date=end_date,
                 )
                 shows.save()
-                shows.old_slot.add(*slot_list)
+                shows.slots.add(*slot_list)
                 show_time_list.append(shows)
                 
             logger.info(f"Creating showtimes for movie: {movie}, screen: {screen}, dates: {date_list}")

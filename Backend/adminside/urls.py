@@ -16,5 +16,10 @@ urlpatterns = [
     path('handle-screen/<int:screen_id>/',verify_screen.as_view(),name='handle-screen'),
     path('cancel-show/<int:show_id>/',Cancel_Show , name='cancel-show'),
     path('get-cancelled_booking/', PendingCancelledShows.as_view() , name='get-cancelled_booking'),
-    path('ticket-sold/',Ticket_Sold.as_view(),name='total-tickets-sold')
+    path('dashboard_view/',dashboard_stats.as_view(),name='total-tickets-sold'),
+    path('ticket-trend/',ticket_trend_data.as_view(),name='ticket-chart'),
+    path('recent-sales/', RecentSale.as_view(),name='recent-sales'),
+    path('revenue-chart/',revenue_chart_data.as_view(),name='revenue-chart'),
+    path('report-xldownload/',ExportTheatreReport.as_view(),name='report-xldownload'),
+    path('get-active-theatres/',GetTheatres , name='get-active-theatres'),
 ]

@@ -228,14 +228,17 @@ function TicketView() {
 
               <div className='flex items-center gap-2' >
               <div>
+                {!open &&
+
                 <button className='text-green-600 w-60 h-12' onClick={() => setOpen(prev => !prev)}>
                     Click to show Refund Status <Ticket className='inline' />
 
 
                 </button>
+                }
               <div className='mx-auto mb-5' >
                 {open &&
-                  <ShowRefundStatus refundId={refundInfo.id} />                    
+                  <ShowRefundStatus refundId={refundInfo.id} openStatus={setOpen} />                    
                 }
                 
               </div>

@@ -11,6 +11,8 @@ from django.db.models import Count
 from datetime import time
 from theatre_owner.serializers import FechShowSerializer
 from seats.models import *
+from django.db.models import Prefetch
+
 # Create your views here.
 
 class Fetchcities(APIView):
@@ -19,15 +21,18 @@ class Fetchcities(APIView):
     def get(self , request) :
         print(request.user , 'user')
         now = datetime.now()
-        theatres = Theatre.objects.annotate(movie_count = Count('screens__showtimes__movie')).filter(movie_count__gte=1 , screens__showtimes__show_date__gte = now).distinct()
+        theatres = Theatre.objects.annotate(movie_count = Count('screens__showtimes__movie')).filter(movie_count__gte=1 , screens__showtimes__show_date__gte = now)
+        unique_theatres = theatres.values_list('city', flat=True).distinct()
+        cities = City.objects.filter(id__in = unique_theatres)
+
         city_data = [{
             
-            "id" : theatre.city.id,
-            "name" : theatre.city.name, 
-            "state" : theatre.city.state ,
-            "pincode" : theatre.city.pincode ,
+            "id" : city.id,
+            "name" : city.name, 
+            "state" : city.state ,
+            "pincode" : city.pincode ,
         }
-        for theatre in theatres
+        for city in cities
       
         ]
         return JsonResponse({ "cities" : city_data},safe=False)
@@ -156,17 +161,23 @@ class movie_showtime(APIView):
                 screen__theatre__city_id = cityid
             ).select_related(
                 'screen__theatre',
-                'slot'
+            ).prefetch_related(
+                
+                'slots'
+                
             )
+            print(showtimes, 'showtimes')
             
         except ShowTime :
             return Response({'error' : 'show not available'} , status=status.HTTP_404_NOT_FOUND)
+        
+        
         
         theatre_data = {}
         for show in showtimes :
             theatre_name = show.screen.theatre.name
             if theatre_name not in theatre_data : 
-                    
+                
                 theatre_data[theatre_name] = {
                     'name' : show.screen.theatre.name,
                     'city' : show.screen.theatre.city.name,
@@ -181,16 +192,22 @@ class movie_showtime(APIView):
             
             for cat in unique_prices :
                 price_range = SeatCategory.objects.get(id=cat['category_id'])
-                prices.append(price_range.price)    
-            label = get_showtime_label(show.slot.start_time)
+                prices.append(price_range.price)
+            slot = show.slots.first() 
+            label = get_showtime_label(slot.start_time) if slot else ''
             theatre_data[theatre_name]['shows'].append({
                     'show_id' : show.id,
                     'show_date': show.show_date,
                     'end_date' : show.end_date,
-                    'start_time' : show.slot.start_time.strftime('%H:%M') if show.slot else None ,
-                    'end_time' : show.end_time.strftime('%H:%M') if show.end_time else None ,
                     'label' : label ,
                     'price' : prices,
+                    'slots' : [{
+                        'slot_id' : showslot.id,
+                        'start_time' : showslot.start_time.strftime('%H:%M'),
+                            
+                        }
+                        for showslot in show.slots.all()
+                    ],
                     
                     'movies_data' : {
                         'language' : show.movie.language ,
@@ -202,6 +219,8 @@ class movie_showtime(APIView):
                         'screen_type' : show.screen.screen_type
                     },
             })
+            
+        print(theatre_data, 'theatre data')
         shows = ShowTime.objects.filter(screen__theatre__city = cityid)
         movies = set(show.movie for show in shows)
         movie_data = []
@@ -217,10 +236,12 @@ class Show_Details(APIView):
     permission_classes = [permissions.AllowAny]
     def get(self , request , show_id ):
         try :
+            slot_id = request.GET.get('slot_id')
             show = ShowTime.objects.get(id = show_id)
+        
         except ShowTime.DoesNotExist:
             return Response({'error' : 'show not found'} , status=status.HTTP_404_NOT_FOUND)
-        serializer = FechShowSerializer(show)
+        serializer = FechShowSerializer(show , context={'slot_id' : slot_id , 'show_id':show_id})
         return Response(serializer.data , status=status.HTTP_200_OK)
     
         

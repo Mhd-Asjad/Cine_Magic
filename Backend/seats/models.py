@@ -1,5 +1,5 @@
 from django.db import models
-from theatres.models import *
+# from theatres.models import *
 # Create your models here.
 
 class SeatScreenLayout(models.Model):

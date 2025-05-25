@@ -80,7 +80,7 @@ function ShowTheatres() {
   return (
 
 
-    <div className="mb-6">
+  <div className="w-full max-w-screen-xl mx-auto">
     <h2 className="text-lg font-medium text-gray-700 mb-3">Active Theatres</h2>
     <div className="space-y-2">
 

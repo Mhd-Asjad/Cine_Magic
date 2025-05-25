@@ -6,7 +6,11 @@ class Theatre(models.Model):
     owner = models.ForeignKey('theatre_owner.TheaterOwnerProfile' , on_delete=models.CASCADE , related_name='theatres' ,  null=True, blank=True)
     name = models.CharField(max_length=100)
     city =  models.ForeignKey('movies.City' , on_delete=models.CASCADE , related_name='theatres')
-    address = models.TextField()    
+    address = models.TextField()
+    # lat and lng coords for theatre
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
     is_confirmed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -34,12 +38,10 @@ class TimeSlot(models.Model):
     def __str__(self ) :
         return f"screen  {self.screen.screen_number} - {self.start_time}"
     
-        
 class ShowTime(models.Model):
     screen = models.ForeignKey(Screen , on_delete=models.CASCADE , related_name='showtimes')
     movie = models.ForeignKey('movies.Movie' , on_delete=models.CASCADE , related_name='TimeSlotSlot')
-    slots = models.ManyToManyField(TimeSlot , blank=True , through='showslots')
-    # slot = models.ForeignKey(TimeSlot , on_delete=models.CASCADE , blank=True , null=True , related_name='showtime') # related_name='showtimes'
+    slots = models.ManyToManyField(TimeSlot , blank=True , through='ShowSlot')
     end_time = models.TimeField(blank=True , null=True)
     show_date = models.DateField(blank=True , null=True)
     end_date = models.DateField(blank=True,null=True)
@@ -50,7 +52,7 @@ class ShowTime(models.Model):
     def __str__(self) :
         return f"{self.movie.title} at {self.screen.theatre.name} , Screeen {self.screen.screen_number} "
     
-class showslots(models.Model):
+class ShowSlot(models.Model):
     showtime = models.ForeignKey(ShowTime , on_delete=models.CASCADE)
     slot = models.ForeignKey(TimeSlot , on_delete=models.CASCADE)
     

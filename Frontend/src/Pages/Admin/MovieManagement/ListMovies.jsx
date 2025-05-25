@@ -64,7 +64,7 @@ function ListMovies() {
     })
 
     return (
-      <div className="min-h-screen bg-gray-100 py-10  mt-8 px-4 md:ml-64">
+      <div className="w-full max-w-screen-xl mx-auto">
         <h2 className="mb-8 text-center font-bold text-3xl text-gray-800">All Movies</h2>
       
 

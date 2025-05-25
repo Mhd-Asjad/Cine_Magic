@@ -2,12 +2,13 @@ from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import HttpResponse
 from django.contrib.auth import authenticate
 from rest_framework import status , permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from useracc.models import User
 from django.http import JsonResponse
-from .serilizers import CitySerializers ,TheatreSerializer , MovieSerializers
+from .serilizers import TheatreSerializer , MovieSerializers
 from movies.models import City , Movie
 from theatres.models import *
 from theatre_owner.models import *
@@ -15,8 +16,21 @@ from rest_framework.decorators import api_view
 from booking.models import *
 from booking.serializers import BookingSerializer
 from django.utils import timezone
+from collections import OrderedDict
+from rest_framework.decorators import permission_classes
+from django.db.models import Sum , Count , Q , F
+import pandas as pd
+from django.db.models.functions import TruncMonth, TruncWeek
+import logging
+from io import BytesIO
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
+from openpyxl.utils.dataframe import dataframe_to_rows
+from seats.models import seats
+
 # Create your views here.
 
+logger = logging.getLogger(__name__)
 # customer listed views
 class UserListView(APIView):
     permission_classes = [permissions.IsAdminUser]
@@ -262,7 +276,6 @@ class verify_screen(APIView):
         return Response({'message' : f'Screen : {screen_number} from {theatre_name} deleted successfully  '},status=status.HTTP_200_OK)
     
 # delete show view
-from rest_framework.decorators import permission_classes
 @api_view(['DELETE'])
 @permission_classes([IsAdminUser])
 def Cancel_Show(request , show_id) :
@@ -286,14 +299,718 @@ class PendingCancelledShows(APIView):
         serializer = BookingSerializer(bookings , many=True)
         return Response(serializer.data , status=status.HTTP_200_OK)
 
-class Ticket_Sold(APIView):
+class dashboard_stats(APIView):
     permission_classes = [permissions.AllowAny]
     def get(self , request) :
         today = timezone.now()
+        
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        
+        if not start_date :
+            start_date = today - timedelta(days=30)
+        else : 
+            start_date = datetime.fromisoformat(start_date)
+        if not end_date :
+            end_date = today
+        else :
+            end_date = datetime.fromisoformat(end_date)
+            
+        booking_queryset = Booking.objects.filter(
+            booking_time__range=[start_date , end_date],
+            status='confirmed'
+        )
+        
+        total_revenue = booking_queryset.aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        total_tickets = BookingSeat.objects.filter(
+            booking__in = booking_queryset,
+            status='booked'
+        ).count()
+        
+        active_users = User.objects.filter(booking__in=booking_queryset).distinct().count()
+        
+        active_theatres = Theatre.objects.filter(
+            screens__showtimes__booking__in=booking_queryset,
+            is_confirmed=True
+        ).distinct().count()
+        
+        # calculate percentage changes (compared to previoous period)
+
+        previous_stats = start_date - (end_date - start_date)
+        previous_booking_queryset = Booking.objects.filter(
+            booking_time__range=[previous_stats , start_date],
+            status='confirmed'
+        )
+        
+        previous_revenue = previous_booking_queryset.aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        revenue_chenge = ((total_revenue - previous_revenue) / previous_revenue) * 100 if previous_revenue else 0
+        ticket_change = ((total_tickets - previous_booking_queryset.count()) / previous_booking_queryset.count()) * 100 if previous_booking_queryset.count() else 0
+        
+        
+        return Response({
+            'total_revenue' : total_revenue,
+            'total_tickets' : total_tickets,
+            'active_users' : active_users,
+            'active_theatres' : active_theatres,
+            'revenue_change' : revenue_chenge,
+            'ticket_change' : ticket_change,
+            'period' : {
+                'start_date' : start_date,
+                'end_date' : end_date
+            }
+        },status=status.HTTP_200_OK)
+        
+        
+        
+class revenue_chart_data(APIView):
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self , request):
+        period = request.GET.get('period' , 'month')
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        
+        
+        logger.info(f"Received period: {period}, start_date: {start_date}, end_date: {end_date}")
+        
+        
+        if not start_date and not end_date:
+            print('no start date and end date')
+            if period == 'week':
+                start_date = timezone.now() - timedelta(days=7)
+                end_date = timezone.now()
+                
+            if period == 'month':
+                start_date = timezone.now() - timedelta(days=30)
+                end_date = timezone.now()
+            else :
+                start_date = timezone.now() - timedelta(days=365)
+                end_date = timezone.now()
+                
+                
+        else:
+            start_date = datetime.fromisoformat(start_date)
+            end_date = datetime.fromisoformat(end_date)
+            
+        
+        
+        if period == 'week':
+            trunc_func = TruncWeek
+            date_format = '%Y-W%W'
+        elif period == 'year':
+            trunc_func = TruncMonth  
+            date_format = '%Y-%m'
+        else:  
+            trunc_func = TruncMonth
+            date_format = '%b'
+
+        # Query revenue data grouped by period
+        revenue_data = Booking.objects.filter(
+            booking_time__range=[start_date, end_date],
+            status='confirmed'
+        ).annotate(
+            period=trunc_func('booking_time')
+        ).values('period').annotate(
+            revenue=Sum('amount'),
+            tickets=Count('bookingseats', filter=Q(bookingseats__status='booked')),
+            theatres=Count('show__screen__theatre', distinct=True)
+        ).order_by('period')
+        
+        logger.info(f"Revenue data: {revenue_data}")
+        # Format data for frontend
+        chart_data = []
+        for item in revenue_data:
+            if period == 'month':
+                label = item['period'].strftime('%b')
+            elif period == 'week':
+                label = f"Week {item['period'].strftime('%W')}"
+            else:  # year
+                label = item['period'].strftime('%Y-%m')
+                
+            chart_data.append({
+                'period': label,
+                'revenue': float(item['revenue'] or 0),
+            })
+            
+        return Response(chart_data , status=status.HTTP_200_OK)
+    
+    
+class ticket_trend_data(APIView):
+    def get(self, request):
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        
+        if not start_date:
+            start_date = timezone.now() - timedelta(days=365)
+        else:
+            start_date = datetime.fromisoformat(start_date)
+        
+        if not end_date:
+            end_date = timezone.now()
+        else:
+            end_date = datetime.fromisoformat(end_date)
+
+        # Step 1: Query aggregated monthly ticket counts
+        ticket_data = BookingSeat.objects.filter(
+            booking__booking_time__range=[start_date, end_date],
+            booking__status='confirmed',
+            status='booked'
+        ).annotate(
+            month=TruncMonth('booking__booking_time')
+        ).values('month').annotate(
+            tickets=Count('id')
+        ).order_by('month')
+
+        # Step 2: Create a mapping from month to ticket count
+        ticket_dict = {item['month'].strftime('%b'): item['tickets'] for item in ticket_data}
+
+        # Step 3: Prepare the final 12-month list
+        result = []
+        month_pointer = start_date.replace(day=1)
+        while month_pointer <= end_date:
+            month_abbr = month_pointer.strftime('%b')
+            result.append({
+                'month': month_abbr,
+                'tickets': ticket_dict.get(month_abbr, 0)
+            })
+            # Increment month
+            if month_pointer.month == 12:
+                month_pointer = month_pointer.replace(year=month_pointer.year + 1, month=1)
+            else:
+                month_pointer = month_pointer.replace(month=month_pointer.month + 1)
+
+        return Response(result, status=status.HTTP_200_OK)
+    
+    
+class RecentSale(APIView):
+    permission_classes = [permissions.AllowAny]
+    def get(self , request):
+        print(request.data)
+        limit = int(request.data.get('limit' , 5))
         try:
-            bookings = Booking.objects.filter(status='confirmed' , show__slot__start_time__gt = today )
-            total_booking = len(bookings)
-            total_amount = sum([booking.amount for booking in bookings])
-            return Response({'bookings' : total_booking , 'total_amount':total_amount}, status=status.HTTP_200_OK)
-        except Exception as Err:
-            return Response({'error':str(Err)},status=status.HTTP_400_BAD_REQUEST)
+            recent_bookings = Booking.objects.filter(
+                status='confirmed'
+            ).select_related(
+                'user', 'show__movie', 'show__screen__theatre'
+            ).order_by('-booking_time')[:limit]
+            
+            print(recent_bookings)
+            
+            sales_data = []
+            for booking in recent_bookings:
+                time_diff = timezone.now() - booking.booking_time
+                if time_diff.days > 0:
+                    time_ago = f"{time_diff.days}d ago"
+                elif time_diff.seconds > 3600:
+                    hours = time_diff.seconds // 3600
+                    time_ago = f"{hours}h ago"
+                else:
+                    minutes = time_diff.seconds // 60
+                    time_ago = f"{minutes}m ago"
+                
+                sales_data.append({
+                    'id': booking.booking_id,
+                    'customer': booking.customer_name,
+                    'email': booking.customer_email,
+                    'amount': float(booking.amount),
+                    'movie': booking.show.movie.title if booking.show and booking.show.movie else 'N/A',
+                    'theatre': booking.show.screen.theatre.name if booking.show and booking.show.screen else 'N/A',
+                    'time': time_ago,
+                    'tickets_count': booking.bookingseats.filter(status='booked').count()
+                })
+            
+            return Response(sales_data , status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            print(f"Error fetching recent sales: {str(e)}") 
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
+# Download xl sheet Reports view 
+class ExportTheatreReport(APIView):
+    def get(self , request):
+        
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        theatre_id = request.GET.get('theatre_id')
+        
+        logger.info(f'data inside export Theatre report ' , request.data)
+        
+        
+        if not start_date :
+            start_date = timezone.now() - timedelta(days=30)
+        else :
+            start_date = datetime.fromisoformat(start_date)
+            
+        if not end_date :
+            end_date = timezone.now()
+        else : 
+            end_date = datetime.fromisoformat(end_date)
+            
+            
+        bookings_queryset = Booking.objects.filter(
+            booking_time__range=[start_date , end_date],
+            status='confirmed',
+        )
+
+        
+        if theatre_id:
+            try:
+                theatre = Theatre.objects.get(id=theatre_id)
+                bookings_queryset = bookings_queryset.filter(show__screen__theatre=theatre)
+            except Theatre.DoesNotExist:
+                return Response({'error': 'Theatre not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            
+        wb = openpyxl.Workbook()
+    
+         # Remove default sheet
+        wb.remove(wb.active)
+        
+        # 1. Theatre Summary Sheet
+        create_theatre_summary_sheet(wb, bookings_queryset, start_date, end_date)
+        
+        # 2. Seat Category Analysis Sheet
+        create_seat_category_sheet(wb, bookings_queryset, start_date, end_date)
+        
+        # 3. Detailed Theatre Performance Sheet
+        create_detailed_performance_sheet(wb, bookings_queryset, start_date, end_date)
+        
+        # 4. Monthly Breakdown Sheet
+        create_monthly_breakdown_sheet(wb, bookings_queryset, start_date, end_date)
+        
+        # Save to BytesIO
+        excel_buffer = BytesIO()
+        wb.save(excel_buffer)
+        excel_buffer.seek(0)
+        
+        # Create HTTP response
+        response = HttpResponse(
+            excel_buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        
+        filename = f'theatre_report_{start_date.strftime("%Y%m%d")}_{end_date.strftime("%Y%m%d")}.xlsx'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response 
+    
+def create_theatre_summary_sheet(wb, bookings_query, start_date, end_date):
+    """Create theatre summary sheet"""
+    ws = wb.create_sheet("Theatre Summary")
+    
+    # Get theatre data
+    theatre_data = []
+    theatres = Theatre.objects.filter(
+        screens__showtimes__booking__in=bookings_query,
+        is_confirmed=True
+    ).distinct()
+    
+    for theatre in theatres:
+        theatre_bookings = bookings_query.filter(
+            show__screen__theatre=theatre
+        )
+        
+        total_revenue = theatre_bookings.aggregate(Sum('amount'))['amount__sum'] or 0
+        total_tickets = BookingSeat.objects.filter(
+            booking__in=theatre_bookings,
+            status='booked'
+        ).count()
+        
+        total_shows = theatre_bookings.values('show').distinct().count()
+        avg_ticket_price = (total_revenue / total_tickets) if total_tickets > 0 else 0
+        
+        theatre_data.append({
+            'Theatre Name': theatre.name,
+            'City': theatre.city.name,
+            'Address': theatre.address,
+            'Total Revenue': float(total_revenue),
+            'Tickets Sold': total_tickets,
+            'Total Shows': total_shows,
+            'Average Ticket Price': float(avg_ticket_price),
+            'Revenue per Show': float(total_revenue / total_shows) if total_shows > 0 else 0
+        })
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(theatre_data)
+    
+    # Add headers
+    ws.append(['THEATRE PERFORMANCE SUMMARY'])
+    ws.append([f'Period: {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'])
+    ws.append([])  # Empty row
+    
+    # Add data
+    for row in dataframe_to_rows(df, index=False, header=True):
+        ws.append(row)
+    
+    # Style the sheet
+    style_worksheet(ws, df.shape[0] + 4)
+    
+    
+
+
+
+def create_theatre_summary_sheet(wb, bookings_query, start_date, end_date):
+    """Create theatre summary sheet"""
+    ws = wb.create_sheet("Theatre Summary")
+    
+    # Get theatre data
+    theatre_data = []
+    theatres = Theatre.objects.filter(
+        screens__showtimes__booking__in=bookings_query,
+        is_confirmed=True
+    ).distinct()
+    
+    for theatre in theatres:
+        theatre_bookings = bookings_query.filter(
+            show__screen__theatre=theatre
+        )
+        
+        total_revenue = theatre_bookings.aggregate(Sum('amount'))['amount__sum'] or 0
+        total_tickets = BookingSeat.objects.filter(
+            booking__in=theatre_bookings,
+            status='booked'
+        ).count()
+        
+        total_shows = theatre_bookings.values('show').distinct().count()
+        avg_ticket_price = (total_revenue / total_tickets) if total_tickets > 0 else 0
+        
+        theatre_data.append({
+            'Theatre Name': theatre.name,
+            'City': theatre.city.name,
+            'Address': theatre.address,
+            'Total Revenue': float(total_revenue),
+            'Tickets Sold': total_tickets,
+            'Total Shows': total_shows,
+            'Average Ticket Price': float(avg_ticket_price),
+            'Revenue per Show': float(total_revenue / total_shows) if total_shows > 0 else 0
+        })
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(theatre_data)
+    
+    # Add headers
+    ws.append(['THEATRE PERFORMANCE SUMMARY'])
+    ws.append([f'Period: {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'])
+    ws.append([])  # Empty row
+    
+    # Add data
+    for row in dataframe_to_rows(df, index=False, header=True):
+        ws.append(row)
+    
+    # Style the sheet
+    style_worksheet(ws, df.shape[0] + 4)
+
+def create_seat_category_sheet(wb, bookings_query, start_date, end_date):
+    """Create seat category analysis sheet"""
+    ws = wb.create_sheet("Seat Category Analysis")
+    
+    # Get seat category data by theatre
+    seat_data = []
+    theatres = Theatre.objects.filter(
+        screens__showtimes__booking__in=bookings_query,
+        is_confirmed=True
+    ).distinct()
+    
+    for theatre in theatres:
+        theatre_bookings = bookings_query.filter(
+            show__screen__theatre=theatre
+        )
+        
+        # Get seat categories for this theatre
+        seat_categories = BookingSeat.objects.filter(
+            booking__in=theatre_bookings,
+            status='booked'
+        ).values(
+            'seat__category'  # Assuming seat has category field
+        ).annotate(
+            count=Count('id'),
+            revenue=Sum('price')
+        )
+        
+        for category in seat_categories:
+            seat_data.append({
+                'Theatre': theatre.name,
+                'City': theatre.city.name,
+                'Seat Category': category['seat__category'] or 'Standard',
+                'Tickets Sold': category['count'],
+                'Revenue': float(category['revenue'] or 0),
+                'Average Price': float(category['revenue'] / category['count']) if category['count'] > 0 else 0
+            })
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(seat_data)
+    
+    # Add summary by category
+    if not df.empty:
+        category_summary = df.groupby('Seat Category').agg({
+            'Tickets Sold': 'sum',
+            'Revenue': 'sum'
+        }).reset_index()
+        category_summary['Average Price'] = category_summary['Revenue'] / category_summary['Tickets Sold']
+    
+    # Add headers
+    ws.append(['SEAT CATEGORY ANALYSIS'])
+    ws.append([f'Period: {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'])
+    ws.append([])
+    
+    # Add detailed data
+    ws.append(['DETAILED BREAKDOWN BY THEATRE'])
+    for row in dataframe_to_rows(df, index=False, header=True):
+        ws.append(row)
+    
+    ws.append([])
+    ws.append(['CATEGORY SUMMARY'])
+    if not df.empty:
+        for row in dataframe_to_rows(category_summary, index=False, header=True):
+            ws.append(row)
+    
+    # Style the sheet
+    style_worksheet(ws, len(df) + len(category_summary) + 8 if not df.empty else 8)
+
+def create_detailed_performance_sheet(wb, bookings_query, start_date, end_date):
+    """Create detailed performance sheet with movie-wise data"""
+    ws = wb.create_sheet("Detailed Performance")
+    
+    detailed_data = []
+    
+    # Get detailed booking data
+    bookings = bookings_query.select_related(
+        'show__movie', 'show__screen__theatre', 'show__screen__theatre__city'
+    ).prefetch_related('bookingseats')
+    
+    for booking in bookings:
+        if booking.show and booking.show.movie and booking.show.screen:
+            seats_booked = booking.bookingseats.filter(status='booked')
+            
+            detailed_data.append({
+                'Booking ID': booking.booking_id,
+                'Theatre': booking.show.screen.theatre.name,
+                'City': booking.show.screen.theatre.city.name,
+                'Movie': booking.show.movie.title,
+                'Screen': f"Screen {booking.show.screen.screen_number}",
+                'Customer Name': booking.customer_name,
+                'Customer Email': booking.customer_email,
+                'Booking Date': booking.booking_time.strftime('%Y-%m-%d'),
+                'Show Date': booking.show.show_date.strftime('%Y-%m-%d') if booking.show.show_date else 'N/A',
+                'Amount': float(booking.amount),
+                'Seats Count': seats_booked.count(),
+                'Status': booking.status
+            })
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(detailed_data)
+    
+    # Add headers
+    ws.append(['DETAILED BOOKING PERFORMANCE'])
+    ws.append([f'Period: {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'])
+    ws.append([])
+    
+    # Add data
+    for row in dataframe_to_rows(df, index=False, header=True):
+        ws.append(row)
+    
+    # Style the sheet
+    style_worksheet(ws, len(df) + 4)
+
+def create_monthly_breakdown_sheet(wb, bookings_query, start_date, end_date):
+    """Create monthly breakdown sheet"""
+    ws = wb.create_sheet("Monthly Breakdown")
+    
+    logger.info(f'inside monthly break down function here' , ws.title)
+    
+    # Get monthly data by theatre
+    monthly_data = []
+    theatres = Theatre.objects.filter(
+        screens__showtimes__booking__in=bookings_query,
+        is_confirmed=True
+    ).distinct()
+    
+    for theatre in theatres:
+        theatre_bookings = bookings_query.filter(
+            show__screen__theatre=theatre
+        )
+        
+        # Group by month
+        monthly_stats = theatre_bookings.extra(
+            select={'month': "DATE_TRUNC('month', booking_time)"}
+        ).values('month').annotate(
+            revenue=Sum('amount'),
+            tickets=Count('bookingseats', filter=Q(bookingseats__status='booked')),
+            bookings_count=Count('id')
+        ).order_by('month')
+        
+        for stat in monthly_stats:
+            monthly_data.append({
+                'Theatre': theatre.name,
+                'City': theatre.city.name,
+                'Month': stat['month'].strftime('%Y-%m'),
+                'Revenue': float(stat['revenue'] or 0),
+                'Tickets Sold': stat['tickets'],
+                'Total Bookings': stat['bookings_count'],
+                'Avg Booking Value': float(stat['revenue'] / stat['bookings_count']) if stat['bookings_count'] > 0 else 0
+            })
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(monthly_data)
+    
+    # Add headers
+    ws.append(['MONTHLY BREAKDOWN'])
+    ws.append([f'Period: {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'])
+    ws.append([])
+    
+    # Add data
+    for row in dataframe_to_rows(df, index=False, header=True):
+        ws.append(row)
+    
+    # Style the sheet
+    style_worksheet(ws, len(df) + 4)
+    
+    
+
+
+def create_seat_category_sheet(wb, bookings_query, start_date, end_date):
+    """Create seat category analysis sheet"""
+    ws = wb.create_sheet("Seat Category Analysis")
+    
+    # Get seat category data by theatre
+    seat_data = []
+    theatres = Theatre.objects.filter(
+        screens__showtimes__booking__in=bookings_query,
+        is_confirmed=True
+    ).distinct()
+    
+    for theatre in theatres:
+        theatre_bookings = bookings_query.filter(
+            show__screen__theatre=theatre
+        )
+        
+        # Get seat categories for this theatre
+        seat_categories = BookingSeat.objects.filter(
+            booking__in=theatre_bookings,
+            status='booked'
+        ).values(
+            'seat__category'  # Assuming seat has category field
+        ).annotate(
+            count=Count('id'),
+            revenue=Sum('price')
+        )
+        
+        for category in seat_categories:
+            seat_data.append({
+                'Theatre': theatre.name,
+                'City': theatre.city.name,
+                'Seat Category': category['seat__category'] or 'Standard',
+                'Tickets Sold': category['count'],
+                'Revenue': float(category['revenue'] or 0),
+                'Average Price': float(category['revenue'] / category['count']) if category['count'] > 0 else 0
+            })
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(seat_data)
+    
+    # Add summary by category
+    if not df.empty:
+        category_summary = df.groupby('Seat Category').agg({
+            'Tickets Sold': 'sum',
+            'Revenue': 'sum'
+        }).reset_index()
+        category_summary['Average Price'] = category_summary['Revenue'] / category_summary['Tickets Sold']
+    
+    # Add headers
+    ws.append(['SEAT CATEGORY ANALYSIS'])
+    ws.append([f'Period: {start_date.strftime("%Y-%m-%d")} to {end_date.strftime("%Y-%m-%d")}'])
+    ws.append([])
+    
+    # Add detailed data
+    ws.append(['DETAILED BREAKDOWN BY THEATRE'])
+    for row in dataframe_to_rows(df, index=False, header=True):
+        ws.append(row)
+    
+    ws.append([])
+    ws.append(['CATEGORY SUMMARY'])
+    if not df.empty:
+        for row in dataframe_to_rows(category_summary, index=False, header=True):
+            ws.append(row)
+    
+    # Style the sheet
+    style_worksheet(ws, len(df) + len(category_summary) + 8 if not df.empty else 8)
+
+    
+
+
+def style_worksheet(ws, data_rows):
+    """Apply styling to worksheet"""
+    
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    
+    # Border styling
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Apply header styling
+    for row in ws.iter_rows(min_row=1, max_row=1):
+        for cell in row:
+            if cell.value:
+                cell.font = Font(bold=True, size=14)
+                cell.alignment = Alignment(horizontal='center')
+    
+    # Find header row (usually has column names)
+    header_row = None
+    for idx, row in enumerate(ws.iter_rows(), 1):
+        if any(cell.value for cell in row if isinstance(cell.value, str) and 
+               cell.value in ['Theatre Name', 'Theatre', 'Booking ID']):
+            header_row = idx
+            break
+    
+    if header_row:
+        # Style header row
+        for cell in ws[header_row]:
+            if cell.value:
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = Alignment(horizontal='center')
+        
+        # Apply borders to data area
+        for row in ws.iter_rows(min_row=header_row, max_row=data_rows):
+            for cell in row:
+                cell.border = thin_border
+    
+    # Auto-adjust column widths
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        
+        adjusted_width = min(max_length + 2, 50)  # Cap at 50 characters
+        ws.column_dimensions[column_letter].width = adjusted_width
+        
+        
+api_view(['GET'])
+def GetTheatres(request):
+    bookings = Booking.objects.all().select_related('show__screen__theatre')
+    data = []
+    for booking in bookings :
+        screen = booking.show.screen
+        theatre = screen.theatre
+        data.append({
+            'id' : theatre.id,
+            'name' : theatre.name,
+            'city' : theatre.city.name
+        })
+        
+    
+    return JsonResponse(data , safe=False, status=200)

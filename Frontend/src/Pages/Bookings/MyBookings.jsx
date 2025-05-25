@@ -80,7 +80,7 @@ function MyBookings() {
                                             <div className='flex justify-between' >
                                                 <span className="text-gray-600">Show on :</span>
                                             <div className="flex items-center text-sm text-gray-600 mt-1">
-                                                {/* <span>{booking.show.show_date} at {formatTime(booking.show.start_time)}</span> */}
+                                                <span>{booking.show.show_date} at {formatTime(booking.show.start_time)}</span>
                                             </div>
                                             </div>
                                             <div className="flex justify-between">

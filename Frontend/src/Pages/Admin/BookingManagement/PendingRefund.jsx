@@ -82,7 +82,7 @@ const PendingRefund = () => {
 
     return (
 
-            <div className="mt-[10%]  md:ml-64" >
+          <div className="w-full max-w-screen-xl mx-auto mt-[10%]">
                 <div className="flex justify-center" >
 
                 <h1 className="font-medium " >Cancelled Tickets</h1>
@@ -106,8 +106,10 @@ const PendingRefund = () => {
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                    {refunds.map((refund , index) => (
-                    <tr key={refund.id} className="hover:bg-gray-50">
+                    {refunds.length > 0 ? (
+                    
+                    refunds.map((refund , index) => (
+                      <tr key={refund.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {index + 1}
                         </td>
@@ -145,8 +147,24 @@ const PendingRefund = () => {
                               {loadingRefundId === refund.id ? 'processing......' : 'process refund'}
                         </button>
                         </td>
+                      </tr>
+                    ))
+                  
+                  
+                  ):(
+
+                    <tr>
+
+                      <td className="px-6 py-4 w-full whitespace-nowrap text-sm font-medium" >
+
+                      <div className="mx-auto">
+                        <span> No Refund Payments are left </span>
+
+                      </div>
+                      </td>
                     </tr>
-                    ))}
+
+                  )}
                 </tbody>
                 </table>
             </div>

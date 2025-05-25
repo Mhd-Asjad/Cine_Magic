@@ -88,8 +88,8 @@ const AvailableShowDetails = () => {
     return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
   }
   const formattedSelectedDate = selectedDate.toISOString().split('T')[0];
-  const handleClick = (screen_id , show_id) => {
-    navigate(`/available-show-details/${screen_id}/${show_id}/seats`)
+  const handleClick = (screen_id , show_id ,slot_id) => {
+    navigate(`/available-show-details/${screen_id}/${show_id}/seats?slot_id=${slot_id}`)
   }
 
   
@@ -106,7 +106,7 @@ const AvailableShowDetails = () => {
   ))]
   
   
-  console.log(showDetails)
+  console.log(showDetails , 'show details')
 
   const sortedShowTime = showDetails.map(theatre => {
     const filteredShow = theatre.shows.filter(show =>  
@@ -114,14 +114,15 @@ const AvailableShowDetails = () => {
     (!selectedTime || show.label === selectedTime )
     )
     console.log(selectedLanguage)
-    console.log(filteredShow)
-
+  
     return{
-
+    // need to fix sort data here
       ...theatre,
-      shows : filteredShow.sort((a , b) => a.start_time.localeCompare(b.start_time))
+      shows : filteredShow
+    
     }
   })
+
 
   const handleChange = (event) => {
     const {name , value} = event.target;
@@ -135,11 +136,9 @@ const AvailableShowDetails = () => {
   
   let showCount = 0;
   const formatted_time = selectedDate.toISOString().split('T')[0];
-  console.log(formatted_time)
   const filterShowDate = sortedShowTime.map((theatre) => {
     theatre.shows.filter(show => {
-
-      if (show.show_date == formatted_time){
+      if (show?.show_date == formatted_time){
         showCount++;
       }
     }
@@ -147,7 +146,7 @@ const AvailableShowDetails = () => {
   })
 
   console.log(showCount , 'sorted one  ')
-  console.log(selectedDate)
+  console.log(sortedShowTime)
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Nav />
@@ -220,93 +219,79 @@ const AvailableShowDetails = () => {
                   <MenuItem value="">
                   <em>None</em>
                   </MenuItem>
-
                     {showTime.map((show , index ) => (
-
                       <MenuItem key={index} value={show}>{show}</MenuItem>
-
                     ))}
                 </Select> 
               </FormControl>
-
             <div>
-
-
-
             </div>
           </div>
-          
         </div>
                     
         <div>
           <span className='px-1 ' ></span>
-        
         </div>
         {showCount > 0 ? (
-
-        
-        sortedShowTime
-        .filter(theatre => theatre.shows.some(show => show.show_date === formattedSelectedDate))
-        .map((theatre) => (
-          <div key={theatre.name} className="bg-white rounded-lg shadow-sm p-4 mt-4 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="text-lg font-semibold">{theatre.name}</h3>
-                <div className="flex items-center text-sm text-gray-600">
-                  <button className="flex items-center mr-4">
-                    <MapPin size={16} className="mr-1" />
-                    <span>Get Directions</span>
-                  </button>
-                  <button className="flex items-center">
-                    <Info size={16} className="mr-1" />
-                    <span>More Info</span>
-                  </button>
+          sortedShowTime
+          .filter(theatre => theatre.shows.some(show => show.show_date === formattedSelectedDate))
+          .map((theatre) => (
+            <div key={theatre.name} className="bg-white rounded-lg shadow-sm p-4 mt-4 mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold">{theatre.name}</h3>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <button className="flex items-center mr-4">
+                      <MapPin size={16} className="mr-1" />
+                      <span>Get Directions</span>
+                    </button>
+                    <button className="flex items-center">
+                      <Info size={16} className="mr-1" />
+                      <span>More Info</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className='flex gap-3'>
-              {theatre.shows
-                .filter(show => show.show_date === formattedSelectedDate)
-                .map((show) => (
-                  <button 
-                    key={show.show_id} 
-                    className="border border-gray-200 rounded px-4 py-2 text-green-600 hover:bg-gray-50"
-                    onClick={() => handleClick(show.screen.screen_id, show.show_id)}
-                    >
-                    <div className="text-center font-semibold">{formatTime(show.start_time)}</div>
-                    <div className="text-xs text-gray-500">{show.screen.screen_type}</div>
-                  </button>
-                ))
+              <div className='flex gap-3 flex-wrap'>
+                {theatre.shows
+                  .filter(show => show.show_date === formattedSelectedDate)
+                  .map((show) =>
+                    show.slots.map((slot) => (
+                      <button
+                        key={slot.slot_id || `${show.show_id}-${slot.start_time}`}
+                        className="border border-gray-200 rounded px-4 py-2 text-green-600 hover:bg-gray-50 flex flex-col items-center"
+                        onClick={() => handleClick(show.screen.screen_id, show.show_id , slot.slot_id)}
+                      >
+                        <div className="text-center font-semibold">
+                          {formatTime(slot.start_time)}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {show.screen.screen_type}
+                        </div>
+                      </button>
+                    ))
+                  )
                 }
+              </div>
             </div>
-          </div>
-
-           ))
+          ))
           ):(
-
             <div className='bg-white rounded-lg shadow-sm p-4 mt-4 mb-6' >
               <div className="text-center py-2">
                   <div className="inline-block p-3 rounded-ful">
                       <img src={not_found} alt="notfound" />
                   </div>
-
                   <p className="mt-2 text-2xl font-bold text-gray-800">No Show found</p>
               </div>
-
             </div>
           )}
-                  
-
-
           <div className="mb-6 ">
             <h3 className="text-lg font-semibold mb-2">Latest Movies to Book in {city_name}</h3>
-
             <div className="text-sm text-blue-600 mb-2">
               {
                 newMovies.map((movie) => (
-              <span key={movie.id} >{`${movie.movie_name} |`}  </span>
-
+                  <span key={movie.id} >{`${movie.movie_name} |`}  </span>
                 ))
               }
             </div>

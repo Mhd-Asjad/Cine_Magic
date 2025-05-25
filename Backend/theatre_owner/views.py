@@ -423,7 +423,7 @@ class Add_Show_Time(APIView):
             # checking overlaping show time
             
             for slot_id in slot_ids:
-                if ShowTime.objects.filter(screen=screen , slot_id=slot_id , show_date=show_date).exists():
+                if ShowTime.objects.filter(screen=screen , slots=slot_id , show_date=show_date).exists():
                     return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
             # overlapping_shows = ShowTime.objects.filter(
             #     screen=screen ,
@@ -559,11 +559,11 @@ class Edit_show_det(APIView):
                 
                 'start_date' : latest_show.show_date,
                 'end_date' : latest_show.end_date if latest_show.end_date else None,
-                'show_time' : latest_show.slot.start_time ,
+                # 'show_time' : latest_show.slot.start_time ,
                 'end_time' : latest_show.end_time,
                 'screen': latest_show.screen.id,
                 'movie': latest_show.movie.id,
-                'slot': latest_show.slot.id
+                # 'slot': latest_show.slot.id
             }
             
             return JsonResponse(details, status=status.HTTP_202_ACCEPTED )
@@ -623,6 +623,7 @@ class Edit_show_det(APIView):
                 slot=slot,
                 show_date__gt=end_date
             ).delete()
+            
             today = datetime.now()
             outdated_shows = ShowTime.objects.filter(
                 slot=slot,
@@ -689,7 +690,7 @@ class Get_Theatre_Bookings(APIView):
                     'theatre_name' : book.show.screen.theatre.name,
                     'screen_number' : book.show.screen.screen_number,
                     'show_date' : book.show.show_date,
-                    'start_time' : book.show.slot.start_time,
+                    'start_time' : book.slot.start_time,
                     'total_price' : book.amount,
                     'status' : book.status,
                     'user_name' : f"{book.user.username}",

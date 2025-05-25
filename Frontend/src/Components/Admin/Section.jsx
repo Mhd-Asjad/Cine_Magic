@@ -13,11 +13,13 @@ import ShowTheatres from '@/Pages/Admin/TheatreManagement/Showtheatres';
 import { AdminRoute } from '@/Pages/Routes/ProtectedRoute';
 import PendingRefund from '@/Pages/Admin/BookingManagement/PendingRefund';
 import ShowBookings from '@/Pages/Theatreowner/BookingManagement/ShowBookings';
+import ExcelDownloadComponent from '@/Pages/Admin/Dashboard/ExcelDownloadComponent';
 function Section() {
   return (
     <div>
         <Routes>
             <Route path="dashboard" element={<AdminRoute> <Dashboard /></AdminRoute>}/>
+            <Route path='download/reports' element={<AdminRoute><ExcelDownloadComponent/></AdminRoute>} />
             <Route path="customers" element={<PrivateRoute><CustomerManagement /></PrivateRoute>} />
             <Route path="enquery" element={<PrivateRoute> <Enquery /> </PrivateRoute>} />
             <Route path="movies" element={<PrivateRoute><ListMovies /></PrivateRoute>} />

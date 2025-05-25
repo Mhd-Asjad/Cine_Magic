@@ -108,7 +108,7 @@ function ShowRequest() {
     }
     console.log(theatreData)
   return (
-    <div className='p-10 mt-10 min-h-screen' >
+    <div className="w-full max-w-screen-xl mx-auto">
 
     
     <Card className='w-full py-10 max-w-4xl mx-auto md:ml-20 sm:ml-30'>

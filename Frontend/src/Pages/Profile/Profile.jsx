@@ -211,17 +211,13 @@ const Profile = () => {
     };
   };
 
-  console.log(imageError , 'image error')
   const handleRemoveTag = (removedTag) => {
     const filteredTags = editBlog.tags.filter((tag) => tag !== removedTag)
-    console.log(editBlog)
     const tagCount = editBlog.tags[0].length
   
-    console.log(tagCount)
     if (tagCount === 0) {
       alert('atleast one tag is required')
     }
-    console.log(filteredTags , 'fltered tags')
     setEditBlog(prev => ({
       ...prev , 
       tags : filteredTags
@@ -268,7 +264,6 @@ const Profile = () => {
     formData.append('content' , editBlog.content)
     console.log(editBlog.images[0].file , 'image file')
     if (editBlog.images[0].file) {
-      console.log(editBlog.images[0].file , 'image file')
       formData.append('images' , editBlog?.images[0]?.file)
     }
     formData.append('tags', JSON.stringify(editBlog.tags));
