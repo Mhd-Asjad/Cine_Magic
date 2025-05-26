@@ -76,6 +76,7 @@ const Profile = () => {
   const {toast} = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  console.log(user)
   const handleToggleForm = () => {
     setShowContactForm(!showContactForm);
   };

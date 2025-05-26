@@ -1,20 +1,23 @@
-import React from 'react';
+import React, { useEffect , useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import { DollarSign, Film, Users, MapPin } from "lucide-react";
+import { Film, Users, MapPin, Tickets, Theater } from "lucide-react";
 import { IoIosAddCircleOutline } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 import TheatreApi from '@/Axios/theatreapi';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/Components/ui/button';
+import { TicketSlash , DollarSign , TheaterIcon , Coins } from 'lucide-react';
 import EditProfile from './EditProfile';
 function TheatreDashboard() {
   
   const theatreOwner = useSelector((state) => state.theatreOwner);
+  const user = useSelector((state) => state.user )
   const {toast} = useToast();
   const navigate = useNavigate()
-
+  const [theatres , setTheatres ] = useState([])
+  
   const validate_owner = async() => {
     try{
       const res = await TheatreApi.get(`/validate-owner/?owner_id=${theatreOwner.theatreId}`,)
@@ -30,12 +33,31 @@ function TheatreDashboard() {
     }
 
   }
+
+  useEffect(() => {
+    const fetchTheatreStat = async() => {
+      try {
+        const response = await TheatreApi.get(`theatre-dashboard/${theatreOwner.theatreId}/`)
+        setTheatres(response.data)
+      }catch(e){
+        console.log(e , 'error found in theatre stat')
+      };
+    };
+    fetchTheatreStat()
+  },[])
+
   const stats = [
-    { title: "Theatre Status", value: 'pending' || "Not Set", icon: Film },
-    { title: "Location", value: theatreOwner.location || "Not Set", icon: MapPin },
+    { title: "Ownership Status", value: user.is_approved ? 'verified' : "Not Set", icon: Film },
     { title: "State", value: theatreOwner.state || "Not Set", icon: MapPin },
+    { title : 'theatre Revenue' , value : theatres.theatre_revenue , icon : DollarSign},
+    { title: "tickets Sold", value : theatres.total_tickets , icon: TicketSlash},
+    {title: "Sales" , value : theatres.total_revenue , icon : Coins },
+    {title: "Active Theatres" , value : theatres.total_theatres , icon : Theater }
+
+
   ];
-  
+
+  console.log(user.is_approved)
 
   return (
     <div className="p-10 bg-gray-50 ">
@@ -64,10 +86,10 @@ function TheatreDashboard() {
                 <div className="ml-4">
                   <p className="text-gray-500">{stat.title}</p>
                   <h3 className={`text-xl font-bold ${
-                    stat.title === "Theatre Status" 
-                      ? theatreOwner.ownership_status === "confirmed"
-                        ? "text-green-600"
-                        : theatreOwner.ownership_status === "pending"
+                    stat.title === "Ownership Status" 
+                      ? user.is_approved === true
+                        ? "text-green-600" 
+                        : !user.is_approved
                         ? "text-yellow-600"
                         : "text-red-600"
                       : ""
@@ -78,6 +100,7 @@ function TheatreDashboard() {
               </CardContent>
             </Card>
           ))}
+
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

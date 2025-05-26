@@ -36,35 +36,46 @@ function Nav() {
     setIsOtpSent(false);
     setMessage('');
   }
-  useEffect(() => {
-    handleCitySelect()
-  },[])
 
-  const handleCitySelect = async ( cityId ) => {
+  const handleCitySelect = async ( cityId , currentCity  ) => {
     // here fetching the city id to show city based movie
     // cityId comes cityselection component
     setIsCityModalOpen(false)
-    const id = cityId ? cityId : cityid
-    console.log(id,'id from location')
+    if (!cityId){
+      return;
+    }
+    console.log(cityId ,'id from location' , 'id from redux:' , cityid)
+    console.log(cityId, ' <-- cityId selected by user');
+
+    // if ()
     try {
-      console.log(cityid , ' fetch city id')
-      const response = await apiMovies.get(`/fetch_movies/${id}/`)
-      const { movies , city_id , location } = response.data;
-      if (movies.length > 0) {
-        console.log('inside if state');
-        
+      const response = await apiMovies.get(`/get-multiplecity-movies/?city_ids=${cityId}`)
+      console.log(response.data , 'city based movies')
+      const [{ city_id , location , movies}] = response.data;
+
+      if (response.data.length > 1){
+        const allMovies = res.data.flatMap(city => city.movies);
+        const uniqueMovies =Array.from(new Map(allMovies.map(movie => [movie.id, movie])).values());
+        dispatch(setMovies(uniqueMovies))
+
+      }else {
         dispatch(setMovies(movies))
+        
+      }
+
+      if (movies.length > 0) {
+
         dispatch(setLocation({
           cityId : city_id,
-          location : location
+          location : currentCity ? currentCity : location
         }))
-        dispatch(setSelectedCity(location))
+        dispatch(setSelectedCity(currentCity ? currentCity : location))
 
       }else{
         console.log('inside else block in Nav ')
         dispatch(clearLocation())
       }
-      console.log(selectedcity)
+      console.log(selectedcity , 'user clicked city')
 
       
     }catch(error){

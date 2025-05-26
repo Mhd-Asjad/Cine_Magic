@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import axios from 'axios';
-import Nav from '@/Components/Navbar/Nav';
+import { X } from 'lucide-react';
 import screenimg from '../../assets/screen.png'
 import seatsApi from '@/Axios/seatsaApi';
 import { useSelector } from 'react-redux';
@@ -177,7 +176,7 @@ function Seats() {
 
   }
 
-  console.log(selectedSeats , 'selected seats')
+  console.log(seats , 'seats')
   if (loading) {
     return (
       <div className='flex justify-center items-center pt-[20%] h-64' >
@@ -194,7 +193,7 @@ function Seats() {
     return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
   }
 
-  console.log(show , 'show_details')
+  console.log(seats , 'show_details')
   return (
     <div className='min-h-screen w-full bg-gray-50'>
       <div className='bg-blue-50 w-full shadow-md p-8 '>
@@ -227,10 +226,11 @@ function Seats() {
         const group = priceCategories.find(group =>
           group.rows.some(rowObj => rowObj.row === row)
         );
+          const isRowUnavailable = rowSeats.every(seat => !seat.label);
+
 
         return (
           <div key={row} className="w-full mb-3">
-            
             {group && (
               <div className="text-center font-semibold text-lg mb-2">
                 {group.category}
@@ -238,10 +238,13 @@ function Seats() {
             )}
 
             <div className="flex justify-center w-full mb-2">
-              <div className="w-6 font-bold mr-2">{row}</div>
+          <div className="w-6 font-bold mr-2">{row}</div>
+
+            {isRowUnavailable ? (
+              <div className="text-gray-400 italic text-sm">Row Unavailable <X className='inline' /></div>
+            ) : (
               <div className="flex space-x-2 gap-2">
-                {rowSeats.map(seat => (
-                  
+                {rowSeats.map(seat =>
                   seat?.label ? (
                     <button
                       key={seat.id}
@@ -251,12 +254,12 @@ function Seats() {
                     >
                       {seat.number}
                     </button>
-
-                  ):(
-                    <div key={seat.id} className="w-6 h-6"/>
+                  ) : (
+                    <div key={seat.id} className="w-6 h-6" />
                   )
-                ))}
+                )}
               </div>
+            )}
             </div>
 
           </div>

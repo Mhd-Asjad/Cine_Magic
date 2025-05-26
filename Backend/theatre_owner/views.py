@@ -17,8 +17,8 @@ from datetime import datetime , timedelta ,date
 from django.utils import timezone
 from django.db.models import Count
 from seats.models import *
-from booking.models import Booking
-import string
+from booking.models import Booking , BookingSeat
+from django.db.models import Sum , Count
 import logging
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class ConfirmTheatreOwner(APIView) :
     # getting unverified theatre enquries 
     def get(self , request ) :
         try :
-            unverified_theatre = TheaterOwnerProfile.objects.filter(ownership_status = 'confirmed' , user__is_theatre_owner = True)
+            unverified_theatre = TheaterOwnerProfile.objects.filter(ownership_status = 'pending' , user__is_theatre_owner = False)
             print(unverified_theatre)
             data = []
             for theatre in unverified_theatre :
@@ -328,7 +328,7 @@ class get_timeslots(APIView) :
         except TimeSlot.DoesNotExist :
             return Response({'error' : 'timeslot not added'} , status=status.HTTP_404_NOT_FOUND)
             
-        serilizer = TimeSlotSerializer(time_slots , many=True)
+        serilizer = TimeSlotSerializer(time_slots , context={ 'screen_id' : screen_id } , many=True)
         return Response({'data' : serilizer.data , 'is_approved' : screen.is_approved }, status=status.HTTP_200_OK)
 
 # adding time slots for the screen
@@ -412,9 +412,9 @@ class Add_Show_Time(APIView):
             if from_date < today : 
                 return Response({'Error':'from date canot be in the past'},status=status.HTTP_400_BAD_REQUEST)
             
-            # if start_time <= timezone.now():
+            if start_time <= timezone.now():
                 
-            #     return Response({'Error':'show time must be in the future'},status=status.HTTP_400_BAD_REQUEST)
+                return Response({'Error':'show time must be in the future'},status=status.HTTP_400_BAD_REQUEST)
             
             
             try:
@@ -427,15 +427,6 @@ class Add_Show_Time(APIView):
             for slot_id in slot_ids:
                 if ShowTime.objects.filter(screen=screen , slots=slot_id , show_date=show_date).exists():
                     return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
-            # overlapping_shows = ShowTime.objects.filter(
-            #     screen=screen ,
-            #     slot = timeslot_id,
-            #     show_date = show_date,
-            # )
-
-            # if overlapping_shows.exists():
-            #     print('there is overlapping showww')    
-            #     return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
 
             logger.info(f"data before creating showtime serializer", data)
             serializers = Createshowtimeserializers(data=data)
@@ -703,4 +694,40 @@ class Get_Theatre_Bookings(APIView):
             
         except Exception as e:
             print(str(e))
-            return Response({'error' : str(e)} , status=status.HTTP_500_INTERNAL_SERVER_ERROR)        
+            return Response({'error' : str(e)} , status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DashboardStatus(APIView):
+    permission_classes = [permissions.AllowAny]
+    def get(self , request , owner_id):
+        try :
+            theatres = Theatre.objects.filter(owner = owner_id)
+            theatre_owner = TheaterOwnerProfile.objects.get(id=owner_id)
+            
+        except Theatre.DoesNotExist:
+            return Response({'error' : 'theatre not found'} , status=status.HTTP_400_BAD_REQUEST)
+        
+        print(theatre_owner)
+        booking_queryset = Booking.objects.filter(
+            show__screen__theatre__in=theatres,
+            status='confirmed',
+        )
+        
+        total_amount = booking_queryset.aggregate(Sum('amount'))['amount__sum'] or 0
+        admin_revenue = float(total_amount) * 0.10
+        theatre_revenue = float(total_amount) * 0.90
+
+        
+        total_tickets = BookingSeat.objects.filter(
+            booking__in = booking_queryset,
+            status = 'booked'
+        ).count()
+        
+        dash_data = []
+        return Response({
+            'total_tickets': total_tickets,
+            'total_revenue': total_amount,
+            'admin_revenue': admin_revenue,
+            'theatre_revenue': theatre_revenue,
+            'total_theatres' : len(theatres)
+            
+        },status=status.HTTP_200_OK)

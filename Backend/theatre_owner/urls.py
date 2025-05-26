@@ -25,5 +25,6 @@ urlpatterns = [
     path('theatre/<int:id>/edit/' , EditTheatreData.as_view() , name='theatre_edit'),
     path('theatre/<int:id>/delete/',DeleteTheatre.as_view() , name='theatre_delete'),
     path('get-theatre-booking/',Get_Theatre_Bookings.as_view() , name='get-theatre-booking'),
+    path('theatre-dashboard/<int:owner_id>/', DashboardStatus.as_view(),name='theatre-dashboard')
 
 ]

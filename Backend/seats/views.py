@@ -10,6 +10,7 @@ from django.db.models import Count
 from booking.models import SeatLock
 from useracc.permissions import IsAuthenticatedUser
 from booking.models import BookingSeat
+from theatres.models import *
 class create_layout(APIView):
     def post(self, request  ) :
         data = request.data

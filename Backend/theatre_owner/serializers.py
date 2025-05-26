@@ -38,10 +38,12 @@ class TimeSlotSerializer(serializers.ModelSerializer) :
     # end_time = serializers.SerializerMethodField() 
     class Meta :
         model = TimeSlot
-        fields= ['id' , 'start_time' ]
+        fields= ['id' , 'start_time']
         
     def get_end_time(self , obj):
-        showtime = ShowTime.objects.filter(slot = obj).first()
+        # screen_id = self.context.get('screen_id')
+        # showtime_ids = ShowTime.objects.get(screen=screen_id)
+        showtime = ShowSlot.objects.filter(slot = obj).first()
         if showtime and showtime.end_time :
             return showtime.end_time.strftime('%H:%M')
         return None 

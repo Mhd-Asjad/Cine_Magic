@@ -13,6 +13,7 @@ import Select from '@mui/material/Select';
 import not_found from '../../assets/not-found.png'
 import { Sliders } from 'lucide-react';
 import apiMovies from '@/Axios/Moviesapi';
+import qs from 'qs';
 
 
 const AvailableShowDetails = () => {
@@ -25,8 +26,8 @@ const AvailableShowDetails = () => {
   const [selectedTime , setSelectedTime] = useState('');
   const { id } = useParams();
   const city_name = useSelector((state)=> state.location.selectedCity)
-  const cityid = useSelector(selectCityId);
-  console.log(cityid , 'city')
+  let cityid = useSelector(selectCityId);
+  console.log(cityid , 'city' , 'movie_id : ' , id)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,7 +40,9 @@ const AvailableShowDetails = () => {
       const response = await apiMovies.get(`/showtimes/${id}/`, {
         params : {
           'city_id' : cityid
-        }
+        },
+        paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' })
+
       });
       setNewMovies(response.data.movies)
 

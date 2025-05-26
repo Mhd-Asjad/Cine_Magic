@@ -74,7 +74,10 @@ const PendingRefund = () => {
           title : error?.response?.data?.error,
           variant : "destructive",
         })
+      }finally{
+        setLoadingRefundId(null)
       }
+
 
     };
 

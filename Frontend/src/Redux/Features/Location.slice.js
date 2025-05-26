@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const locationSlice = createSlice({
     name : 'location' , 
     initialState : {
-        cityId : '' ,
+        cityId : [] ,
         location : '',
         selectedCity : null
 
@@ -21,7 +21,6 @@ const locationSlice = createSlice({
         clearLocation : (state , action) => {
             state.selectedCity = ''
         }
-
     }
 })
 export const selectCityId  = (state) => state.location.cityId;

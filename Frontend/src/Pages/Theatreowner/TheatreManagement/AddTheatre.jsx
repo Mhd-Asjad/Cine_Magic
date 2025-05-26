@@ -65,7 +65,7 @@ function AddTheatre( ) {
             'address' : address,
         }
         try {
-            const res = await TheatreApi.post(`/theatre/${cityId}/add`,theatreData)
+            const res = await TheatreApi.post(`/theatre/${cityId}/add/`,theatreData)
             toast({
                 title : res.data.message,
                 variant : 'success'

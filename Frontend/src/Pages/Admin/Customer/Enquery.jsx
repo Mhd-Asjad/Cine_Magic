@@ -81,7 +81,7 @@ function Enquery() {
                       </Typography>
                       <div className='flex justify-center mb-3'>
                         <img
-                          src={value.owner_photo}
+                          src={value.owner_photo  }
                           alt="owner_pic"
                           className='w-32 h-32 rounded-full object-cover'
                         />

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Download, Calendar, Building, Filter, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import apiAdmin from '@/Axios/api';
-
+import { useToast } from '@/hooks/use-toast';
 const ExcelDownloadComponent = () => {
     const [isDownloading, setIsDownloading] = useState(false);
     const [theatres, setTheatres] = useState([]);
@@ -12,7 +12,9 @@ const ExcelDownloadComponent = () => {
         theatreId: '',
         reportType: 'all'
     });
+    const {toast} = useToast();
 
+    console.log(downloadParams)
 
     useEffect(() => {
 
@@ -42,7 +44,6 @@ const ExcelDownloadComponent = () => {
     setIsDownloading(true);
     
     try {
-      // Build query parameters
       const params = new URLSearchParams();
       
       if (downloadParams.startDate) {
@@ -58,18 +59,13 @@ const ExcelDownloadComponent = () => {
         params.append('report_type', downloadParams.reportType);
       }
       
-      // Make API call to download Excel
       const response = await apiAdmin.get(`report-xldownload/?${params.toString()}`,{
         responseType : 'blob'
       });
       console.log('response', response.data );
       console.log('respone status', response.status);
-    //   if (!response.ok) {
-    //     throw new Error('Failed to download report');
-    //   }
-      
-      // Get filename from response headers
-      let filename = 'theatre_report.xlsx';
+
+      let filename = `${downloadParams.reportType}.xlsx`;
       const contentDisposition = response.headers['content-disposition'];
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
@@ -78,7 +74,6 @@ const ExcelDownloadComponent = () => {
         }
       }
       
-      // Create blob and download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -88,51 +83,12 @@ const ExcelDownloadComponent = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      alert('Report downloaded successfully!');
       
     } catch (error) {
       console.error('Download error:', error);
-      alert('Failed to download report. Please try again.');
     } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  const downloadQuickReport = async (reportType) => {
-    setIsDownloading(true);
-    
-    try {
-      const params = new URLSearchParams();
-      params.append('report_type', reportType);
-      
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 30);
-      
-      params.append('start_date', startDate.toISOString().split('T')[0]);
-      params.append('end_date', endDate.toISOString().split('T')[0]);
-      
-      const response = await apiAdmin.get(`report-xldownload/?${params.toString()}`,{
-        responseType : 'blob'
-      });
-      
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${reportType}_report_${startDate.toISOString().split('T')[0]}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      alert(`${reportType} report downloaded successfully!`);
-      
-    } catch (error) {
-      console.error('Download error:', error);
-      alert('Failed to download report. Please try again.');
-    } finally {
-      setIsDownloading(false);
+      toast({title :'Report downloaded successfully!'})
+      setIsDownloading(false);  
     }
   };
 
@@ -140,10 +96,8 @@ const ExcelDownloadComponent = () => {
 
   return (
     <div className="space-y-6">
-      {/* Quick Download Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" 
-              onClick={() => downloadQuickReport('theatre_summary')}>
+        <Card className="hover:shadow-lg transition-shadow" >
           <CardContent className="p-6 text-center">
             <FileSpreadsheet className="h-12 w-12 text-blue-600 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-900 mb-2">Theatre Summary</h3>
@@ -151,8 +105,7 @@ const ExcelDownloadComponent = () => {
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => downloadQuickReport('seat_analysis')}>
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6 text-center">
             <FileSpreadsheet className="h-12 w-12 text-green-600 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-900 mb-2">Seat Category Analysis</h3>
@@ -160,8 +113,7 @@ const ExcelDownloadComponent = () => {
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => downloadQuickReport('monthly_breakdown')}>
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6 text-center">
             <FileSpreadsheet className="h-12 w-12 text-purple-600 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-900 mb-2">Monthly Breakdown</h3>
@@ -170,7 +122,6 @@ const ExcelDownloadComponent = () => {
         </Card>
       </div>
 
-      {/* Advanced Download Options */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -179,7 +130,6 @@ const ExcelDownloadComponent = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Date Range */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -233,17 +183,16 @@ const ExcelDownloadComponent = () => {
             </div>
           </div>
 
-          {/* Report Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Report Type
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
-                { value: 'all', label: 'Complete Report' },
-                { value: 'summary', label: 'Summary Only' },
-                { value: 'detailed', label: 'Detailed View' },
-                { value: 'financial', label: 'Financial Focus' }
+                { value: 'detailed_performance', label: 'Complete Report' },
+                { value: 'theatre_summary', label: 'Summary Only' },
+                { value : 'seat_analysis' , label : 'seat analysis' },
+                { value : 'monthly_breakdown' , label : 'monthly breakdown' }
               ].map((option) => (
                 <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
                   <input
@@ -260,7 +209,6 @@ const ExcelDownloadComponent = () => {
             </div>
           </div>
 
-          {/* Download Button */}
           <div className="pt-4">
             <button
               onClick={downloadExcelReport}
@@ -281,16 +229,6 @@ const ExcelDownloadComponent = () => {
             </button>
           </div>
 
-          <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-            <p className="font-medium mb-1">📊 Report Includes:</p>
-            <ul className="list-disc list-inside space-y-1 text-xs">
-              <li>Theatre-wise revenue and performance metrics</li>
-              <li>Seat category breakdown with sales and pricing</li>
-              <li>Monthly trends and comparative analysis</li>
-              <li>Detailed booking information and customer data</li>
-              <li>Summary dashboards and pivot tables</li>
-            </ul>
-          </div>
         </CardContent>
       </Card>
     </div>

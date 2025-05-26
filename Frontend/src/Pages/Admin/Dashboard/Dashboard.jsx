@@ -58,7 +58,11 @@ function Dashboard() {
     fetchChartData()
   },[filter , dateRange])
 
+  console.log(chartData);
+  
+
   const fetchRevenueChart = async () =>{
+    setLoading(true)
     try {
       const response = await apiAdmin.get("revenue-chart/", {
         params: {
@@ -70,10 +74,12 @@ function Dashboard() {
       setRevenueData(response.data);
     } catch (error) {
       console.error("Error fetching revenue chart data:", error);
+    }finally {
+      setLoading(false)
     }
   }
  
-  console.log(dateRange , 'date range')
+  console.log(revenueData , 'date range')
 
   const fetchRecentBooking = async() => {
     try {
@@ -168,10 +174,10 @@ function Dashboard() {
         <Card className="w-full">
           <CardContent className="pt-6 text-left ml-2">
             <div className="text-sm text-gray-500 mb-1 flex items-center">
-              Total Revenue <span className="ml-2">₹</span>
+              Total theatre amount <span className="ml-2">₹</span>
             </div>
-            <div className="text-2xl font-bold">₹{theatreStats.total_revenue}</div>
-            <div className="text-xs text-green-500 mt-1">+ from last month</div>
+            <div className="text-2xl font-bold">₹{revenueData[0].total_revenue}</div>
+            <div className="text-xs text-green-500 mt-1"> {theatreStats?.revenue_change}% + from last month</div>
           </CardContent>
         </Card>
 
@@ -181,8 +187,7 @@ function Dashboard() {
             <div className="text-sm text-gray-500 mb-1 flex items-center">
               Users <span className="ml-2"><User size={16} /></span>
             </div>
-            <div className="text-2xl font-bold">+{theatreStats.active_users.toLocaleString()}</div>
-            <div className="text-xs text-green-500 mt-1">+ from last month</div>
+            <div className="text-2xl font-bold">+{theatreStats?.active_users.toLocaleString()}</div>
           </CardContent>
         </Card>
 
@@ -192,8 +197,8 @@ function Dashboard() {
             <div className="text-sm text-gray-500 mb-1 flex items-center">
               Total Tickets Sold <span className="ml-2">🎟️</span>
             </div>
-            <div className="text-2xl font-bold">+{theatreStats.total_tickets}</div>
-            <div className="text-xs text-green-500 mt-1">+ from last month</div>
+            <div className="text-2xl font-bold">+{theatreStats?.total_tickets}</div>
+            <div className="text-xs text-green-500 mt-1">{theatreStats?.ticket_change}% + from last month</div>
           </CardContent>
         </Card>
 
@@ -203,8 +208,7 @@ function Dashboard() {
             <div className="text-sm text-gray-500 mb-1 flex items-center">
               Active Now <span className="ml-2">⚡</span>
             </div>
-            <div className="text-2xl font-bold">+{theatreStats.active_theatres}</div>
-            <div className="text-xs text-green-500 mt-1">+ since last hour</div>
+            <div className="text-2xl font-bold">+{theatreStats?.active_theatres}</div>
           </CardContent>
         </Card>
 
@@ -300,10 +304,10 @@ function Dashboard() {
                 <XAxis dataKey="period" />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value, name) => [`$${value}`, 'revenue']}
+                  formatter={(value, name) => [`₹${value}`, 'admin revenue']}
                   labelStyle={{ color: '#374151' }}
                 />
-                <Bar dataKey="revenue" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="admin_revenue" fill="#3B82F6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

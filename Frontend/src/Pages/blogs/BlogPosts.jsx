@@ -90,7 +90,7 @@ function BlogPosts() {
             <div 
               key={blog.id} 
               className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg hover:bg-gray-50 transition-shadow duration-300"
-              onClick={() => navigate(`/posts/details/${blog.id}`)}
+              onClick={() => navigate(`/posts/details/${blog.id}?fromPage=${page}`)}
 
             >
             

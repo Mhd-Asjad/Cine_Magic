@@ -13,6 +13,7 @@ from theatre_owner.serializers import FechShowSerializer
 from seats.models import *
 from django.db.models import Prefetch
 from .serializers import CitySerializer
+from collections import defaultdict
 from math import radians, sin, cos, sqrt, atan2
 
 # Create your views here.
@@ -48,6 +49,8 @@ class CityBasedMovies(APIView) :
             city = City.objects.get(id = city_id)
             showtimes = ShowTime.objects.filter(screen__theatre__city = city_id ,show_date__gte = today).select_related('movie').distinct()
             movies = {showtime.movie for showtime in showtimes}
+            
+            print(movies, 'movies in the city')
             
         except City.DoesNotExist:
             return Response({'detail' : 'city is not found'} , status=status.HTTP_404_NOT_FOUND)
@@ -136,7 +139,7 @@ class DetailedMovieView(APIView) :
             return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
 
 def get_showtime_label(start_time):
-    if not start_time:
+    if not start_time :
         return ''
     if time(6, 0) <= start_time < time(12, 0):
         return 'Morning'
@@ -147,11 +150,19 @@ def get_showtime_label(start_time):
     else:
         return 'Night'
 
-
 class movie_showtime(APIView):
     permission_classes = [permissions.AllowAny]
-    def get(self , request  , id):
-        cityid = request.GET.get('city_id')
+    def get(self , request  , id) :
+        cityids = request.GET.getlist('city_id')
+        print(cityids , 'idss')
+        if not cityids:
+            print('no city idies provide')
+        
+        try : 
+            city_ids = list(set(map(int , cityids)))    
+        except ValueError :
+            return Response({'detail': 'Invalid city_id values'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             movie = Movie.objects.get(id = id)
         except Movie.DoesNotExist:
@@ -160,13 +171,11 @@ class movie_showtime(APIView):
         try :
             showtimes = ShowTime.objects.filter(
                 movie = movie,
-                screen__theatre__city_id = cityid
+                screen__theatre__city__id__in = city_ids
             ).select_related(
                 'screen__theatre',
             ).prefetch_related(
-                
                 'slots'
-                
             )
             print(showtimes, 'showtimes')
             
@@ -224,7 +233,7 @@ class movie_showtime(APIView):
             })
             
         print(theatre_data, 'theatre data')
-        shows = ShowTime.objects.filter(screen__theatre__city = cityid)
+        shows = ShowTime.objects.filter(screen__theatre__city__id__in = city_ids)
         movies = set(show.movie for show in shows)
         movie_data = []
         for movie in movies :
@@ -273,6 +282,8 @@ class get_nearest_cities(APIView):
         user_lat = float(request.GET.get('latitude'))
         user_lon = float(request.GET.get('longitude'))
         
+        print('userlat' , user_lat , 'user long:' , user_lon)
+        
         theatres = Theatre.objects.filter(is_confirmed=True).exclude(city_id=None)
         
         city_map = {}
@@ -297,3 +308,68 @@ class get_nearest_cities(APIView):
         city_distance.sort(key=lambda x : x['distance_km'])
 
         return Response(city_distance[:5] , status=status.HTTP_200_OK)
+    
+class multiple_city_based_movies(APIView):
+    permission_classes = [permissions.AllowAny]
+    def get(self , request):
+
+        city_ids = request.query_params.get('city_ids')
+        print(city_ids)
+        if not city_ids:
+            return Response({'detail': 'city_ids parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Convert comma-separated city_ids to a list of integers
+            city_ids = [int(cid.strip()) for cid in city_ids.split(',')]
+        except ValueError:
+            return Response({'detail': 'Invalid city_ids format'}, status=status.HTTP_400_BAD_REQUEST)
+
+        today = datetime.now()
+
+        # Bulk fetch valid cities
+        cities = City.objects.filter(id__in=city_ids)
+        city_map = {city.id: city for city in cities}
+
+        # Fetch showtimes in one go, filtering only valid cities
+        showtimes = ShowTime.objects.filter(
+            screen__theatre__city__in=city_ids,
+            show_date__gte=today
+        ).select_related('movie', 'screen__theatre__city')
+
+        # Group movies by city
+        city_movies_map = defaultdict(set)
+        for showtime in showtimes:
+            city_id = showtime.screen.theatre.city.id
+            city_movies_map[city_id].add(showtime.movie)
+
+        # Build final response
+        result = []
+        for city_id, movies in city_movies_map.items():
+            city = city_map.get(city_id)
+            if not city:
+                continue  # skip unknown cities just in case
+
+            movie_data = [
+                {
+                    'id': movie.id,
+                    'title': movie.title,
+                    'language': movie.language,
+                    'duration': movie.duration,
+                    'release_date': movie.release_date,
+                    'description': movie.description,
+                    'genre': movie.genre,
+                    'poster': request.build_absolute_uri(movie.poster.url) if movie.poster else None,
+                }
+                for movie in movies
+            ]
+
+            result.append({
+                'city_id': city.id,
+                'location': city.name,
+                'movies': movie_data
+            })
+
+        return Response(result, status=status.HTTP_200_OK)
+
+        
+        

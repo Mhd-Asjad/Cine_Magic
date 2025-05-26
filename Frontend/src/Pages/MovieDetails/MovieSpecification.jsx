@@ -67,7 +67,7 @@ function MovieSpecification( ) {
               <img
                 src={movie.poster}
                 alt={movie.title}
-                className="w-[400px] h-[300px] rounded-lg shadow-xl"
+                className="w-[500px] h-[350px] object-cover rounded-lg shadow-xl"
               />
             </div>
   

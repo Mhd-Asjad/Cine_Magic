@@ -61,7 +61,7 @@ function Addshowtime() {
       
     }
   }
-
+  console.log(showTimes , 'show times')
   const handleAddForm = () => {
     if (screenApproved) {
       setShowAddForm(true)

@@ -3,10 +3,12 @@ import { useSelector } from 'react-redux'
 import TheatreApi from '@/Axios/theatreapi'
 import { useEffect , useState } from 'react'
 import { Coins } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 function ShowBookings() {
     const [bookings , setBookings] = useState([])
     const [loading , setLoading] = useState(true)
+    const navigate = useNavigate();
     const theatre_owner_id = useSelector((state) => state.theatreOwner.theatreId)
 
 
@@ -45,6 +47,12 @@ function ShowBookings() {
     const date = new Date();
     date.setHours(hours , minutes)
     return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
+    }
+
+    const onShowBooking = (booking_id) => {
+        navigate(`/theatre-owner/show/booking/${booking_id}`)
+        
+
     }
     console.log(bookings , 'bookings show theatre')
   return (
@@ -107,7 +115,7 @@ function ShowBookings() {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <button
-                                    // onClick={() => onbooking(booking.id)}
+                                    onClick={() => onShowBooking(booking.id)}
                                     className="inline-flex items-center px-3 py-2 border-dashed border-2 text-sm leading-4 font-medium rounded-md  hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                 >
                                     <Coins className="w-4 h-4 mr-1" />

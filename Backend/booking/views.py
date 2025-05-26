@@ -42,7 +42,7 @@ class Checkout(APIView) :
             session_id = request.session.session_key
 
             if not seats_ids or not show_id:
-                print('no seats or show id')
+                logger.error(f'no seats or show id {seats_ids}')
                 return Response({'seat_error' : 'no seats are locked'} , status=status.HTTP_400_BAD_REQUEST)
             
             expired = SeatLock.objects.filter(
@@ -105,10 +105,10 @@ class ProcessPayment(APIView):
         auth = (settings.PAYPAL_CLIENT_ID , settings.PAYPAL_CLIENT_SECRET)
         
         response = requests.get(validation_url , auth=auth)
-        print(response)
+        logger.info(f'payment details {response}')
         if response.status_code == 200 :
             payment_data = response.json()
-            print(payment_data)
+            logger.info(payment_data)
             
             return Response({'message' : 'payment compleated successfully'  ,  },status=status.HTTP_200_OK)
         
@@ -129,21 +129,20 @@ class Create_Booking(APIView):
         total_amount = data['total_amount']
         paymentdet = data['payment_details']    
         price = total_amount // len(seat_ids)
-        print(type(data)) 
+        logger.info('data type' ,type(data)) 
         try:
             purchase_units  = paymentdet.get('purchase_units' , [])
             if purchase_units :
                 captures = purchase_units[0].get('payments' , {}).get('captures' , [])
                 if captures :
                     capture_id = captures[0].get('id')
-                    print(capture_id , 'capture id')
                 else :
-                    print('No Capture found')
+                    logger.info('No Capture found')
             else :
-                print('No purchase unit found')
+                logger.warning('No purchase unit found')
                 capture_id = None
         except Exception as e:
-            print('Error in purchase unit' , str(e))
+            logger.error('Error in purchase unit' , str(e))
         with transaction.atomic():
             show = ShowTime.objects.get(id=show_id)
             slot = TimeSlot.objects.get(id=slot_id)
@@ -180,7 +179,6 @@ class Create_Booking(APIView):
                 amount = total_amount,
                 capture_id = capture_id,
                 payment_method = 'paypal',
-
             )
         return Response({'message': 'Booking created successfully' , 'booking_id' : booking.id }, status=status.HTTP_201_CREATED)
         # except Exception as e:
@@ -252,7 +250,6 @@ class Show_Bookings(APIView):
 # ticket detailed view for the booking id
 @api_view(['GET'])
 def Ticket_View( request , booking_id ):
-    print('entered into the view')
     try :
         booking = Booking.objects.get(id=booking_id)
     
@@ -261,7 +258,7 @@ def Ticket_View( request , booking_id ):
     
     show_det = Movie.objects.get(id=booking.show.movie_id)
     show = FetchMovieSerializer(show_det, context={'request' : request})
-    print(show.data)
+    logger.info(f'recieved show data{show.data}')
     booking_seats = BookingSeat.objects.filter(booking=booking)
     seat_det = {}
     for seat in booking_seats :
@@ -312,7 +309,6 @@ class Calculate_Refund_amount(APIView):
         time_diff = show_date_time - now
         hours_diff = time_diff.total_seconds() // 3600
         
-        print(hours_diff , 'hours diff')
         if hours_diff > 24 :
             refund_percentage = 98
         elif 12 <= hours_diff <= 24 :
@@ -324,7 +320,7 @@ class Calculate_Refund_amount(APIView):
             
 
         refund_amount = (booking.amount * refund_percentage) / 100
-        print(refund_percentage , 'refund amount')
+        logger.info(refund_percentage , 'refund amount')
         refund_data= {
             'id' : booking.id ,
             'booking_id' : booking_id ,
@@ -341,9 +337,7 @@ class Cancel_Ticket(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self , request , booking_id) :
         data = request.data
-        print(booking_id ,'jjkdsd')
         re_amount = data.get('refund_amount')
-        print( re_amount ,'amount')
         
         try:
             booking = Booking.objects.get(id=booking_id)
@@ -436,7 +430,6 @@ class ticket_view(APIView):
                 return Response({'error' : 'link is invalid'},status=status.HTTP_400_BAD_REQUEST)
             
             serializer = TicketViewSerializer(booking)
-            print(serializer.data)
             return Response(serializer.data , status=status.HTTP_200_OK)
         except Exception as e :
             return Response({'error' : str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)

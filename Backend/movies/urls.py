@@ -7,6 +7,7 @@ urlpatterns = [
     path('showtimes/<int:id>/' ,movie_showtime.as_view() , name='movie-showtime'),
     path('show-detail/<int:show_id>/' , Show_Details.as_view() , name='show-detail'),
     path('fetchall-citys/',FetchCities.as_view() , name='fetchall-citys'),
-    path('get-nearest-citys/' , get_nearest_cities.as_view() , name='get-nearest-citys')
+    path('get-nearest-citys/' , get_nearest_cities.as_view() , name='get-nearest-citys'),
+    path('get-multiplecity-movies/', multiple_city_based_movies.as_view() , name='get-multiplecity')
     
 ]

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import seatsApi from '@/Axios/seatsaApi'
-
+import { RockingChair } from 'lucide-react'
 function LayoutCards() {
     const owner_id = useSelector((state) => state.theatreOwner.theatreId)
     const [screenData, setScreen] = useState([])
@@ -62,6 +62,12 @@ function LayoutCards() {
                                         })}
                                     </div>
                                 </div>
+                            <div className='flex justify-center ' >
+                                <button className='py-3 px-1 font-semibold mt-4 border-dashed border-2 '>
+                                    edit Layoutout <RockingChair className='inline' />
+                                </button>
+
+                            </div>
                             </div>
                         ))
                 )

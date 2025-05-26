@@ -1,45 +1,70 @@
 import React , {useEffect, useState} from 'react'
 import { MapPin , Locate } from 'lucide-react';
 import apiMovies from '@/Axios/Moviesapi';
-import { data } from 'react-router-dom';
-
+import { useDispatch } from 'react-redux';
+import { setMovies } from '@/Redux/Features/MovieSlice';
+import { setLocation , setSelectedCity } from '@/Redux/Features/Location.slice';
 function Cityselction({ oncityselect }) {
   
     const [ cities , setCities ] = useState([]);
     const [ loading , setLoading] = useState(true)
     const [ error , setError] = useState('')
+    const dispatch = useDispatch();
 
-  
+    const fetchNearestMovies = async(city_ids , lat , lon) => {
+      try{
+        const res = await apiMovies.get(`/get-multiplecity-movies/?city_ids=${city_ids.join(',')}`)
+        const city_id = res.data.map((movie)=> movie.city_id)
+
+        
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+        const data = await response.json();
+        const currentCity = data.address.city || data.address.town || data.address.village || ''
+
+        dispatch(setSelectedCity(currentCity))
+        dispatch(setLocation({
+          cityId : city_id ,
+          location : currentCity
+        })) 
+          
+          const allMovies = res.data.flatMap(city => city.movies);
+          const uniqueMovies =Array.from(new Map(allMovies.map(movie => [movie.id, movie])).values());
+
+          dispatch(setMovies(uniqueMovies))
+
+        if (oncityselect){
+          oncityselect(city_id , currentCity)
+        }
+
+      }catch(error){  
+        console.log(error , 'err while fetching multiple movies')
+      }
+    }
 
     const handleDetectLocation = () => {
-      if (!navigator.geolocation){
-        alert('this browser wont allowing locations');
-        return
+      if (!navigator.geolocation) {
+        alert('Geolocation is not supported by this browser.');
+        return;
       }
 
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude , longitude } = position.coords;
-          apiMovies.get(`/get-nearest-citys/`, {
-              params: { 
-                latitude,
-                longitude
-              }
-            })
-            .then((response) => {
-              const data = response.data;
-              const city_ids = data.map((city)=> city.city_id)
-              
-            })  
-            .catch((e) => {
-              console.log(e, 'error');
-            });
-        },
-        (err) => {
-          setError && setError("Permission denied or error getting location.");
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const res = await apiMovies.get(`/get-nearest-citys/`, {
+            params: { latitude, longitude }
+          });
+
+          const city_ids = res.data.map(city => city.city_id);
+          console.log(res.data)
+          await fetchNearestMovies(city_ids, latitude, longitude);
+
+        } catch (error) {
+          console.error('Failed to fetch nearest cities:', error);
         }
-      );
-    }
+      });
+    };
+
 
     const fetchCities = async () => {
       try {
@@ -69,27 +94,24 @@ function Cityselction({ oncityselect }) {
 
     return (
       <div >
-      <div className='flex justify-center w-[90%] p-2 mb-4 border' >
+      <div className="flex items-center justify-center mb-6">
+        <MapPin className="text-indigo-600 mr-2" size={24} />
+        <h2 className="text-xl md:text-xl font-semibold text-gray-800">Select Location</h2>
+      </div>
+      <div className='mx-auto flex items-center w-1/2 p-2 mb-4 border ' >
 
         <button 
           className='text-md text-blue-500'
           onClick={handleDetectLocation}
-        >
-          
-          
+        >      
           Detect My location <Locate className='inline' /> 
-        
-        
+      
         </button>
 
         <span className='ml-6' >
           helps to find nearst theaters
         </span>
 
-      </div>
-      <div className="flex items-center justify-center mb-6">
-        <MapPin className="text-indigo-600 mr-2" size={24} />
-        <h2 className="text-xl md:text-xl font-semibold text-gray-800">Select Location</h2>
       </div>
 
       
