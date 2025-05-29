@@ -16,4 +16,5 @@ urlpatterns = [
     path('edit-user/<int:userId>/' , editUser.as_view() , name='edit-user'),
     path('google-auth/',GoogleAuthView.as_view(),name='google-auth'),
     path('get-usertype/', checkUserType.as_view(), name='get-usertype'),
+    path('reset-password/',resetuser_password.as_view(),name='reset-password')
 ]

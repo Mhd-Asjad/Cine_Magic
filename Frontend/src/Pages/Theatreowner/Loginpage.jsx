@@ -75,9 +75,7 @@ function Loginpage() {
               </button>
           </form>
           
-          <p className="text-gray-400 text-sm text-center mt-4">
-              Forgot password? <a href="/reset" className="text-blue-400 hover:underline">Reset here</a>
-          </p>
+        
       </div> 
    
 

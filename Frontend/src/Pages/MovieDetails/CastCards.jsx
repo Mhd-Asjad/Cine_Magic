@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 
-function CastCards({movie_id , castLength=0}) {
+function CastCards({movie_id , castLength}) {
     const [ casts , setCasts ] = useState([]);
     useEffect(() => {
         const getCredits = async() => {
@@ -15,24 +15,25 @@ function CastCards({movie_id , castLength=0}) {
                         Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ODExYWI5MTExYWRlZWMxN2UyMzk0Zjg1OTE3OTM4YiIsIm5iZiI6MTcyNTc3NDY1OS4xNTY5OTk4LCJzdWIiOiI2NmRkM2I0MzU0YWYwZTE3MGUzOGJlMWUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.uOfHGjAWVEJgIZsds9hX1-hW7DoYtJVs9iupSj-OFdc'
                     }
                 })
-                setCasts(res.data.cast)
-                
+                setCasts(res.data.cast)         
+                console.log(res.data.cast)       
                  
             }catch(e){
                 console.log(e)
+            }finally{
+              castLength(res.data.length)
             }
 
         };
         if (movie_id) {
-
             getCredits()
-        }
-        console.log(casts)
-        if (casts.length > 0){
-          castLength(casts.length)
         }
         
     },[movie_id])
+
+    if (casts){
+      castLength(casts.length)
+    }
     return (
     <div>
         <div className="p-4">

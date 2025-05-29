@@ -35,18 +35,18 @@ class FetchMovieSerializer(serializers.ModelSerializer) :
             return request.build_absolute_uri(obj.poster.url)
         return None
 class TimeSlotSerializer(serializers.ModelSerializer) :
-    # end_time = serializers.SerializerMethodField() 
+    end_time = serializers.SerializerMethodField() 
     class Meta :
         model = TimeSlot
-        fields= ['id' , 'start_time']
+        fields= ['id' , 'start_time' , 'end_time']
         
     def get_end_time(self , obj):
-        # screen_id = self.context.get('screen_id')
-        # showtime_ids = ShowTime.objects.get(screen=screen_id)
-        showtime = ShowSlot.objects.filter(slot = obj).first()
-        if showtime and showtime.end_time :
-            return showtime.end_time.strftime('%H:%M')
-        return None 
+        logger.info(f'getting slot obj {obj}')
+        show = ShowSlot.objects.filter(slot = obj ).select_related('slot').first()
+        print(show.id)
+        if show.showtime.end_time :
+            return show.showtime.end_time.strftime('%H:%M')
+        return None
     
 class CreateScreenSerializer(serializers.ModelSerializer):
     theatre_name = serializers.CharField(source='theatre.name',read_only=True)

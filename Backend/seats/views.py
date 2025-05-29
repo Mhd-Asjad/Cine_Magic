@@ -177,10 +177,10 @@ class Lock_seats(APIView):
         locked_seats = SeatLock.objects.filter(
             seat_id__in = seats_ids ,
             show_id = show_id,
-            expires_at__gt=timezone.now()
-                
+            expires_at__gt=timezone.now(),
         )
-        if locked_seats.exists():
+
+        if locked_seats.exists() :
             return Response({'error' : 'some seats are not available‼️'} , status=status.HTTP_400_BAD_REQUEST)
                     
         for seat_id in seats_ids:

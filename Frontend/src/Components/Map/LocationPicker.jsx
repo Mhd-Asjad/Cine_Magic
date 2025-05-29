@@ -106,7 +106,7 @@ function LocationPicker({ onLocationSelect }) {
       }
     }
 
-  }, [selectedLocation])
+  }, [selectedLocation ])
   console.log(selectedLocation)
   return (
     <>

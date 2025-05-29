@@ -22,6 +22,7 @@ import PrivateRoute from "./Pages/Routes/PrivateRoute";
 import { UserRoute } from "./Pages/Routes/ProtectedRoute";
 import BlogInfo from "./Pages/blogs/BlogInfo";
 import VerifiedTicket from "./Pages/Bookings/VerifiedTicket";
+import ResetPassword from "./Pages/userauth/ResetPassword";
 function App() {
 
     return (
@@ -50,6 +51,7 @@ function App() {
                     <Route path='/blogs' element={<BlogPosts/>} />
                     <Route path='/blogs/add' element={<AddBlog/>} />
                     <Route path="/posts/details/:id" element={<BlogInfo/>}/>
+                    <Route path="/reset-password" element={<ResetPassword/>} />
 
                     {/* adminpages */}
                     <Route path="/admin/login" element={<AdminLogin />} />

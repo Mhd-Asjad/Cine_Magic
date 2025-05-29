@@ -8,17 +8,21 @@ import { split } from 'postcss/lib/list';
 import Upcomingmovies from './Upcomingmovies';
 function MovieList({ movie }) {
   const navigate = useNavigate();
+  const selectedCity = useSelector((state) => state.location.selectedCity);
+
   const handleMovieSelect = (movieId) => {
     navigate(`/movie/${movieId}/details`)
   }
   
   return (  
-    <div className="w-full bg-white rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300">
-      <div className="relative -mb-[18%] aspect-[2/3] flex justify-center">
+    <div className="w-full bg-white rounded-lg h-full overflow-hidden hover:shadow-lg transition-all duration-300">
+      
+      
+      <div className="relative mb-4 aspect-[2/3] justify-center mx-auto ">
         <img
           src={movie.poster}
           alt={`${movie.title} poster`}
-          className="w-[79%] h-[80%] object-cover rounded cursor-pointer"
+          className="w-[79%] h-[60%] object-cover rounded cursor-pointer"
           onClick={() => handleMovieSelect(movie.id)}
         />
         {(() => {
@@ -36,9 +40,7 @@ function MovieList({ movie }) {
           }
           return null;
         })()}
-      </div>
-
-      <div className="ml-10 mb-6">
+      <div className="ml-5 mt-2">
         <h3 className="font-medium text-lg text-gray-600 mb-1">{movie.title}</h3>
         <div className="text-gray-500 text-sm mb-3">
           <span className='flex items-center'>
@@ -51,6 +53,8 @@ function MovieList({ movie }) {
           </span>
         </div>
       </div>
+      </div>
+
     </div>
   );
 }
@@ -60,7 +64,6 @@ const MovieGrid = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedGenre , setSelectedGenre ] = useState('')
   const movies = useSelector((state) => state.movie.movies);
-  const selectedCity = useSelector((state) => state.location.selectedCity);
 
   const filteredMovies = movies.filter(movie => {
     const matchesSearch = movie.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -104,10 +107,7 @@ const MovieGrid = () => {
         />
       </div>
       
-      <h2 className="text-2xl font-medium mb-6">
-        Movies in {selectedCity || 'your city'}
-      </h2>
-      
+     
       <div className="flex flex-col md:flex-row">
         <div className="w-full md:w-64 p-6 rounded-lg bg-white mr-[4%]">
           <h2 className="text-lg font-semibold mb-4">Filter by Language</h2>

@@ -141,7 +141,7 @@ function ShowScreen() {
     }
     
     const handleAddShowTime = async() => {
-        if (!selectedMovie || !selectedScreen || !showDate ) {
+        if (!selectedMovie || !selectedScreen || !showDate || !selectedShowTime ) {
             toast({
                 title : 'please fill up all fields',
                 variant:"destructive"

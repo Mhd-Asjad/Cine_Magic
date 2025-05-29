@@ -208,7 +208,7 @@ function TicketView() {
                                       <p><strong>Booking Amount:</strong> ₹{refundInfo.amount}</p>
                                       <p><strong>Refund %:</strong> {refundInfo.refund_percentage}</p>
                                       <p><strong>Refund Amount:</strong> ₹{refundInfo.refund_amount}</p>
-                                      <p><strong>{refundInfo.hour_diff > 0 ? 'Hours Before Show' : 'Hours Passed After Show'}:</strong> {refundInfo.hour_diff > 0 ? `${refundInfo.hour_diff} hours` : `${Math.abs(refundInfo.hour_diff)} hrs`}</p>
+                                      <p><strong>{refundInfo.hour_diff > 0 ? 'Hours Before Show' : 'refund status'}:</strong> {refundInfo.hour_diff > 0 ? `${refundInfo.hour_diff} hours` : `Not Applicable`}</p>
                                       {refundInfo.refund_percentage === 0 && <p className="text-red-500 mt-2">⚠ No refund is applicable as per refund policy.</p>}
                                   </>
                               )}

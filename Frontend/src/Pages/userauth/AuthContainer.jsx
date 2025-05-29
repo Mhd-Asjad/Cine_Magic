@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import RegistrationForm from './RegistrationForm';
-import LoginForm from './LoginForm';
+// import LoginForm from './LoginForm';
 import { jwtDecode } from 'jwt-decode';
 import { GoogleOAuthProvider , GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
@@ -8,17 +8,25 @@ import { useDispatch } from 'react-redux';
 import { setUser_id , setUsername , setPrevilage , setEmail } from '@/Redux/Features/UserSlice';
 import { useToast } from '@/hooks/use-toast';
 import userApi from '@/Axios/userApi';
+import { GalleryVerticalEnd } from "lucide-react";
+import {LoginForm} from "@/components/login-form";
+import ResetPassword from './ResetPassword';
 
 function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined }) {
     const [ isLogin , setIsLogin ] = useState(true)
-    const navigate = useNavigate();
+    const [isResetPassowrd , setResetPaword ] = useState(false);
     const dispatch = useDispatch();
     const {toast} = useToast();
-    const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID  
+    const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
     const toggleForm = () => {
         
         setIsLogin(prev => (!prev))
     };
+
+    const togglePassword = () => {
+        setResetPaword(prev => (!prev))
+        setIsLogin(prev => (!prev))
+    }
     useState(() => {
         if (Logined){
             console.log('is logined')
@@ -31,10 +39,10 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined })
         const {email , name } = decoded
         try {
             const res = await userApi.post('google-auth/',{
-                'email' : email , 
+                'email' : email ,
                 'username' : name
             })
-            const { refresh_token , access_token , id , userEmail , username } = res.data.user
+            const { refresh_token , access_token , id , userEmail , username , is_approved , is_theatre_owner } = res.data.user
             console.log(refresh_token , access_token)
             localStorage.setItem('user_token' , access_token)
             localStorage.setItem('user_token_refresh',refresh_token)
@@ -42,6 +50,10 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined })
             dispatch(setUser_id(id))
             dispatch(setEmail(userEmail))
             dispatch(setUsername(username))
+            dispatch(setPrevilage({
+                is_approved : is_approved,
+                is_theatre : is_theatre_owner,
+            }))
 
 
 
@@ -63,46 +75,47 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined })
 
             <div className="container mx-auto p-6">
                 {isLogin ? (
-                    <LoginForm isModalClose={isModalClose} />
-                ) :  (
+                    
+                    <LoginForm isModalClose={isModalClose} handleResetForm={togglePassword} google_success={handleGoogleSuccess} />
+                    
+                ) :  isResetPassowrd ? (
+                    <ResetPassword handleResetForm={togglePassword} />
+                ) :(
+                    
                     <RegistrationForm
                         setMessage={() => {}}
                         setIsOtpSent={setIsOtpSent}
                         setUserEmail={setUserEmail}
                         setUserPrevillage={setPrevilage}
                     />
-                )}
-                <p className="text-center mt-2">
-                    {!isLogin ? (
 
-                        <>
-                            Already have an account?{' '}
-                            <span
-                                className="text-blue-500 cursor-pointer hover:underline"
-                                onClick={toggleForm}
-                            >
-                                Login
-                            </span>
-                        </>
-                    ) : (
+                ) }
+
+
+                
+                <p className="text-center mt-2">
+                    {!isLogin && !isResetPassowrd ? (
+
+                        <div className="text-center text-sm">
+                        Don&apos;t have an account?{" "}
+                        <a onClick={toggleForm} className="underline cursor-pointer underline-offset-4">
+                            Sign up
+                        </a>
+                    </div>
+                    ) : !isResetPassowrd ? (
 
                         <>
                             Don't have an account?{' '}
                             <span
-                                className="text-blue-500 cursor-pointer hover:underline"
+                                className="underline cursor-pointer underline-offset-4"
                                 onClick={toggleForm}
                             >
                                 Register
                             </span>
 
-                                <p> <span className='text-sm text-gray-500' > OR </span></p>
-                                <div className='flex items-center justify-center py-3 px-5 w-2/5 h-12 mx-auto mt-3 rounded-md cursor-pointer' > 
-                                    <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.log("Login Failed")} />
-                                </div>
-
                         </>
                         
-                    )}
+                    ):null}
                 </p>
             </div>
 

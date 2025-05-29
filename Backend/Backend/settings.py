@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'booking',
     'theatre_owner',
     'blog',
+    'review',
     'rest_framework',
     'rest_framework_simplejwt',
     'allauth',

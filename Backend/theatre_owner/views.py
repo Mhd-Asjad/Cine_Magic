@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import RefreshToken
 from movies.models import *
-from theatres.models import Theatre , Screen , ShowTime , TimeSlot
+from theatres.models import Theatre , Screen , ShowTime , TimeSlot , ShowSlot
 from useracc.models import User
 from django.http import JsonResponse
 from django.db import IntegrityError
@@ -98,7 +98,7 @@ class ConfirmTheatreOwner(APIView) :
         profile_id = request.data.get('id')
         ownership_status = request.data.get('ownership_status')
         user_id = request.data.get('userId')
-        print(ownership_status)
+        logger.info(f'ownership {ownership_status}')
 
         if not profile_id and ownership_status :
             return Response(
@@ -111,7 +111,15 @@ class ConfirmTheatreOwner(APIView) :
             
             theatre_owner = TheaterOwnerProfile.objects.get(id=profile_id)
             user = User.objects.get(id=user_id)
-            if theatre_owner :
+            logger.error(f'handling user : {user}')
+            
+            
+               
+                
+                
+            
+            
+            if theatre_owner and ownership_status == 'confirmed':
                 theatre_owner.ownership_status = ownership_status
                 user.is_approved = True
                 user.is_theatre_owner = True
@@ -169,10 +177,38 @@ class ConfirmTheatreOwner(APIView) :
                 )
 
 
-            return Response(
-                {'message': 'Ownership status updated successfully!'},
-                status=status.HTTP_200_OK
-            )
+                return Response(
+                    {'message': 'Ownership status updated successfully!'},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                
+                theatre_owner.delete()
+                
+                username = user.username
+                email_subject = 'Theatre Verification Has Been Rejected' 
+                email_message = f'''
+                    Dear {username},
+                    Your registration has been unvalidated due to some reasons
+                    try to register with propper theatre docs and connect with us 
+                    Thank you for letting know
+                '''
+                
+                send_mail(
+
+                    email_subject,
+                    email_message,
+                    'mhdasjad877@gmail.com', 
+                    [user.email],
+                    fail_silently=True
+                )
+                
+                return Response(
+                    {'message' : 'theatre ownership rejected successfully'},
+                    status=status.HTTP_200_OK
+                )
+    
+        
         except TheaterOwnerProfile.DoesNotExist :
             return Response(
                 {"error" : "Theatre or pofile not available"},
@@ -328,7 +364,7 @@ class get_timeslots(APIView) :
         except TimeSlot.DoesNotExist :
             return Response({'error' : 'timeslot not added'} , status=status.HTTP_404_NOT_FOUND)
             
-        serilizer = TimeSlotSerializer(time_slots , context={ 'screen_id' : screen_id } , many=True)
+        serilizer = TimeSlotSerializer(time_slots , many=True)
         return Response({'data' : serilizer.data , 'is_approved' : screen.is_approved }, status=status.HTTP_200_OK)
 
 # adding time slots for the screen
@@ -543,20 +579,18 @@ class Edit_show_det(APIView):
     def get( self , request , slot_id ) :
         try:
             
-            show_det = ShowTime.objects.filter(slot = slot_id)
-            print(show_det)
-            latest_show = show_det.order_by('-modified_at').first()
-            
-    
+            show_det = ShowSlot.objects.filter(slot = slot_id).select_related('slot').first()
+            show = show_det.showtime
+            slot = show_det.slot
             details = {
                 
-                'start_date' : latest_show.show_date,
-                'end_date' : latest_show.end_date if latest_show.end_date else None,
-                # 'show_time' : latest_show.slot.start_time ,
-                'end_time' : latest_show.end_time,
-                'screen': latest_show.screen.id,
-                'movie': latest_show.movie.id,
-                # 'slot': latest_show.slot.id
+                'start_date' : show.show_date,
+                'end_date' : show.end_date if show.end_date else None,
+                'show_time' : slot.start_time ,
+                'end_time' : show.end_time,
+                'screen': show.screen.id,
+                'movie': show.movie.id,
+                'slot': slot.id
             }
             
             return JsonResponse(details, status=status.HTTP_202_ACCEPTED )
@@ -602,32 +636,32 @@ class Edit_show_det(APIView):
                     return Response({'Error': 'Another show already scheduled in this slot'}, status=status.HTTP_400_BAD_REQUEST)
 
             slot = TimeSlot.objects.get(id=slot_id)
-            shows = ShowTime.objects.filter(slot=slot)
+            shows = ShowTime.objects.filter(slots=slot)
             shows.update(end_time=end_time_obj)
             old_start_time = slot.start_time
             if old_start_time != start_time_obj:
-                print('Time changed')
-            slot.start_time = start_time_obj
-            slot.save()
+                slot.start_time = start_time_obj
+                slot.save()
 
-            ShowTime.objects.filter(
-                screen=screen,
-                movie=movie,
-                slot=slot,
-                show_date__gt=end_date
-            ).delete()
+            # ShowTime.objects.filter(
+            #     screen=screen,
+            #     movie=movie,
+            #     show_date__gt=end_date,
+            #     slots=slot,
+            # ).delete()
             
             today = datetime.now()
             outdated_shows = ShowTime.objects.filter(
-                slot=slot,
+                slots=slot,
                 show_date__lt=show_date,
             ).filter(show_date__lt=today)
-            outdated_shows.delete()
+            # for show in outdated_shows:
+            #     if not show.bookings
 
             existing_dates = set(
                 ShowTime.objects.filter(
                     screen=screen,
-                    slot=slot,
+                    slots=slot,
                     movie=movie,
                     show_date__range=(show_date, end_date)
                 ).values_list('show_date', flat=True)
@@ -637,20 +671,18 @@ class Edit_show_det(APIView):
                 start_date = datetime.strptime(start, "%Y-%m-%d").date()
                 end_date = datetime.strptime(end, "%Y-%m-%d").date()
                 return [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
-
-            showtimes_to_create = [
-                ShowTime(
-                    movie=movie,
-                    screen=screen,
-                    slot=slot,
-                    show_date=day,
-                    end_date=end_date,
-                    end_time = custom_end_dt
-                    
-                )
-                for day in get_date_range(show_date, end_date) if day not in existing_dates
-            ]
-            ShowTime.objects.bulk_create(showtimes_to_create)
+            
+            for day in get_date_range(show_date, end_date):
+                if day not in existing_dates:
+                    show = ShowTime.objects.create(
+                        movie=movie,
+                        screen=screen,
+                        show_date=day,
+                        end_date=end_date,
+                        end_time = custom_end_dt
+                        
+                    )
+                    ShowSlot.objects.create(showtime=show , slot=slot)
 
             return Response({'message': 'Successfully updated and created showtimes'}, status=status.HTTP_200_OK)
 

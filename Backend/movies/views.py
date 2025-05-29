@@ -88,7 +88,7 @@ class DetailedMovieView(APIView) :
         tmdb_url = "https://api.themoviedb.org/3/search/movie"
         tmdb_params = {
             "api_key" : settings.TMDB_API_KEY , 
-            "query" : movie.title ,
+            "query" : movie.title,
             "include_adult" : False ,
             "language" : "ml",
             "region" : "IN",
@@ -98,45 +98,42 @@ class DetailedMovieView(APIView) :
         movie_id = 0
         backdrop_url = ''
         try :
-            tmdb_response = requests.get(tmdb_url , params=tmdb_params,timeout=10)
-            tmdb_response.raise_for_status()
-                
-            if tmdb_response.status_code == 200 :
-                tmdb_data = tmdb_response.json()
-                results = tmdb_data.get("results",[])
-                print(results[0])
-                
-                if results :
-                    movie_id = results[0]['id']
-                    backdrop_url = results[0]['backdrop_path'] or results[0]['poster_path']
+            tmdb_response = requests.get(tmdb_url , params=tmdb_params,timeout=5)
+            tmdb_response.raise_for_status()    
+            tmdb_data = tmdb_response.json()
+            results = tmdb_data.get("results",[])
+            
+            if results :
+                movie_id = results[0]['id']
+                backdrop_url = results[0]['backdrop_path'] or results[0]['poster_path']
         
             print('respose status' ,tmdb_response.status_code)
-            movie_data = {
-                'movie_id' : movie_id,
-                'bg_image' : backdrop_url,
-                "title": movie.title,
-                "language": movie.language,
-                "duration": movie.duration,
-                "release_date": movie.release_date,
-                "description": movie.description,
-                "genre": movie.genre,
-                "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
-            }
-            return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
 
                     
         except requests.exceptions.RequestException as e:
             print(f'error fetching tmdb data {e}')
-            movie_data = {
-                "title": movie.title,
-                "language": movie.language,
-                "duration": movie.duration,
-                "release_date": movie.release_date,
-                "description": movie.description,
-                "genre": movie.genre,
-                "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
-            }
-            return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
+        movie_data = {
+            'movie_id' : movie_id,
+            'bg_image' : backdrop_url,
+            "title": movie.title,
+            "language": movie.language,
+            "duration": movie.duration,
+            "release_date": movie.release_date,
+            "description": movie.description,
+            "genre": movie.genre,
+            "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
+        }
+        return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
+        # movie_data = {
+        #     "title": movie.title,
+        #     "language": movie.language,
+        #     "duration": movie.duration,
+        #     "release_date": movie.release_date,
+        #     "description": movie.description,
+        #     "genre": movie.genre,
+        #     "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
+        # }
+        # return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
 
 def get_showtime_label(start_time):
     if not start_time :

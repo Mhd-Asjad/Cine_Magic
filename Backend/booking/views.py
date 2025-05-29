@@ -232,6 +232,7 @@ class Show_Bookings(APIView):
                     'movie' : booking.show.movie.title,
                     'show_date' : booking.show.show_date.strftime('%Y-%m-%d'),
                     'start_time' : booking.slot.start_time.strftime("%H:%M"),
+                    'end_time' : booking.show.end_time.strftime('%H:%M')
                         
                     },                    
                     'seats' : seats ,

@@ -12,7 +12,7 @@ function MovieSpecification( ) {
   const {id} = useParams()
   const [movie , setMovies] = useState(null);
   const [error , setError] = useState('') ;
-  const [castLength , setCastLength] = useState(0)
+  const [castLength , setCastLength] = useState(null)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,7 +52,7 @@ function MovieSpecification( ) {
     <div className="bg-gray-100 ">
 
   
-      {movie && (
+    {movie && (
         <div className="relative w-full h-[400px] md:h-[600px]">
           <img
             src={`${IMAGE_BASE_URL}${movie.bg_image}`} 
@@ -108,7 +108,7 @@ function MovieSpecification( ) {
         </div>
         
       )}
-      {/* {castLength > 0 ?( */}
+      {/* {castLength && ( */}
 
 
       <div className="max-w-7xl mx-auto px-4 mt-10">
@@ -119,18 +119,13 @@ function MovieSpecification( ) {
 
       </div>
 
-      {/* // ):(
-      //   <div className='flex justify-center' >
 
-      //     <p>no cast found</p>
+      {/* )} */}
 
-      //   </div>
-
-      // )} */}
-      <Upcomingmovies/>
-  
-      <Footer />
-    </div>
+        <Upcomingmovies/>
+        <Footer />
+        
+      </div>
     </div>
   )
 }  

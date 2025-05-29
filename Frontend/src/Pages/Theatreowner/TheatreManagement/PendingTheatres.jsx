@@ -34,44 +34,44 @@ function PendingTheatres() {
 
   return (
     <div className="mt-10 flex flex-wrap justify-center gap-10">
-      <div className="rounded-lg shadow-lg bg-white py-6 px-8 w-[400px]">
-        <h1 className="text-red-500 text-2xl font-bold mb-6 text-center">
-          Pending Theatre Approvals
-        </h1>
+        <div className="rounded-lg shadow-lg bg-white py-6 px-8 w-[400px]">
+          <h1 className="text-red-500 text-2xl font-bold mb-6 text-center">
+            Pending Screens Approvals
+          </h1>
 
-        {pendingTheatres.length > 0 ? (
-          pendingTheatres.map((theatre) => (
-            <div
-              key={theatre.id}
-              className="border border-gray-300 rounded-lg p-5 mb-4 flex flex-col gap-2 shadow-sm"
-            >
-              <h2 className="text-xl font-semibold">
-                {theatre.name}, 📍 {theatre.city}
-              </h2>
-              <p className="text-gray-500">Address: {theatre.address}</p>
-              <span className="text-yellow-500 font-bold">
-                {theatre.is_confirmed ? "Confirmed" : "Not Confirmed"}
-              </span>
-
-              <button
-                onClick={() => navigate(`/theatre-owner/${theatre.id}/add-screen`)}
-                disabled={theatre.has_screens}
-                className={`w-full mt-4 py-2 rounded-lg font-bold transition ${
-                  theatre.has_screens
-                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    : "bg-orange-400 hover:bg-orange-500 text-white"
-                }`}
+          {pendingTheatres.length > 0 ? (
+            pendingTheatres.map((theatre) => (
+              <div
+                key={theatre.id}
+                className="border border-gray-300 rounded-lg p-5 mb-4 flex flex-col gap-2 shadow-sm"
               >
-                {theatre.has_screens ? "Requested" : "Verify Screen ‼️"}
-              </button>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500 text-center text-lg">
-            No pending theatres to verify.
-          </p>
-        )}
-      </div>
+                <h2 className="text-xl font-semibold">
+                  {theatre.name}, 📍 {theatre.city}
+                </h2>
+                <p className="text-gray-500">Address: {theatre.address}</p>
+                <span className="text-yellow-500 font-bold">
+                  {theatre.is_confirmed ? "Confirmed" : "Not Confirmed"}
+                </span>
+
+                <button
+                  onClick={() => navigate(`/theatre-owner/${theatre.id}/add-screen`)}
+                  disabled={theatre.has_screens}
+                  className={`w-full mt-4 py-2 rounded-lg font-bold transition ${
+                    theatre.has_screens
+                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      : "bg-orange-400 hover:bg-orange-500 text-white"
+                  }`}
+                >
+                  {theatre.has_screens ? "Requested" : "Verify Screen ‼️"}
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-center text-lg">
+              No pending theatres to verify.
+            </p>
+          )}
+        </div>
 
       <div className="rounded-lg shadow-lg bg-white py-6 px-8 w-[400px]">
         <h1 className="text-green-500 text-2xl font-bold mb-6 text-center">

@@ -19,7 +19,6 @@ function EditShow() {
     const fetchShowDetails = async () => {
       try {
         const res = await TheatreApi.get(`/edit-show/${id}/`);
-        console.log(res.data)
         const { start_date, end_date, show_time, end_time , movie , screen , slot } = res.data;
         setStartDate(start_date);
         setEndDate(end_date);

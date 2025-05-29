@@ -9,6 +9,7 @@ function ShowTheatres() {
   const [ theatres , setTheatres ] = useState([])
   const [expandedTheatre, setExpandedTheatre] = useState(null);
   const [expandedScreens, setExpandedScreens] = useState({});
+  const [ loading , setLoading] = useState(true);
   const {toast} = useToast();
 
   useEffect(() => {
@@ -18,11 +19,13 @@ function ShowTheatres() {
         setTheatres(res.data)
       }catch(e){
           console.log(e?.response)
+      }finally{
+        setLoading(false)
       }
     };
     fetchTheaters()
   },[expandedScreens])
-  console.log(theatres , 'adfjksjl')
+  console.log(theatres)
 
   const toggleTheatreExpansion = (theatreId) => {
     setExpandedTheatre(expandedTheatre === theatreId ? null : theatreId);
@@ -76,6 +79,11 @@ function ShowTheatres() {
     };
   }
   
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center' >Loading.....</div>
+    )
+  }
 
   return (
 

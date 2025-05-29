@@ -1,166 +1,107 @@
-import React, { useState } from 'react'
-import { Formik, Form, ErrorMessage, Field } from 'formik'
-import * as Yup from 'yup'
-import toastr from 'toastr'
-import 'toastr/build/toastr.min.css';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import Box from '@mui/material/Box';
-import { FilledInput, FormControl } from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import IconButton from '@mui/material/IconButton';
-import InputLabel from '@mui/material/InputLabel';
-import { useDispatch } from 'react-redux';
-import Button from '@mui/material/Button';
-import login from './AuthService';
-import userApi from '@/Axios/userApi';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+// import { Form, FormField, FormItem, FormMessage } from "@/components/ui/log";
+import { Eye, EyeOff } from "lucide-react";
+import login from "./AuthService";
+import userApi from "@/Axios/userApi";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
-function LoginForm( { isModalClose  }) {
-    const [showpassword , setShowPassword ] = useState(false);
-    const handleClickShowPassword = () => setShowPassword((show) => !show)
-    const dispatch = useDispatch();
+export default function LoginForm({ isModalClose }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const dispatch = useDispatch();
 
-    const handleMouseDownPassword = (event) => {
-        event.preventDefault();
-    };
-    
-    const handleMouseUpPassword = (event) => {
-        event.preventDefault();
-    };
-    
-    const initialValues = {
-        username : '' ,
-        password : '' ,
+  const schema = Yup.object().shape({
+    username: Yup.string().required("* username is required"),
+    password: Yup.string().required("* password is required"),
+  });
 
+  const form = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  const checkUserType = async (username, password) => {
+    try {
+      const res = await userApi.post("get-usertype/", { username, password });
+      return res.data.user_type;
+    } catch (e) {
+      console.error("User type error:", e);
     }
-    
-    const validationSchema = Yup.object({
+  };
 
+  const onSubmit = async (data) => {
+    const { username, password } = data;
+    const userType = await checkUserType(username, password);
 
-        username : Yup.string().required('* username is required'),
-        password : Yup.string().required('*password is required')
-    })
-
-    const checkUserType = async(username , password) => {
-        try{
-            const response = await userApi.post('get-usertype/' , 
-                {
-                    'username' : username ,
-                    'password' : password
-                }
-            );
-            console.log('response in checking user type' , response) 
-            const userType = response.data.user_type;
-            return userType
-        }catch(e) {
-            console.log('error in checking user type' , e)
-        }
+    try {
+      await login(dispatch, username, password, userType);
+      isModalClose();
+    } catch (e) {
+      console.log("login error", e);
+      toastr.error("Invalid credentials");
     }
-    const onSubmit = async (values, { setSubmitting }) => {
-        console.log(values)
-        const username = values.username;
-        const password = values.password
-        
-        const userType = await checkUserType(username , password)
-        console.log('user type on login form' , userType )
+  };
 
-        try {
-            const res = await login( dispatch , username , password , userType)
-            console.log(res.data)
-            isModalClose()
-            
-        }catch(e) {
-            console.log('loggin error' , e)
-            toastr.error('invalid credentials')
-            setSubmitting(false)
-        }
-    }
   return (
-
-    <Box sx={{  display: 'flex', flexWrap: 'wrap', justifyContent : 'center' }}>
-
-      <div className='' >
-        <h2 className="text-xl  font-semibold mb-4">Login</h2>
-        <Formik
-        
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={onSubmit}
-        >
-
-            {({ isSubmitting }) => (
-            <Form className="space-y-4">
-
-                    <div>
-                        < Field
-                            as={TextField}
-                            label='username'
-                            name="username"
-                            id="username"
-                            sx={{ m: 1, width: '45ch' }}
-            
-                        />
-                        <ErrorMessage
-                            name="username"
-                            component="div"
-                            className="text-red-500 text-sm mt-1"
-                        />
-                    </div>
-                <div>
-
-                <FormControl sx={{ m: 1, width: '45ch' }} variant="outlined">
-                <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-                <Field
-                    as={FilledInput}
-                    id="outlined-adornment-password"
-                    name="password"
-                    type={ showpassword ? 'text' : 'password' }
-                    endAdornment={
-                        <InputAdornment position="end">
-                        <IconButton
-                            aria-label={
-                            showpassword ? 'hide the password' : 'display the password'
-                            }
-                            onClick={handleClickShowPassword}
-                            onMouseDown={handleMouseDownPassword}
-                            onMouseUp={handleMouseUpPassword}
-                            edge="end"
-
-                        >
-                            {showpassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                        </InputAdornment>
-                    }
-                
-                />
-                </FormControl>
-                <ErrorMessage
-                    name="password"
-                    component="div"
-                    className="text-red-500 text-sm mt-1"
-                />
-                
-                </div>
-
-                <div className="flex mx-auto w-[25%]">
-                <Button 
-                    variant="contained" disableElevation
-                    type="submit"   
-                    className='w-full '
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting ? 'Logging in...' : 'Login'}
-                </Button>
-
-                </div>
-            </Form>
+    <div className="w-full space-y-6">
+      <h2 className="text-xl font-semibold">Login</h2>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <Label>Username</Label>
+                <Input {...field} placeholder="Enter your username" />
+                <FormMessage />
+              </FormItem>
             )}
+          />
 
-        </Formik>
-        </div>
-    </Box>
-  )
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <Label>Password</Label>
+                <div className="relative">
+                  <Input
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                  />
+                  <span
+                    className="absolute right-2 top-2.5 cursor-pointer"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </span>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
+        </form>
+      </Form>
+    </div>
+  );
 }
-
-export default LoginForm

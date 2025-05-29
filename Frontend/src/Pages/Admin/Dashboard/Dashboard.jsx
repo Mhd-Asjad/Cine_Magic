@@ -176,7 +176,7 @@ function Dashboard() {
             <div className="text-sm text-gray-500 mb-1 flex items-center">
               Total theatre amount <span className="ml-2">₹</span>
             </div>
-            <div className="text-2xl font-bold">₹{revenueData[0].total_revenue}</div>
+            <div className="text-2xl font-bold">₹ {revenueData[0]?.total_revenue ? revenueData[0].total_revenue : 0}</div>
             <div className="text-xs text-green-500 mt-1"> {theatreStats?.revenue_change}% + from last month</div>
           </CardContent>
         </Card>

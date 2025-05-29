@@ -15,7 +15,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, CheckCircle, DeleteIcon,  User , CalendarRange , Trash, X , ShieldAlert } from 'lucide-react';
 import LocationPicker from "@/Components/Map/LocationPicker";
 import 'leaflet/dist/leaflet.css';
-import { postAdded } from "@/Redux/Features/BlogSlice";
 import { Link, useNavigate } from "react-router-dom";
 import apiBlogs from "@/Axios/Blogapi";
 import {
@@ -610,7 +609,7 @@ const Profile = () => {
                         </div>
 
                       )}  
-                    <div className="p-5 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="p-5 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
                     {!blogs?.message ? (
                       
                       blogs.map((blog) => (
@@ -683,7 +682,7 @@ const Profile = () => {
                         </div>
                       ))
                     ):(
-                       <div className="flex items-center justify-center h-64">
+                       <div className="flex mx-auto h-64">
                         <div className="flex flex-col items-center justify-center mx-auto text-gray-500">
                           <svg
                             className="w-16 h-16 mb-4 text-gray-400"

@@ -6,6 +6,7 @@ from rest_framework import status , permissions
 from .serializers import UserSerializer , OtpVerificationSerializer , RegisterSerializers , UserEditSerializers
 from .models import User
 from django.contrib.auth import authenticate
+from django.core.validators import validate_email
 import json
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -17,6 +18,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from theatre_owner.serializers import TheatreOwnerSerialzers
 from theatre_owner.models import TheaterOwnerProfile
+from django.core.exceptions import ValidationError
+
 
 class UserRegisterView(APIView) :
     permission_classes = [permissions.AllowAny]
@@ -61,7 +64,7 @@ class UserLoginView(APIView) :
             password = data.get('password')
             user_type = data.get('user_type' , 'normal')
             user = authenticate(request , username=username , password=password)
-        
+            print(data , 'this is data using')
             if user is None :
                 return Response({'error' : 'invalid credentials'},status=status.HTTP_401_UNAUTHORIZED)
     
@@ -115,6 +118,36 @@ class UserLoginView(APIView) :
         
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class resetuser_password(APIView):
+    permission_classes = [permissions.AllowAny]
+    def post(self , request):
+        data = request.data
+        identifier = data.get('identifier')
+        new_password = data.get('password')
+        
+        if not identifier or not new_password :
+            return Response({'error' : 'fill all the fields'},status=status.HTTP_400_BAD_REQUEST)
+        
+        try :
+            validate_email(identifier)
+            is_email = True
+        except ValidationError :
+            is_email = False
+            
+            
+        try :
+            user = User.objects.get(email=identifier) if is_email else User.objects.get(username=identifier)
+            
+        except User.DoesNotExist:
+            return Response({'error': 'user Does not exist'},status=status.HTTP_400_BAD_REQUEST)
+        
+        user.set_password(new_password)
+        user.save()
+        
+
+        return Response({'message': 'password changed successfully'} , status=status.HTTP_200_OK)
+            
 
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -167,7 +200,9 @@ class GoogleAuthView(View):
                     'refresh_token' : str(refresh), 
                     'id' : user.id,
                     'userEmail' : user.email,
-                    'username' : user.username
+                    'username' : user.username,
+                    'is_approved' : user.is_approved,
+                    'is_theatre_owner' : user.is_theatre_owner,
                 }
             })
         except Exception as e:

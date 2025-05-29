@@ -1,16 +1,54 @@
 import React, { useEffect, useState } from 'react'
 import Nav from '@/Components/Navbar/Nav'
 import { useSelector } from 'react-redux'
-import axios from 'axios'
 import notFound from '../../assets/no-booking.png'
 import { useNavigate } from 'react-router-dom'
 import apiBooking from '@/Axios/Bookingapi'
+import axios from 'axios'
+import { Star } from 'lucide-react'
+import CustomAlert from '@/Components/CustomAlert'
+import { 
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/Components/ui/dialog'
+import Rating from '@mui/material/Rating';
+import Box from '@mui/material/Box';
+import StarIcon from '@mui/icons-material/Star';
+import { useToast } from '@/hooks/use-toast'
+
+const labels = {
+  0.5: 'Useless',
+  1: 'Useless+',
+  1.5: 'Poor',
+  2: 'Poor+',
+  2.5: 'Ok',
+  3: 'Ok+',
+  3.5: 'Good',
+  4: 'Good+',
+  4.5: 'Excellent',
+  5: 'Excellent+',
+};
+
+function getLabelText(value) {
+  return `${value} Star${value !== 1 ? 's' : ''}, ${labels[value]}`;
+}
 
 function MyBookings() {
     const userId = useSelector((state) => state.user.id)
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [ bookings, setBookings] = useState([]);
+    const [ loading, setLoading] = useState(true);
+    const [ error, setError] = useState(null);
+    const [ showReviewForm , setShowReviewForm] = useState(false)
+    const [ message , setMessage] = useState()
+    const [ review , setReview] = useState('')
+    const { toast } = useToast();
+    const [ selectedShow , setSelectedShow] = useState(null)
+    const [ value, setValue ] = React.useState(2);
+    const [ hover, setHover] = React.useState(-1);
+
     const navigate = useNavigate();
     useEffect(() => {
         const fetchBookings = async() => {
@@ -39,14 +77,66 @@ function MyBookings() {
         const date = new Date();
         date.setHours(hours , minutes)
         return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
-      }
+    }
+
+    const handleRating = (booking) => {
+        const now = new Date()
+        setSelectedShow(booking)
+        const showDate = booking.show.show_date
+        const endTime =  booking.show.end_time 
+
+        const endDateTimeString = `${showDate}T${endTime}`;
+        const endDateTime = new Date(endDateTimeString)
+
+        if (now > endDateTime) {
+            setShowReviewForm(true)
+
+        }else{
+            setMessage('Post Review After show ends')
+        }   
+
+    }
+
+
+    const handleSubmit = async(bookingId) => {
+        try {
+            const current_user_type = localStorage.getItem('current_user_type')
+            const authToken = localStorage.getItem(`${current_user_type}_token`)
+            const res = await axios.post(`http://127.0.0.1:8000/review/rate-movie/${bookingId}/`, {
+                'rating' : value,
+                'review' : review,
+            },{
+                headers: {
+                    Authorization : `Bearer ${authToken}` ,
+                    'Content-Type': 'application/json'
+                }
+            })
+            toast({title : res.data.message})
+            setShowReviewForm(false)
+
+        }catch(e){
+            console.log(e)
+            toast({title :e?.response?.data?.error})
+        }
+    }
     
-    
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setMessage('')
+        },4000)
+
+        return () => clearInterval(interval)
+    },[message])
+
+  console.log(selectedShow)
   return (
     <div className="min-h-screen bg-gray-50 ">
         <Nav/>
 
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 mt-10">
+            {message &&
+                <CustomAlert  setMessage={setMessage} message={message} isError={true} title={'Alert'} />
+            }
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200">
                     <h2 className="text-xl font-medium text-gray-800">My Bookings</h2>
@@ -63,7 +153,8 @@ function MyBookings() {
                             <p className="text-red-500">{error}</p>
                         </div>
                     ) : bookings.length > 0 ? (
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+                        
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                             {bookings.map((booking, idx) => (
                                 <div key={idx} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
                                     <div className="bg-blue-50 px-4 py-2">
@@ -100,7 +191,7 @@ function MyBookings() {
                       
 
                                             <div className="pt-2 text-xs text-gray-500 border-t border-gray-100">
-                                                <div className='flex mt-2 justify-center mb-2 ' >
+                                                <div className='flex mt-2 gap-2 justify-end mb-2 ' >
 
                                                 <button 
                                                     className='outline outline-2 px-2 py-2 text-black rounded-md outline-blue-200' 
@@ -109,6 +200,71 @@ function MyBookings() {
 
                                                  Ticket Overview
                                                 </button>
+                                                <div>
+                                                <button
+                                                className="outline outline-2 px-2 py-2 text-green rounded-md outline-green-200"
+                                                onClick={() => {handleRating(booking)}}
+                                                >
+                                                rate now <Star className="inline" />
+                                                </button>
+                                            </div>
+
+                                            <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
+                                            <DialogContent className="sm:max-w-md">
+                                                <DialogHeader>
+                                                <DialogTitle className="flex justify-center items-center">
+                                                    Rate Your Experience For ({selectedShow?.show?.movie})
+                                                </DialogTitle>
+                                                </DialogHeader>
+
+                                                <div className="flex justify-center items-center flex-col">
+                                                <Box sx={{ width: 200, display: 'flex', alignItems: 'center' }}>
+                                                    <Rating
+                                                    name="hover-feedback"
+                                                    value={value}
+                                                    size='large'
+                                                    precision={0.5}
+                                                    getLabelText={getLabelText}
+                                                    onChange={(event, newValue) => setValue(newValue)}
+                                                    onChangeActive={(event, newHover) => setHover(newHover)}
+                                                    emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
+                                                    />
+                                                    {value !== null && (
+                                                    <Box sx={{ ml: 2 }}>{labels[hover !== -1 ? hover : value]}</Box>
+                                                    )}
+                                                </Box>
+                                                    <textarea
+                                                    rows="4"
+                                                    placeholder="Write your review here... ( Optional )"
+                                                    value={review}
+                                                    onChange={(e) => setReview(e.target.value)}
+                                                    className="w-full mt-4 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                    />                                                
+                                                </div>
+
+                                                <DialogFooter className="gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                    setShowReviewForm(false);
+                                                    setSelectedShow(null)
+                                                    }}
+                                                    className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={() => handleSubmit(booking.id)}
+                                                    className="px-4 py-2 rounded-md bg-green-500 text-white hover:bg-green-600"
+                                                >
+                                                    Submit
+                                                </button>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                            </Dialog>
+
+                                                </div>
+                                            <div>
+
                                             </div>
                                            </div>
                                         </div>

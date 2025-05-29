@@ -47,7 +47,6 @@ function Nav() {
     console.log(cityId ,'id from location' , 'id from redux:' , cityid)
     console.log(cityId, ' <-- cityId selected by user');
 
-    // if ()
     try {
       const response = await apiMovies.get(`/get-multiplecity-movies/?city_ids=${cityId}`)
       console.log(response.data , 'city based movies')
@@ -96,6 +95,8 @@ function Nav() {
     toggleDropdown()
     navigate('/')
   }
+
+  console.log(user)
   return (
 
     <nav className="bg-white-800 shadow-md">
@@ -127,6 +128,7 @@ function Nav() {
 
               onClick={() => setIsCityModalOpen(true)}
             >
+
               <MdOutlineAddLocation className="text-2xl" />
               <span className="text-base font-medium">
                   {selectedcity || 'Select Location'}
@@ -151,17 +153,13 @@ function Nav() {
               {dropdownOpen && (
    
                 <div className="absolute mx-auto mt-1 w-48 bg-white border rounded-md shadow-lg z-10">
-                  
-
-
-
                   <a
                     href="/profile"
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
                     profile
                   </a>
 
-                  { user.is_approved && (
+                  {user.is_approved && (
                     <a
                     href="/theatre-owner/dashboard"
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100">

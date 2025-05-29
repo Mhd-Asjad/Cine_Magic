@@ -52,7 +52,7 @@ function OtpVerificationForm({ email, setMessage, closeModal }) {
 
   return (
     <div>
-      <h2 className="flex justify-center mt-[10%] text-xl font-semibold mb-4">Verify OTP</h2>
+      <h2 className="flex justify-center mt-[4%] text-xl font-semibold mb-4">Verify OTP</h2>
         {/* <div className='flex bg-black justify-center ml-10' >
 
           <CountDownTimer onExpiresAT={twoMinutesLater} onExpire={handleOtpSubmit} />
@@ -63,7 +63,7 @@ function OtpVerificationForm({ email, setMessage, closeModal }) {
         validate={(values) => {
           const errors = {};
           if (!/^\d{6}$/.test(values.otp)) {
-            errors.otp = 'OTP Not Contains Any Letters';
+            errors.otp = 'Invalid Otp Format';
           }
           if (!values.otp || values.otp.length !== 6) {
             errors.otp = 'OTP must be exactly 6 digits';

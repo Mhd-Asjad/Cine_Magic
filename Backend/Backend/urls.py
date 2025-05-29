@@ -34,7 +34,8 @@ urlpatterns = [
     path('theatre_owner/',include('theatre_owner.urls')),
     path('seats/' , include('seats.urls')),
     path('booking/', include('booking.urls')),
-    path('blog/' , include('blog.urls'))
+    path('blog/' , include('blog.urls')),
+    path('review/',include('review.urls'))
 ]
 if settings.DEBUG :
     urlpatterns += static(settings.MEDIA_URL , document_root = settings.MEDIA_ROOT)

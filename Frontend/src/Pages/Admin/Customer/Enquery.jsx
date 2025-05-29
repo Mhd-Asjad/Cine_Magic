@@ -46,17 +46,20 @@ function Enquery() {
 
     }
 
-    const handleDecline = async (userId) => {
+    const handleDecline = async (ownerId , userId) => {
         
         setIsLoading(true)
         try {
             const res = await TheatreApi.post('theatreowners/', {
-                'id' :  userId ,
+                'id' : ownerId  ,
+                'userId': userId ,
                 'ownership_status' : 'rejected'
             })
-            toast({ title  : res.data.message})
+            toast({ title  :`${res.data.message}❌`})
         }catch(e){
-            console.log(e.response?.error || 'unexpected error occurs ')
+            console.log(e.response?.data || 'unexpected error occurs ')
+        }finally{
+          setIsLoading(false)
         }
     }
     console.log(enquery)
@@ -103,7 +106,7 @@ function Enquery() {
                       <Button variant="contained" color="success" onClick={() => handleAccept(value.id, value.user_id)}>
                         Accept
                       </Button>
-                      <Button variant="outlined" color="error" onClick={() => handleDecline(value.id)}>
+                      <Button variant="outlined" color="error" onClick={() => handleDecline(value.id , value.user_id)}>
                         Decline
                       </Button>
                     </div>
