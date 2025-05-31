@@ -18,6 +18,7 @@ import Rating from '@mui/material/Rating';
 import Box from '@mui/material/Box';
 import StarIcon from '@mui/icons-material/Star';
 import { useToast } from '@/hooks/use-toast'
+import apiReview from '@/Axios/Reviewapi'
 
 const labels = {
   0.5: 'Useless',
@@ -102,7 +103,7 @@ function MyBookings() {
         try {
             const current_user_type = localStorage.getItem('current_user_type')
             const authToken = localStorage.getItem(`${current_user_type}_token`)
-            const res = await axios.post(`http://127.0.0.1:8000/review/rate-movie/${bookingId}/`, {
+            const res = await apiReview.post(`rate-movie/${bookingId}/`, {
                 'rating' : value,
                 'review' : review,
             },{

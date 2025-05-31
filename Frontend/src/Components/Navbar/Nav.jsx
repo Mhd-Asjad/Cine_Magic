@@ -4,7 +4,6 @@ import Modal from '../Modals/Modal';
 import OtpVerificationForm from '../../Pages/userauth/OtpVerificationForm';
 import { MdOutlineAddLocation } from "react-icons/md";
 import Cityselction from '../../Pages/Home/Cityselction';
-import axios from 'axios'
 import { useDispatch , useSelector } from 'react-redux';
 import { setMovies } from '../../Redux/Features/MovieSlice';
 import { setLocation, setSelectedCity , clearLocation } from '../../Redux/Features/Location.slice';
@@ -16,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { selectCityId } from '../../Redux/Features/Location.slice';
 import { logout } from '@/Pages/userauth/AuthService';
 import apiMovies from '@/Axios/Moviesapi';
+import { MessageCircle , LayoutDashboard , UserIcon , LogOut, User } from 'lucide-react';
 
 function Nav() {
   const [isModalOpen , setIsModalOpen] = useState(false);
@@ -152,18 +152,18 @@ function Nav() {
 
               {dropdownOpen && (
    
-                <div className="absolute mx-auto mt-1 w-48 bg-white border rounded-md shadow-lg z-10">
+                <div className="absolute mx-auto mt-1 w-48 bg-white rounded-md shadow-lg z-10">
                   <a
                     href="/profile"
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                    profile
+                    <User className='inline'/> profile
                   </a>
 
                   {user.is_approved && (
                     <a
                     href="/theatre-owner/dashboard"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                     theatre Profile
+                    className="block px-4 py-2 text-gray-800  hover:bg-gray-100">
+                    <LayoutDashboard className='inline' /> theatre Profile
                     </a>
                   )}
 
@@ -171,14 +171,24 @@ function Nav() {
                      <a
                      href="/admin/dashboard"
                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                     admin dashboard
+                     <LayoutDashboard className='inline'/> admin dashboard
                    </a>
                   )}
 
                   <a
+
+                    href="/complaint/assistant"
+                    className="block px-4 py-2  text-gray-800 hover:bg-gray-100"
+                  >
+                    <MessageCircle className='inline'/> Help or Chat
+                  </a>
+
+
+
+                  <a
                     onClick={handleLogout}
                     className="block px-4 py-2 cursor-pointer text-gray-800 hover:bg-gray-100">
-                    Logout
+                   <LogOut className='inline'/> Logout
 
                   </a>
                 </div>

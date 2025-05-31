@@ -3,3 +3,6 @@ from .models import *
 # Register your models here.
 
 admin.site.register(Rating)
+admin.site.register(FAQ)
+admin.site.register(ChatLog)
+admin.site.register(Complaints)

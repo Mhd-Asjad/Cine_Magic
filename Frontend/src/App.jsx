@@ -23,13 +23,14 @@ import { UserRoute } from "./Pages/Routes/ProtectedRoute";
 import BlogInfo from "./Pages/blogs/BlogInfo";
 import VerifiedTicket from "./Pages/Bookings/VerifiedTicket";
 import ResetPassword from "./Pages/userauth/ResetPassword";
+import FAQPage from "./Pages/UserComplaints/FAQPage";
 function App() {
 
     return (
         <>
             <Router>
                 <Routes>
-                    <Route path="/" element={<Landingpage/> }/>
+                    <Route path="/" element={<PrivateRoute allowedTypes='user' ><Landingpage/> </PrivateRoute>}/>
                     <Route path="/movie/:id/details" element={<MovieSpecification/>} />
                     <Route path="/profile" element={<Profile/>} />
                     <Route path={`/available-show-details/:id`} element={<AvailableShowDetails/>} />
@@ -52,6 +53,7 @@ function App() {
                     <Route path='/blogs/add' element={<AddBlog/>} />
                     <Route path="/posts/details/:id" element={<BlogInfo/>}/>
                     <Route path="/reset-password" element={<ResetPassword/>} />
+                    <Route path="/complaint/assistant" element={<FAQPage/>} />
 
                     {/* adminpages */}
                     <Route path="/admin/login" element={<AdminLogin />} />

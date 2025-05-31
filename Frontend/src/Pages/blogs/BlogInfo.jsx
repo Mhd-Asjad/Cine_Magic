@@ -10,6 +10,7 @@ import {Stack} from '@mui/material';
 import Modal from '@/Components/Modals/Modal';
 import AuthContainer from '../userauth/AuthContainer';
 import { Send , Clock1 } from 'lucide-react';
+import { getDate, getDay } from 'date-fns';
 function BlogInfo() {
     const [postDetails , setPostDetails] = useState(null);
     const [comment , setComment] = useState('');
@@ -24,6 +25,11 @@ function BlogInfo() {
     const openModal = () => setIsModalOpen(true);
     const closeModal = ()  => {
         setIsModalOpen(false);
+    }
+    const formatDate = (date) => {
+        const day = getDate(date)
+        const month = date.toLocaleString('default', { month: 'long' });
+        console.log(day , month )
     }
     useEffect(( ) => {
         const fetchPostDetails = async() => {
@@ -77,18 +83,20 @@ function BlogInfo() {
         const now = new Date()
         const past = new Date(timeStamp)
         const diff = Math.floor((now - past) / 1000 )
-
+        
         if (diff < 60) return `${diff} seconds ago`;
         if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
         if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-        return `${Math.floor(diff / 86400)} days ago`;
-
+        const timeDiff = `${Math.floor(diff / 86400)} days ago`;
+        return timeDiff
 
     }
 
     if (loading) {
         return <div className='flex justify-center items-center h-screen'>Loading...</div>
     }
+
+    console.log(allComments)
 
     return(
         <div>
@@ -149,12 +157,17 @@ function BlogInfo() {
                                     <div className='flex gap-2 justify-between border py-2 px-2' >
                                         <div className='flex gap-2 items-center'>
                                         <Stack>
+
                                             <Avatar sx={{ fontSize : '15px' , height : '30px' , width : '30px' }}>{comment.username[0].toUpperCase()}</Avatar>
 
                                         </Stack>
 
-
                                         <p className="text-sm mt-1">
+                                            <div>
+
+
+                                            <span>{formatDate(comment.created_at)}</span>
+                                            </div>
                                             <span className="font-semibold">{comment.username}:</span> {comment.name}
                                             
                                         </p>

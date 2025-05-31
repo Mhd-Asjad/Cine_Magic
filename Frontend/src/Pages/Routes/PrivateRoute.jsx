@@ -77,8 +77,7 @@ function PrivateRoute({ children , allowedTypes }) {
     console.log(isAuthenticated)
     console.log(currentRole , 'before invalid token')
 
-
-    const redirectPath = allowedTypes === 'user' ? '/' : `/${allowedTypes}/login`;
+    const redirectPath = allowedTypes === 'user' ? '' : `/${allowedTypes}/login`;
     
     if (loading) {
         return <div className="flex justify-center text-center h-screen" >Loading.....</div>

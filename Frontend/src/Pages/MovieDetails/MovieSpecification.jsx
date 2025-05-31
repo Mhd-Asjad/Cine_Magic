@@ -6,6 +6,7 @@ import Footer from '../../Components/Footer/footer'
 import CastCards from './CastCards'
 import Upcomingmovies from '@/Components/MovieCards/Upcomingmovies'
 import apiMovies from '@/Axios/Moviesapi'
+import MovieReviews from './MovieReviews'
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w780';
 
 function MovieSpecification( ) {
@@ -36,11 +37,9 @@ function MovieSpecification( ) {
 
   if (!movie) {
     return(
-      <div className="bg-gray-100 min-h-screen">
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center bg-gray-100 min-h-screen">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
-    </div>
 
     )
   }
@@ -121,6 +120,12 @@ function MovieSpecification( ) {
 
 
       {/* )} */}
+
+
+        <div  className="max-w-7xl mx-auto px-4 mt-10" >
+
+          <MovieReviews movie_id={id} />
+        </div>
 
         <Upcomingmovies/>
         <Footer />
