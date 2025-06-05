@@ -7,7 +7,6 @@ import { IoIosAddCircleOutline } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 import TheatreApi from '@/Axios/theatreapi';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/Components/ui/button';
 import { TicketSlash , DollarSign , TheaterIcon , Coins } from 'lucide-react';
 import EditProfile from './EditProfile';
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
