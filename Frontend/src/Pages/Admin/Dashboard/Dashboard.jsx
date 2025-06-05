@@ -1,6 +1,4 @@
 import React , {useEffect, useState} from 'react'
-import Sidebar from '../../../Components/Admin/Sidebar'
-import Navbar from '../../../Components/Admin/Navbar'
 import apiAdmin from '../../../Axios/api';
 import { 
   Card, 
@@ -9,8 +7,6 @@ import {
   CardTitle, 
 } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer , Bar , BarChart } from 'recharts';
-import { SectionCards } from "@/components/section-cards"
-import { SiteHeader } from "@/components/site-header"
 import { Calendar, Film , User } from "lucide-react";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { date } from 'zod';
@@ -164,10 +160,7 @@ function Dashboard() {
           
 
       <div className="grid grid-cols-1 lg:col-span-3 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl">
-        
-        {/* Total Revenue */}
-
-
+    
         <div >
 
         </div>
@@ -185,7 +178,7 @@ function Dashboard() {
         <Card className="w-full">
           <CardContent className="pt-6 text-left ml-2">
             <div className="text-sm text-gray-500 mb-1 flex items-center">
-              Users <span className="ml-2"><User size={16} /></span>
+              Regular Users <span className="ml-2"><User size={16} /></span>
             </div>
             <div className="text-2xl font-bold">+{theatreStats?.active_users.toLocaleString()}</div>
           </CardContent>
@@ -206,7 +199,7 @@ function Dashboard() {
         <Card className="w-full">
           <CardContent className="pt-6 text-left ml-2">
             <div className="text-sm text-gray-500 mb-1 flex items-center">
-              Active Now <span className="ml-2">⚡</span>
+              Active Theaters<span className="ml-2">⚡</span>
             </div>
             <div className="text-2xl font-bold">+{theatreStats?.active_theatres}</div>
           </CardContent>

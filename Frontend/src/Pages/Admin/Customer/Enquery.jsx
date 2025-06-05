@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import Sidebar from '../../../Components/Admin/Sidebar'
-import Navbar from '../../../Components/Admin/Navbar'
+import { AlertCircle , CheckCircle } from 'lucide-react';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import toastr from 'toastr';
 import TheatreApi from '../../../Axios/theatreapi';
 import { useToast } from '@/hooks/use-toast';
 function Enquery() {
 
     const [ enquery , setEnquery ] = useState([])
-    const [ isLoading , setIsLoading ] = useState(true);
-    const {toast} = useToast();
+    const [ isLoading , setIsLoading ] = useState(false);
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+    
     useEffect(()=> {
         unauthrizedTheatres()
-        setIsLoading(false)
-    },[isLoading])
+    },[successMessage])
 
     const unauthrizedTheatres = async () => {
         try {
@@ -26,20 +24,21 @@ function Enquery() {
             setEnquery(res.data.enquery)
 
         }catch(e) {
-            console.log(e.response?.message || 'error occurss')
+            setError(e.response?.message || 'error occurss')
         }
     }
-    console.log(enquery)
     const handleAccept = async (ownerProfile_id , user_id) => {
+      try {
         setIsLoading(true)
-        try {
-            
-            const res = await TheatreApi.post('theatreowners/', {
-                'id' :  ownerProfile_id ,
-                'ownership_status' : 'confirmed',
-                'userId' : user_id
-            })
-            toast({title : `${res.data.message}✅`})
+        setError  
+        const res = await TheatreApi.post('theatreowners/', {
+            'id' :  ownerProfile_id ,
+            'ownership_status' : 'confirmed',
+            'userId' : user_id
+        })
+        setSuccessMessage({title : `${res.data.message}✅`})
+        setTimeout(() => setSuccessMessage(''), 3000);
+
         }catch(e){
             console.log(e.response?.error || 'unexpected error occurs ')
         }
@@ -48,16 +47,20 @@ function Enquery() {
 
     const handleDecline = async (ownerId , userId) => {
         
-        setIsLoading(true)
-        try {
+      try {
+          setIsLoading(true)
+            setError(null)
             const res = await TheatreApi.post('theatreowners/', {
                 'id' : ownerId  ,
                 'userId': userId ,
                 'ownership_status' : 'rejected'
             })
-            toast({ title  :`${res.data.message}❌`})
+            console.log(res.data)
+            setSuccessMessage({ title  :`${res.data.message}❌`})
+            // setTimeout(() => setSuccessMessage(''), 3000);
+
         }catch(e){
-            console.log(e.response?.data || 'unexpected error occurs ')
+            setError(e.response?.data || 'unexpected error occurs ')
         }finally{
           setIsLoading(false)
         }
@@ -67,7 +70,24 @@ function Enquery() {
         <div className='flex min-h-screen bg-gray-100'>
           <div className='w-full p-6 mt-10'>
             <h2 className='text-center font-semibold text-2xl mb-8'>Theatre Owners</h2>
-      
+
+            {successMessage && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center">
+                        <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                        <span className="text-green-700">{successMessage}</span>
+                    </div>
+                </div>
+            )}
+
+            {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center">
+                        <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
+                        <span className="text-red-700">{error}</span>
+                    </div>
+                </div>
+            )}
             {isLoading ? (
               <div className="flex justify-center items-center text-xl font-bold text-blue-600">
                 Loading...

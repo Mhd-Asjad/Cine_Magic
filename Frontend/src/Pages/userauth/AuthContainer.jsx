@@ -95,25 +95,26 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined })
                 
                 <p className="text-center mt-2">
                     {!isLogin && !isResetPassowrd ? (
-
-                        <div className="text-center text-sm">
-                        Don&apos;t have an account?{" "}
-                        <a onClick={toggleForm} className="underline cursor-pointer underline-offset-4">
-                            Sign up
-                        </a>
-                    </div>
-                    ) : !isResetPassowrd ? (
-
                         <>
-                            Don't have an account?{' '}
+                        
+                            Already have acoount?{' '}
                             <span
                                 className="underline cursor-pointer underline-offset-4"
                                 onClick={toggleForm}
                             >
-                                Register
+                                login
                             </span>
-
                         </>
+
+                    ) : !isResetPassowrd ? (
+
+                        <div className="text-center text-sm">
+                            Don&apos;t have an account?{" "}
+                            <a onClick={toggleForm} className="underline cursor-pointer underline-offset-4">
+                                Sign up
+                            </a>
+                        </div>
+
                         
                     ):null}
                 </p>

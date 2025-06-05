@@ -53,7 +53,6 @@ function ShowScreen() {
     const [ showTimes , setShowTime] = useState([])
     const [selectedShowTime , setSelectedShowTime] = useState([]);
     const [ showDetails , setShowDetails ] = useState([]);
-    const [ isShowDialogOpen , setIsDialogOpen] = useState(false)
     const [ message , setMessage ] = useState('')
     const [ seats , setSeats ] = useState({})
     const {toast} = useToast();
@@ -182,7 +181,7 @@ function ShowScreen() {
             }
     }
 
-     console.log(selectedShowTime , 'new')
+     console.log(showDetails)
 
     const fetchShowtime = async() => {
         try{
@@ -228,7 +227,6 @@ function ShowScreen() {
         
     }
 
-    // Allow selecting multiple showtimes, toggling them in the array
     const handleSelectedShowTime = (showtimeId) => {
         setSelectedShowTime((prev) => {
             if (Array.isArray(prev)) {
@@ -245,7 +243,6 @@ function ShowScreen() {
         });
     }
 
-    console.log(selectedShowTime , 'selected show time')
 
     return (
         <div className='p-10 m-10'>
@@ -255,7 +252,7 @@ function ShowScreen() {
             <Card className="w-full py-10 max-w-4xl mx-auto">
                 <CardHeader>
                     <CardTitle className="flex justify-center text-xl font-semibold text-gray-700">
-                        Screens Available
+                        Screens Available 
                     </CardTitle>
                     <div className='flex justify-end pr-4 '>
 
@@ -399,83 +396,7 @@ function ShowScreen() {
                                             </div>
                                         <td className='p-4'> 
                                             <div className='flex space-x-2'>
-
-                                              
-
-                                                {sortedShowDetails.length > 0 ? (
-                                                    <Dialog>
-                                                        <DialogTrigger>
-                                                            <Button variant="outline" size="icon" 
-                                                            
-                                                            >
-                                                                <Eye className='h-4 w-2' />
-                                                            </Button>
-
-                                                        </DialogTrigger>
-                                                        
-                                                            <DialogContent className="sm:max-w-xl max-h-screen overflow-y-auto mb-1 bg-white" >
-
-                                                            {message &&(
-
-                                                                <Alert className='cursor-pointer hover:bg-gray-100 hover:border-1 mt-3' onClick={() => setMessage('')} >
-                                                                <Terminal className="h-4 w-4" />
-                                                                <AlertTitle>alert</AlertTitle>
-                                                                <AlertDescription>
-                                                                    {message}
-                                                                </AlertDescription>
-                                                                </Alert>
-                                                                )
-                                                            }
-                                                            <div className="p-4">
-                                                                <DialogTitle className="text-xl font-bold mb-4 text-center">
-
-                                                                showtime of Movie (Screen {screen.screen_number})
-                                                                </DialogTitle>
-
-                                                  
-                                                                        
-                                                                        <ul className="list-disc pl-5">
-                                                                        {sortedShowDetails.map((show) => {
-                                                        
-                                                                            if (show.screen_number == screen.screen_number ) { 
-
-                                                                                return (
-                                                                                    <div key={show.id} className="grid grid-cols-3 items-center gap-4 p-4 border rounded my-2">
-                                                                                    
-                                                                                    <div className="flex">
-                                                                                        <img className="w-44 h-32 object-cover" src={show.poster} alt="Poster" />
-                                                                                    </div>
-
-                                                                                    <div className="flex flex-col text-sm w-52">
-                                                                                        <p><strong>Movie name:</strong> {show.movie_name}</p>
-                                                                                        <p><strong>Show Date:</strong> {show.show_date}</p>
-                                                                                        <p><strong>Start Time:</strong> {formatTime(show.start_time)}</p>
-                                                                                    </div>
-                                                                                    
-                                                                                    <div className="flex justify-center ml-5 mt-[60%]">
-                                                                                        <Button
-                                                                                        onClick={() => handleCancel(show.id)}
-                                                                                        className="border text-white px-2 py-2 rounded"
-                                                                                        >
-                                                                                        <X className='h-4 w-2' /> Cancel Show
-                                                                                        </Button>
-                                                                                    </div>
-
-                                                                                    </div>
-
-                                                                                );
-                                                                            }
-                                                                            return null  
-                                                                            
-                                                                        })}
-                                                                        </ul>   
-                                                            </div>
-                                                        
-                                                            </DialogContent>
-                                                    </Dialog>
-                                                    ) : null
-                                                }   
-                                                <Dialog
+                                                 <Dialog
                                                     open={isDialogOpen}
                                                     onOpenChange={(open) => {
                                                         setDialogOpen(open);
@@ -487,7 +408,6 @@ function ShowScreen() {
                                                         className="bg-blue-500 text-white px-4 py-2 rounded"
                                                         onClick={() => {
                                                             setSelectedScreen(screen);
-                                                            setIsDialogOpen(true)
                                                         }}
                                                         >
                                                         Add Show
@@ -587,7 +507,7 @@ function ShowScreen() {
                                                                                 key={showtime.id}
                                                                                 onClick={() => handleSelectedShowTime(showtime.id)}
                                                                                 className={`cursor-pointer px-4 py-2 rounded-lg border ${
-                                                                                    selectedShowTime.includes(showtime.id)
+                                                                                    selectedShowTime?.includes(showtime.id)
                                                                                         ? 'bg-blue-500 text-white border-blue-500'
                                                                                         : 'bg-white text-gray-700 border-gray-300'
                                                                                 }`}
@@ -619,6 +539,93 @@ function ShowScreen() {
                                                         </div>
                                                         </DialogContent>
                                                     </Dialog>
+                                              
+
+                                                {sortedShowDetails.length > 0 ? (
+                                                    <Dialog>
+                                                        <DialogTrigger>
+                                                            <Button variant="outline" size="icon" 
+                                                            
+                                                            >
+                                                                <Eye className='h-4 w-2' />
+                                                            </Button>
+
+                                                        </DialogTrigger>
+                                                        
+                                                            <DialogContent className="sm:max-w-xl max-h-screen overflow-y-auto mb-1 bg-white" >
+
+                                                            {message &&(
+
+                                                                <Alert className='cursor-pointer hover:bg-gray-100 hover:border-1 mt-3' onClick={() => setMessage('')} >
+                                                                <Terminal className="h-4 w-4" />
+                                                                <AlertTitle>alert</AlertTitle>
+                                                                <AlertDescription>
+                                                                    {message}
+                                                                </AlertDescription>
+                                                                </Alert>
+                                                                )
+                                                            }
+                                                            <div className="p-4">
+                                                                <DialogTitle className="text-xl font-bold mb-4 text-center">
+
+                                                                showtime of Movie (Screen {screen.screen_number})
+                                                                </DialogTitle>
+
+                                                  
+                                                                        
+                                                                        <ul className="list-disc pl-5">
+                                                                        {sortedShowDetails.map((show) => {
+                                                        
+                                                                            if (show.screen_number == screen.screen_number ) { 
+
+                                                                                return (
+                                                                                    <div key={show.id} className="grid grid-cols-3 items-center gap-4 p-4 border rounded my-2">
+                                                                                    
+                                                                                    <div className="flex">
+                                                                                        <img className="w-44 h-32 object-cover" src={show.poster} alt="Poster" />
+                                                                                    </div>
+
+                                                                                    <div className="flex flex-col text-sm w-52">
+                                                                                        <p><strong>Movie name:</strong> {show.movie_name}</p>
+                                                                                        <p><strong>Show Date:</strong> {show.show_date}</p>
+                                                                                        <span>showTime : </span>
+                                                                                        <div className='flex'>
+
+
+                                                                                            {
+                                                                                                show.showtimes.map((time) => (
+
+                                                                                                    <p>{`${formatTime(time.start_time)} ,`}</p>
+                                                                                                ))
+                                                                                            }
+
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    
+                                                                                    <div className="flex justify-center ml-5 mt-[60%]">
+                                                                                        <Button
+                                                                                        onClick={() => handleCancel(show.id)}
+                                                                                        className="border text-white px-2 py-2 rounded"
+                                                                                        >
+                                                                                        <X className='h-4 w-2' /> Cancel Show
+                                                                                        </Button>
+                                                                                    </div>
+
+                                                                                    </div>
+
+                                                                                );
+                                                                            }
+                                                                            return null  
+                                                                            
+                                                                        })}
+                                                                        </ul>   
+                                                            </div>
+                                                        
+                                                            </DialogContent>
+                                                    </Dialog>
+                                                    ) : null
+                                                }   
+                                               
                                                 </div> 
                                             </td>
                                             <td>

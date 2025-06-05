@@ -98,12 +98,14 @@ function MyBookings() {
 
     }
 
+    console.log(selectedShow)
 
-    const handleSubmit = async(bookingId) => {
+
+    const handleSubmit = async() => {
         try {
             const current_user_type = localStorage.getItem('current_user_type')
             const authToken = localStorage.getItem(`${current_user_type}_token`)
-            const res = await apiReview.post(`rate-movie/${bookingId}/`, {
+            const res = await apiReview.post(`rate-movie/${selectedShow.id}/`, {
                 'rating' : value,
                 'review' : review,
             },{
@@ -254,7 +256,7 @@ function MyBookings() {
                                                     Cancel
                                                 </button>
                                                 <button
-                                                    onClick={() => handleSubmit(booking.id)}
+                                                    onClick={handleSubmit}
                                                     className="px-4 py-2 rounded-md bg-green-500 text-white hover:bg-green-600"
                                                 >
                                                     Submit

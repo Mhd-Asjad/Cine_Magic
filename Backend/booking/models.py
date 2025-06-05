@@ -73,7 +73,7 @@ class Booking(models.Model):
         
     def __str__(self):
         id = str(self.id)
-        return f'{id} - {self.status}'
+        return f'{id} - {self.status} - {self.booking_time}'
         
 class BookingSeat(models.Model) :
     
@@ -90,7 +90,7 @@ class BookingSeat(models.Model) :
         unique_together = ('booking' , 'seat')
     
     def __str__(self) :
-        return f'{self.seat} - {self.status}'
+        return f'{self.seat} - {self.status} - {self.booking.booking_time}'
         
 class Payment(models.Model):
     booking  =  models.OneToOneField(Booking , on_delete=models.CASCADE,related_name='payment')

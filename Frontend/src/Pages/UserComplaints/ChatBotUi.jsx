@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useChat } from "ai/react"
 import { ChatMessages } from '@/components/ui/chat'
 import { ChatContainer } from '@/components/ui/chat'
@@ -7,15 +7,15 @@ import { MessageInput } from '@/Components/ui/message-input'
 import { MessageList } from '@/Components/ui/message-list'
 import { PromptSuggestions } from '@/Components/ui/prompt-suggestions'
 import { sentToChatBot } from './Chatbotapi'
+import apiReview from '@/Axios/Reviewapi'
 
-export function ChatBotUi() {
-
+export function ChatBotUi({ setLastMessageId}) {
     const current_user = localStorage.getItem('current_user_type');
     const token = localStorage.getItem(`${current_user}_token`);
 
 
-    // const [ messages , setMessages ] = useState()
-    const { messages, input, handleInputChange, append ,  handleSubmit, isLoading, stop } = useChat({
+    const [historyLoaded , setHistoryLoaded ] = useState(false)
+    const { messages, input, handleInputChange, append , setMessages ,  handleSubmit, isLoading, stop } = useChat({
         api : 'http://127.0.0.1:8000/review/chatbot/',
         streamProtocol : 'text',
         headers :  {
@@ -27,16 +27,48 @@ export function ChatBotUi() {
         onError: (error) => {
             console.error('Chat error:', error);
         }
-
     });
 
+    useEffect(() => {
+        const fetchChatLog = async() => {
+            try {
+                const res = await apiReview.get('chat-history/')
+                const data = res.data;
+                if (res.status === 200 && data.length > 0) {
+                    const formattedMessage = data.map((log) => ({
+                        id: log.id.toString(),
+                        role: log.role,
+                        content: log.content,
+                        createdAt: new Date(log.timestamp)
+                    }));
+                    console.log(formattedMessage)
+                    setMessages(formattedMessage)                          
+                }
+                setHistoryLoaded(true)
+            }catch(error){
+                console.log('history log error' , error);
+                
+            }
+        }
+        fetchChatLog()
+
+    },[])
+
+    
+    
     const lastMessage = messages.at(-1)
     const isEmpty = messages.length === 0
     const isTyping = lastMessage?.role === "user"
-    console.log(messages)
-
+    setLastMessageId(lastMessage?.id)
+        if (!historyLoaded) {
+        return (
+            <div className='flex justify-center mt-[55%]' >
+                loading....
+            </div>
+        )
+    }
   return (
-    <div className="flex flex-col p-4 h-full">
+    <div className="grid grid-flow-row grid-cols-1 p-4 h-full">
 
         <ChatContainer>
 
@@ -45,42 +77,45 @@ export function ChatBotUi() {
                 {isEmpty ? (
                     <PromptSuggestions
                     append={append}
-                    suggestions={["How to report a complaint?", "Track my last ticket"]}
+                    suggestions={[ "Track my last ticket" , 'How Can I Cancel My Ticket?' , 'How can I contact customer care?']}
                     />
                 ) : null}
             </div>
 
         {!isEmpty ? (
             <ChatMessages>
-             <MessageList messages={messages} isTyping={isTyping} />
+                <div>
+
+                 <MessageList messages={messages} isTyping={isTyping}/>
+
+                </div>
             </ChatMessages>
         ) : null}
 
-            {/* <form onSubmit={handleSubmit} > */}
+        <div className='' >
 
 
+            <ChatForm
+            
+                className="mt-auto h-full"
+                isPending={isLoading || isTyping}
+                handleSubmit={handleSubmit}
+                >
 
-                <ChatForm
-                
-                    className="mt-auto h-full"
-                    isPending={isLoading || isTyping}
-                    handleSubmit={handleSubmit}
-                    >
+                {({ files, setFiles }) => (
+                    <MessageInput
+                        value={input}
+                        onChange={handleInputChange}
+                        allowAttachments={false}
+                        files={files}
+                        setFiles={setFiles}
+                        stop={stop}
+                        isGenerating={isLoading}
+                    />
+                )}
 
-                    {({ files, setFiles }) => (
-                        <MessageInput
-                            value={input}
-                            onChange={handleInputChange}
-                            allowAttachments={false}
-                            files={files}
-                            setFiles={setFiles}
-                            stop={stop}
-                            isGenerating={isLoading}
-                        />
-                    )}
-
-                </ChatForm>
-            {/* </form> */}
+            </ChatForm>
+        </div>
         </ChatContainer>
     </div>
   )

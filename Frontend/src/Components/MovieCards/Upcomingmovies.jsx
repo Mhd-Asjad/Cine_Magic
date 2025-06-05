@@ -1,12 +1,14 @@
 import React, { useEffect, useRef ,  useState } from 'react'
 import axios from 'axios';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function Upcomingmovies() {
     const [upcomingMovies , setUpcomingMovies] = useState([]);
     const [ isLeftVisible , setIsLeftVisible ] = useState(false);
     const [isRightVisible, setIsRightVisible] = useState(true);
     const scrollContainerRef = useRef(null);
+    const navigate = useNavigate();
     const TMDB_API = import.meta.env.TMDB_API_KEY
     useEffect(()=> {
         const fetchUpcomingMovies = async () => {
@@ -81,7 +83,8 @@ function Upcomingmovies() {
                       <img 
                         src={ movie.poster_path ? `https://image.tmdb.org/t/p/w300/${movie.poster_path}/` : `https://image.tmdb.org/t/p/w300/${movie.backdrop_path}/` } 
                         alt={movie.title} 
-                        className="w-full h-64 object-cover rounded-md"
+                        className="w-full h-64 object-cover rounded-md cursor-pointer"
+                        onClick={() => navigate(`/movie/${movie.id}`)}
                       />
                       <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-gradient-to-t from-black to-transparent">
                         <div className="text-white text-xs">
@@ -93,7 +96,6 @@ function Upcomingmovies() {
                     <div className="p-2">
                       <h3 className="font-medium text-base text-gray-800">{movie.title}</h3>
                       <p className="text-gray-600 text-xs">{movie.language}</p>
-                      {/* <p className="text-gray-500 text-xs mt-1">{movie.genre_ids}</p> */}
                     </div>
                   </div>
                 ))}

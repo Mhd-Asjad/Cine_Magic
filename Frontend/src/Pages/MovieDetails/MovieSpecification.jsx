@@ -7,13 +7,13 @@ import CastCards from './CastCards'
 import Upcomingmovies from '@/Components/MovieCards/Upcomingmovies'
 import apiMovies from '@/Axios/Moviesapi'
 import MovieReviews from './MovieReviews'
+import { BookCheck } from 'lucide-react'
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w780';
 
 function MovieSpecification( ) {
   const {id} = useParams()
   const [movie , setMovies] = useState(null);
   const [error , setError] = useState('') ;
-  const [castLength , setCastLength] = useState(null)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +33,6 @@ function MovieSpecification( ) {
   const handleChange = () => {
     navigate(`/available-show-details/${id}`)
   }
-  console.log(castLength)
 
   if (!movie) {
     return(
@@ -48,10 +47,10 @@ function MovieSpecification( ) {
 
       <Nav />
 
-    <div className="bg-gray-100 ">
+      <div className="bg-gray-100 ">
 
   
-    {movie && (
+      {movie && (
         <div className="relative w-full h-[400px] md:h-[600px]">
           <img
             src={`${IMAGE_BASE_URL}${movie.bg_image}`} 
@@ -61,7 +60,6 @@ function MovieSpecification( ) {
           <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent"></div>
   
           <div className="absolute inset-0 z-10 flex flex-col md:flex-row items-center justify-center max-w-7xl px-4">
-            {/* Poster */}
             <div className="w-full md:w-64 mb-6 md:mb-0 md:mr-8">
               <img
                 src={movie.poster}
@@ -85,8 +83,8 @@ function MovieSpecification( ) {
           
               <button 
                 onClick={handleChange} 
-                className="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 h-8 py-1 p-1 rounded-lg text-lg"
-              >
+                className="flex items-center space-x-2 bg-orange-400 hover:bg-orange-400/80 px-6 py-3 rounded-lg font-medium transition-colors">
+                <BookCheck className='w-5 h-5' />
                 Book Now
               </button>
             </div>
@@ -94,7 +92,6 @@ function MovieSpecification( ) {
         </div>
       )}
   
-      {/* Movie Description and Cast */}
       {movie && (
         <div className="max-w-7xl mx-auto px-4 mt-10">
           <div className="p-6 shadow-md rounded-lg bg-white">
@@ -107,20 +104,14 @@ function MovieSpecification( ) {
         </div>
         
       )}
-      {/* {castLength && ( */}
-
 
       <div className="max-w-7xl mx-auto px-4 mt-10">
 
         <div className="mt-10">
-          <CastCards castLength={setCastLength} movie_id={movie.movie_id} />
+          <CastCards movie_id={movie.movie_id} />
         </div>
 
       </div>
-
-
-      {/* )} */}
-
 
         <div  className="max-w-7xl mx-auto px-4 mt-10" >
 

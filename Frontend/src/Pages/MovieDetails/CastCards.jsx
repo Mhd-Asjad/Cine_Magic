@@ -1,13 +1,12 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 
-function CastCards({movie_id , castLength}) {
+function CastCards({movie_id }) {
     const [ casts , setCasts ] = useState([]);
     useEffect(() => {
         const getCredits = async() => {
 
             try {
-             
     
                 const res = await axios.get(`https://api.themoviedb.org/3/movie/${movie_id}/credits?language=en-US`,{
                     headers: {
@@ -16,14 +15,10 @@ function CastCards({movie_id , castLength}) {
                     }
                 })
                 setCasts(res.data.cast)         
-                console.log(res.data.cast)       
                  
             }catch(e){
                 console.log(e)
-            }finally{
-              castLength(res.data.length)
             }
-
         };
         if (movie_id) {
             getCredits()
@@ -31,13 +26,11 @@ function CastCards({movie_id , castLength}) {
         
     },[movie_id])
 
-    if (casts){
-      castLength(casts.length)
-    }
     return (
     <div>
-        <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Top Cast</h2>
+      {casts.length > 0 ? (
+      <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">{  'Top Cast'}</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
         {casts.slice(0, 8).map((cast, index) => (
           <div
@@ -58,7 +51,8 @@ function CastCards({movie_id , castLength}) {
           </div>
         ))}
       </div>
-    </div>
+      </div>
+      ) :null}
     </div>
   )
 }

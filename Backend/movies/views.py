@@ -142,7 +142,7 @@ def get_showtime_label(start_time):
         return 'Morning'
     elif time(12, 0) <= start_time < time(16, 0):
         return 'Afternoon'
-    elif time(16, 0) <= start_time < time(21, 0):
+    elif time(16, 0) <= start_time < time(18, 0):
         return 'Evening'
     else:
         return 'Night'
@@ -202,7 +202,7 @@ class movie_showtime(APIView):
             for cat in unique_prices :
                 price_range = SeatCategory.objects.get(id=cat['category_id'])
                 prices.append(price_range.price)
-            slot = show.slots.first() 
+            slot = show.slots.first()  # change label to gives as for each time slot to multiple
             label = get_showtime_label(slot.start_time) if slot else ''
             theatre_data[theatre_name]['shows'].append({
                     'show_id' : show.id,
@@ -213,6 +213,7 @@ class movie_showtime(APIView):
                     'slots' : [{
                         'slot_id' : showslot.id,
                         'start_time' : showslot.start_time.strftime('%H:%M'),
+                        'lablel' : get_showtime_label(showslot.start_time) if showslot.start_time else ''
                             
                         }
                         for showslot in show.slots.all()

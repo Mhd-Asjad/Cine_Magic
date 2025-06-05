@@ -23,7 +23,7 @@ function MovieReviews({ movie_id }) {
     <div className='p-4 border border-gray-100' >
         <div  className='flex justify-between' >
         <h2 className='text-xl font-bold mb-4'> movie Reviews</h2>
-        <a href="#" className="text-sm hover:underline">View All</a>
+        <a href="#" className="text-sm hover:underline"> {reviews.length > 3 ?'View All' : ''}</a>
 
         </div>
 
@@ -55,9 +55,9 @@ function MovieReviews({ movie_id }) {
 
         ):(
 
-        <div className="flex -text-center text-gray-500 p-4">
-          No reviews yet.
-        </div>
+            <div className="mx-auto text-gray-500 p-4">
+            No reviews yet.
+            </div>
 
 
         )}

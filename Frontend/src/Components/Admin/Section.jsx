@@ -14,6 +14,8 @@ import { AdminRoute } from '@/Pages/Routes/ProtectedRoute';
 import PendingRefund from '@/Pages/Admin/BookingManagement/PendingRefund';
 import ShowBookings from '@/Pages/Theatreowner/BookingManagement/ShowBookings';
 import ExcelDownloadComponent from '@/Pages/Admin/Dashboard/ExcelDownloadComponent';
+import ShowComplaints from '@/Pages/Admin/ComplaintsManagement/ShowComplaints';
+import RespondComplaint from '@/Pages/Admin/ComplaintsManagement/RespondComplaint';
 function Section() {
   return (
     <div>
@@ -29,6 +31,8 @@ function Section() {
             <Route path='pending-theatres' element={<PrivateRoute><ShowRequest/></PrivateRoute>} />
             <Route path='showtheatres' element={<PrivateRoute><ShowTheatres/></PrivateRoute>} />
             <Route path='bookings' element={<PendingRefund/>} ></Route>
+            <Route path='complaints' element={<ShowComplaints/>} />
+            <Route path='complaint/action/:id' element={<RespondComplaint onBack={'/admin/complaints'} />} />
             
         </Routes>
       

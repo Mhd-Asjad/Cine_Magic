@@ -27,8 +27,10 @@ class ChatLog(models.Model):
     is_bot = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    def __str__(self):
-        return self.user.username
+    def __str__(self) :
+        value = self.reply if self.is_bot else self.message
+        role = 'bot' if self.is_bot else 'user' 
+        return f'{role} - {value} ({self.user.username}) '
     
 class Complaints(models.Model):
     CATEGORY_CHOICES = [
@@ -46,12 +48,13 @@ class Complaints(models.Model):
         ('closed', 'Closed'),
     ]
     user = models.ForeignKey(User , on_delete=models.CASCADE)
-    chat = models.ForeignKey(ChatLog , on_delete=models.CASCADE)
+    chat = models.ForeignKey(ChatLog , on_delete=models.CASCADE , related_name='complaints')
     category = models.CharField(max_length=100 ,choices=CATEGORY_CHOICES )
     subject = models.CharField(max_length=255)
     screen_shot = models.ImageField(upload_to='complaints/' , blank=True , null=True)
     description = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    response_message = models.TextField(blank=True , null=True)
     is_resolved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

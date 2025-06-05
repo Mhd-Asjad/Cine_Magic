@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/Components/ui/button';
 import { TicketSlash , DollarSign , TheaterIcon , Coins } from 'lucide-react';
 import EditProfile from './EditProfile';
+import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 function TheatreDashboard() {
   
   const theatreOwner = useSelector((state) => state.theatreOwner);
@@ -60,7 +61,7 @@ function TheatreDashboard() {
   console.log(user.is_approved)
 
   return (
-    <div className="p-10 bg-gray-50 ">
+    <div className="p-10 bg-gray-50">
       <div className="p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">{theatreOwner.theatreName || "Theatre Dashboard"}</h1>
@@ -69,7 +70,7 @@ function TheatreDashboard() {
       <EditProfile/>
         <div className='flex mb-2 pb-4 justify-end p-3' >
   
-        <button className='flex mb-2 justify-end items-center gap-1 border rounded-md py-1 px-3 border-green-300 font-semibold'
+        <button className='flex mb-2 justify-end items-center gap-1 border rounded-md py-1 px-3 border-green-300 font-semibfold'
           onClick={validate_owner}
           >
           <IoIosAddCircleOutline className='text-2xl' />
@@ -101,6 +102,11 @@ function TheatreDashboard() {
             </Card>
           ))}
 
+        </div>
+
+        <div className='mb-4' >
+
+          <ChartAreaInteractive/>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

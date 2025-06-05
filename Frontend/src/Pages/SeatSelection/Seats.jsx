@@ -176,7 +176,7 @@ function Seats() {
 
   }
 
-  console.log(seats , 'seats')
+  console.log(show , 'shows')
   if (loading) {
     return (
       <div className='flex justify-center items-center pt-[20%] h-64' >
@@ -200,7 +200,7 @@ function Seats() {
         <div className='' >
 
           <h2 className='ml-[12%] text-xl font-bold text-gray-800' >{show.movie_title}</h2>
-          < p className='font-medium ml-[12%] mt-3' >◉ {show.show_date} , {formatTime(show?.slot?.start_time)}  { show.slot.end_time ? `to ${formatTime(show.end_time)}`:''} {show.theatre_name} {show.theatre_details}</p>
+          < p className='font-medium ml-[12%] mt-3' >◉ {show.show_date} , {formatTime(show?.slot?.start_time)}  { show.slot.end_time ? `to ${formatTime(show.slot.end_time)}`:''} {show.theatre_name} {show.theatre_details}</p>
 
         </div>
       <div className="flex justify-end px-10  space-x-8 pt-5 ">

@@ -129,6 +129,8 @@ class Create_Booking(APIView):
         total_amount = data['total_amount']
         paymentdet = data['payment_details']    
         price = total_amount // len(seat_ids)
+        tax_amount = total_amount // 10
+        grant_total = tax_amount + total_amount 
         logger.info('data type' ,type(data)) 
         try:
             purchase_units  = paymentdet.get('purchase_units' , [])
@@ -154,7 +156,7 @@ class Create_Booking(APIView):
                 customer_email = user.email ,
                 status = 'confirmed',
                 payment_id = paymentdet['id'],
-                amount = total_amount
+                amount = grant_total
             )
             
             booking.generate_qrcode()
@@ -176,7 +178,7 @@ class Create_Booking(APIView):
                 booking = booking,
                 order_id = booking.booking_id,
                 payer_id = paymentdet['id'],
-                amount = total_amount,
+                amount = grant_total ,
                 capture_id = capture_id,
                 payment_method = 'paypal',
             )

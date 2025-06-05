@@ -48,14 +48,29 @@ class ShowTime(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     
-   
     def __str__(self) :
         return f"{self.movie.title} at {self.screen.theatre.name} , Screeen {self.screen.screen_number} "
     
 class ShowSlot(models.Model):
     showtime = models.ForeignKey(ShowTime , on_delete=models.CASCADE)
     slot = models.ForeignKey(TimeSlot , on_delete=models.CASCADE)
+    calculated_end_time = models.TimeField(null=True , blank=True) 
     
     class Meta:
         unique_together = ('showtime' , 'slot')
         
+    def save(self , *args , **kwargs):
+        
+        print('creating saving endting')
+        if not self.calculated_end_time and self.showtime.movie:
+            print("MOVIE:", self.showtime.movie)
+            print("SLOT START TIME:", self.slot.start_time)
+
+
+            start_dt = datetime.combine(datetime.today() , self.slot.start_time)
+            end_dt = start_dt + timedelta(minutes=self.showtime.movie.duration)
+            
+            self.calculated_end_time = end_dt.time()
+            
+            
+        super().save(*args, **kwargs)

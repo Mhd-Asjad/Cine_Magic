@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect , useState } from "react";
 import { Navigate , useNavigate } from 'react-router-dom'
 import {jwtDecode} from 'jwt-decode'
-import Logout from "@/Components/Admin/Logout";
 import userApi from "@/Axios/userApi";
 
 function PrivateRoute({ children , allowedTypes }) {
@@ -18,6 +17,7 @@ function PrivateRoute({ children , allowedTypes }) {
         }
         
         try {
+
             const res = await userApi.post('token/refresh/', {
                 'refresh': refreshToken
             });
@@ -25,21 +25,36 @@ function PrivateRoute({ children , allowedTypes }) {
             const newAccessToken = res.data.access;
             localStorage.setItem(`${currentRole}_token`, newAccessToken);
             return true;
+
         } catch (error) {
             console.error('Token refresh failed:', error?.response?.data || error.message);
+            localStorage.removeItem(`${currentRole}_token`);
+            localStorage.removeItem(`${currentRole}_token_refresh`);
+            localStorage.removeItem('current_user_type');
+
+
             return false;
         }
+
     }, [currentRole]);
     
     const check_auth = useCallback(async() => {
-        const refreshtok = localStorage.getItem(`${currentRole}_refresh_token`);
+        const refreshtok = localStorage.getItem(`${currentRole}_token_refresh`);
         const access_token = localStorage.getItem(`${currentRole}_token`)
         console.log(refreshtok)
-        if (!refreshToken) {
+        if (!refreshtok) {
             console.log('no refresh token found')
             setIsAuthenticated(false)
             setLoading(false)
-            return
+            return;
+        }
+
+        if (!access_token) {
+            console.log('no access token is found , try to refreshing......')
+            const refreshSuccessful = await refreshToken();
+            setIsAuthenticated(refreshSuccessful)
+            setLoading(false);
+            return;
         }
         try {
 
@@ -60,32 +75,39 @@ function PrivateRoute({ children , allowedTypes }) {
             console.log(e.message , 
                 'token validation error '
             )
-            setIsAuthenticated(false)
+            const refreshSuccessful = await refreshToken();
+
+            setIsAuthenticated(refreshSuccessful)
             return
         }finally {
             setLoading(false)
         }
         
-    },[currentRole , refreshToken])
+    },[currentRole , refreshToken , allowedTypes])
     
     useEffect(() => {
         check_auth().catch((e) => e.message)
 
-    //     return () => clearInterval(check_token_exp)
-
     },[check_auth , currentRole , refreshToken ])
-    console.log(isAuthenticated)
-    console.log(currentRole , 'before invalid token')
 
-    const redirectPath = allowedTypes === 'user' ? '' : `/${allowedTypes}/login`;
+
+    console.log('user is authenticated :',isAuthenticated )
+    console.log(allowedTypes , 'allowed before checking validation')
+
+    const redirectPath = allowedTypes === 'user' ? '/' : `/${allowedTypes}/login`;
     
     if (loading) {
-        return <div className="flex justify-center text-center h-screen" >Loading.....</div>
+        console.log('not authenticated, redirecting to:', redirectPath);
+        return <div className="flex justify-center h-screen" >Loading.....</div>
     }
-    console.log(redirectPath)
+
     if(!isAuthenticated) {
+        console.log('not authenticated')
+        console.log(redirectPath)
         return <Navigate to={redirectPath} replace />;  
     }
+
     return children;
 }
+
 export default PrivateRoute

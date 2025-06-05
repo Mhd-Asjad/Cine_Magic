@@ -24,6 +24,7 @@ import {
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
 import apiAdmin from "@/Axios/api"
+import TheatreApi from "@/Axios/theatreapi"
 
 const chartConfig = {
   visitors: {
@@ -49,8 +50,10 @@ export function ChartAreaInteractive() {
   React.useEffect(() => {
     const fetchChartData = async () => {
       try {
-        const response = await apiAdmin.get("revenue_chart/",{
-          'period' : timeRange
+        const response = await TheatreApi.get("theatre-revenue/",{
+          params: {
+            'period' : timeRange
+          }
         })
         setChartData(response.data)
       }catch(error) {
@@ -85,7 +88,7 @@ export function ChartAreaInteractive() {
   return (
     (<Card className="@container/card">
       <CardHeader className="relative">
-        <CardTitle>Total Visitors</CardTitle>
+        <CardTitle>Revnue Chart</CardTitle>
         <CardDescription>
           <span className="@[540px]/card:block hidden">
             Total for the last 3 months
@@ -147,6 +150,7 @@ export function ChartAreaInteractive() {
               axisLine={false}
               tickMargin={8}
               minTickGap={32}
+
               tickFormatter={(value) => {
                 const date = new Date(value)
                 return date.toLocaleDateString("en-US", {
@@ -164,16 +168,17 @@ export function ChartAreaInteractive() {
                       day: "numeric",
                     });
                   }}
+
                   indicator="dot" />
               } />
             <Area
-              dataKey="mobile"
+              dataKey="revenue"
               type="natural"
               fill="url(#fillMobile)"
               stroke="var(--color-mobile)"
               stackId="a" />
             <Area
-              dataKey="desktop"
+              dataKey="tickets"
               type="natural"
               fill="url(#fillDesktop)"
               stroke="var(--color-desktop)"

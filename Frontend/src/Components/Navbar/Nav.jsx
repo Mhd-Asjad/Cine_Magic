@@ -239,7 +239,7 @@ function Nav() {
       <Modal isOpen={isModalOpen} closeModal={closeModal}>
 
         {!isOtpSent ? (
-        <AuthContainer setIsOtpSent={setIsOtpSent} setUserEmail={setUserEmail} isModalClose={closeModal}  />
+        <AuthContainer setIsOtpSent={setIsOtpSent} setUserEmail={setUserEmail} isModalClose={closeModal}/>
           
         ) : (
           <OtpVerificationForm email={userEmail} setMessage={setMessage} closeModal={closeModal}  />

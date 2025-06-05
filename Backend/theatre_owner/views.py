@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status , permissions
 from django.contrib.auth import authenticate
 from .models import TheaterOwnerProfile
-from .serializers import TheatreOwnerSerialzers , FetchMovieSerializer , CreateScreenSerializer , Createshowtimeserializers , TimeSlotSerializer , UpdateTheatreOwnerSeriailizer
+from .serializers import TheatreOwnerSerialzers , FetchMovieSerializer , CreateScreenSerializer , Createshowtimeserializers , TimeSlotSerializer , UpdateTheatreOwnerSeriailizer , FetchShowTimeSerializer
 from rest_framework.permissions import IsAuthenticated , AllowAny
 from django.core.mail import send_mail
+from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from movies.models import *
 from theatres.models import Theatre , Screen , ShowTime , TimeSlot , ShowSlot
@@ -15,10 +16,11 @@ from django.http import JsonResponse
 from django.db import IntegrityError
 from datetime import datetime , timedelta ,date
 from django.utils import timezone
+from django.utils.timezone import now
 from django.db.models import Count
 from seats.models import *
 from booking.models import Booking , BookingSeat
-from django.db.models import Sum , Count
+from django.db.models import Sum , Count , Subquery , OuterRef
 import logging
 
 logger = logging.getLogger(__name__)
@@ -70,7 +72,7 @@ class ConfirmTheatreOwner(APIView) :
     # getting unverified theatre enquries 
     def get(self , request ) :
         try :
-            unverified_theatre = TheaterOwnerProfile.objects.filter(ownership_status = 'pending' , user__is_theatre_owner = False)
+            unverified_theatre = TheaterOwnerProfile.objects.filter(ownership_status = 'pending' , user__is_theatre_owner = True)
             print(unverified_theatre)
             data = []
             for theatre in unverified_theatre :
@@ -112,12 +114,7 @@ class ConfirmTheatreOwner(APIView) :
             theatre_owner = TheaterOwnerProfile.objects.get(id=profile_id)
             user = User.objects.get(id=user_id)
             logger.error(f'handling user : {user}')
-            
-            
-               
-                
-                
-            
+
             
             if theatre_owner and ownership_status == 'confirmed':
                 theatre_owner.ownership_status = ownership_status
@@ -164,7 +161,7 @@ class ConfirmTheatreOwner(APIView) :
                     Username: {user.username}
                     Password: (Use the password you registered with)
 
-                    Login here: http://localhost:3000/theatre-login
+                    Login here: http://localhost:5173/theatre/login
                 '''
 
                 send_mail(
@@ -183,7 +180,7 @@ class ConfirmTheatreOwner(APIView) :
                 )
             else:
                 
-                theatre_owner.delete()
+                # theatre_owner.delete()
                 
                 username = user.username
                 email_subject = 'Theatre Verification Has Been Rejected' 
@@ -198,7 +195,7 @@ class ConfirmTheatreOwner(APIView) :
 
                     email_subject,
                     email_message,
-                    'mhdasjad877@gmail.com', 
+                    settings.EMAIL_HOST_USER,
                     [user.email],
                     fail_silently=True
                 )
@@ -249,11 +246,12 @@ class fetch_showtime(APIView):
             if not screens.exists():
                 return Response({'error': 'No screens found'}, status=status.HTTP_404_NOT_FOUND)
             
-            showtimes = ShowTime.objects.filter(screen__in=screens)
-            serializer = Createshowtimeserializers(showtimes , many=True , context={'request' : request})
+            showtimes = ShowTime.objects.filter(screen__in=screens).prefetch_related('movie' , 'slots' , 'screen')
+            serializer = FetchShowTimeSerializer(showtimes , many=True , context={'request' : request})
             return Response(serializer.data , status=status.HTTP_200_OK)
 
         except Exception as e:
+            print('error while fetching showtime' , str(e))
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 # show pending theatres for the theatre owner
 class pending_theatres(APIView):
@@ -463,8 +461,7 @@ class Add_Show_Time(APIView):
             for slot_id in slot_ids:
                 if ShowTime.objects.filter(screen=screen , slots=slot_id , show_date=show_date).exists():
                     return Response({'Error': 'This screen already has a show during this (date and time)'}, status=status.HTTP_400_BAD_REQUEST)
-
-            logger.info(f"data before creating showtime serializer", data)
+            
             serializers = Createshowtimeserializers(data=data)
             if serializers.is_valid():
                 serializers.save()
@@ -733,6 +730,8 @@ class DashboardStatus(APIView):
     def get(self , request , owner_id):
         try :
             theatres = Theatre.objects.filter(owner = owner_id)
+            screens = [s.id for t in theatres for s in t.screens.all()]
+
             theatre_owner = TheaterOwnerProfile.objects.get(id=owner_id)
             
         except Theatre.DoesNotExist:
@@ -741,6 +740,7 @@ class DashboardStatus(APIView):
         print(theatre_owner)
         booking_queryset = Booking.objects.filter(
             show__screen__theatre__in=theatres,
+            show__screen__id__in = screens,
             status='confirmed',
         )
         
@@ -754,7 +754,6 @@ class DashboardStatus(APIView):
             status = 'booked'
         ).count()
         
-        dash_data = []
         return Response({
             'total_tickets': total_tickets,
             'total_revenue': total_amount,
@@ -763,3 +762,64 @@ class DashboardStatus(APIView):
             'total_theatres' : len(theatres)
             
         },status=status.HTTP_200_OK)
+
+# theatre owner revenue tracking view
+class Revenue_Chart(APIView):
+    permission_classes = [permissions.AllowAny]
+    def get(self , request):
+        period = request.GET.get('period', 'month')
+        theatres = Theatre.objects.filter(owner__user_id=request.user)
+        screens = [s.id for t in theatres for s in t.screens.all()]
+        # Time range
+        today = now().date()
+        if period == "week":
+            start_date = today - timedelta(days=7)
+        elif period == "month":
+            start_date = today - timedelta(days=30)
+        elif period == "year":
+            start_date = today - timedelta(days=365)
+        else:
+            start_date = today - timedelta(days=30)
+            
+        logger.info(screens)
+
+        seat_counts = BookingSeat.objects.filter(
+            booking=OuterRef('pk'),
+            status='booked'
+        ).values('booking').annotate(
+            count=Count('id')
+        ).values('count')
+
+        # Step 1: Annotate bookings with ticket count using subquery
+        bookings = Booking.objects.filter(
+            status='confirmed',
+            show__screen__id__in=screens,
+            booking_time__date__gte=start_date
+        ).annotate(
+            ticket_count=Subquery(seat_counts)
+        ).values('booking_time__date').annotate(
+            total=Sum('amount'),
+            tickets=Sum('ticket_count')
+        ).order_by('booking_time__date')
+        logger.info(f'confirmed booking{bookings}')
+
+        date_to_total = {
+            entry['booking_time__date']: {
+                'total': entry['total'],
+                'tickets': entry['tickets']
+            }
+            for entry in bookings
+        }        
+        
+        data = []
+        current_date = start_date
+        while current_date <= today:
+            totals = date_to_total.get(current_date , {'total' : 0 , 'tickets':0})
+            data.append({
+                'date': current_date.isoformat(),
+                'revenue': round(float(totals['total']) * 0.9 , 2),
+                'tickets': totals['tickets'],
+            })
+            current_date += timedelta(days=1)
+
+        return Response(data , status=status.HTTP_200_OK)

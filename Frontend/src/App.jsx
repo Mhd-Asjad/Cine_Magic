@@ -24,14 +24,16 @@ import BlogInfo from "./Pages/blogs/BlogInfo";
 import VerifiedTicket from "./Pages/Bookings/VerifiedTicket";
 import ResetPassword from "./Pages/userauth/ResetPassword";
 import FAQPage from "./Pages/UserComplaints/FAQPage";
+import UpcomingMovieDetails from "./Pages/MovieDetails/UpcomingMovieDetails";
 function App() {
 
     return (
         <>
             <Router>
                 <Routes>
-                    <Route path="/" element={<PrivateRoute allowedTypes='user' ><Landingpage/> </PrivateRoute>}/>
+                    <Route path="/" element={<Landingpage/>} />
                     <Route path="/movie/:id/details" element={<MovieSpecification/>} />
+                    <Route path="/movie/:movieId" element={<UpcomingMovieDetails/>} />
                     <Route path="/profile" element={<Profile/>} />
                     <Route path={`/available-show-details/:id`} element={<AvailableShowDetails/>} />
                     <Route path={'/available-show-details/:screenId/:showId/seats'} element={<Seats/>} />
