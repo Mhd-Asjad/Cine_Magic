@@ -1,8 +1,8 @@
 import React ,{useEffect, useState} from 'react'
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import Sidebar from '../../../Components/Admin/Sidebar';
-import Navbar from '../../../Components/Admin/Navbar';
+import Sidebar from '../../../components/Admin/Sidebar';
+import Navbar from '../../../components/Admin/Navbar';
 import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom';
 import TheatreApi from '@/Axios/theatreapi';

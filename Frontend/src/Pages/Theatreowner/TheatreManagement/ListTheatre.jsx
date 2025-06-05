@@ -1,7 +1,7 @@
 import React , {useEffect, useState} from 'react'
 import axios from 'axios'
 import { IoIosAddCircleOutline } from "react-icons/io";
-import Modal from '../../../Components/Modals/Modal';
+import Modal from '../../../components/Modals/Modal';
 import Addcity from '@/Pages/Admin/CityManagement/Addcity';
 import { MdDelete } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';

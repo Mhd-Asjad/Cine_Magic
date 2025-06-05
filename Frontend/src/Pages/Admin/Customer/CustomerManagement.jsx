@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import Navbar from '../../../Components/Admin/Navbar'
-import Sidebar from '../../../Components/Admin/Sidebar'
+import Navbar from '../../../components/Admin/Navbar'
+import Sidebar from '../../../components/Admin/Sidebar'
 import apiAdmin from '../../../Axios/api';
 import Button from "@mui/material/Button";
 import { useNavigate } from 'react-router-dom';
