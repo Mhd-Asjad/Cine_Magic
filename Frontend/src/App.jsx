@@ -19,7 +19,6 @@ import TicketView from "./Pages/Bookings/TicketView";
 import BlogPosts from "./Pages/blogs/BlogPosts";
 import AddBlog from "./Pages/blogs/AddBlog";
 import PrivateRoute from "./Pages/Routes/PrivateRoute";
-import { UserRoute } from "./Pages/Routes/ProtectedRoute";
 import BlogInfo from "./Pages/blogs/BlogInfo";
 import VerifiedTicket from "./Pages/Bookings/VerifiedTicket";
 import ResetPassword from "./Pages/userauth/ResetPassword";
