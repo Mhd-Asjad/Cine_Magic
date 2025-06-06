@@ -2,18 +2,28 @@
 FROM python:3.10-slim as builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PATH=/root/.local/bin:$PATH
+    PYTHONUNBUFFERED=1 
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY requirements.txt ./
 
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt 
+RUN apt-get update && apt-get install -y gcc libpq-dev \
+  && pip install --upgrade pip \
+  && pip install --no-cache-dir -r requirements.txt \
+  && apt-get purge -y --auto-remove gcc libpq-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Copy the Python dependencies from the builder stage
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 COPY . .
+
 
 EXPOSE 8000
 

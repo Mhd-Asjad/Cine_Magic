@@ -7,6 +7,10 @@ __pycache__/
 *.log
 .env
 venv/
-
+.vscode/
+.idea/
+.DS_Store
+*.db
 media/
 staticfiles/
+Frontend/

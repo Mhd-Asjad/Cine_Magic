@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+
 from pathlib import Path
 from decouple import config
 from corsheaders.defaults import default_headers
@@ -144,6 +145,9 @@ AUTHENTICATION_BACKENDS = [
     
 ]
 
+SECRET_KEY = os.getenv("SECRET_KEY")
+print(SECRET_KEY)
+
 
 ROOT_URLCONF = 'Backend.urls'
 
@@ -171,14 +175,17 @@ AUTH_USER_MODEL = 'useracc.User'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+USE_DOCKER = os.getenv('USE_DOCKER', 'no') == 'yes'
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),      
-        'PORT': config('DB_PORT',default = '5432'),
+        'NAME': os.getenv('DB_NAME' , 'movie_ticket'),
+        'USER': os.getenv('DB_USER' , 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD' , 'asjadk123'),
+        'HOST': 'localhost',
+        'PORT': os.getenv('DB_PORT' , '5432'),
     }
 }
 

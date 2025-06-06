@@ -61,9 +61,9 @@ class OtpVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
 
-    def validate( self , data ):
+    def validate( self , data ) :
 
-        cached_data = cache.get(f'otp_{data['email']}')
+        cached_data = cache.get(f"otp_{data['email']}")
         print(cached_data)
         if not cached_data :
             raise serializers.ValidationError({"error": "OTP is expired.....! "})
@@ -74,7 +74,7 @@ class OtpVerificationSerializer(serializers.Serializer):
         return data
     
     def create(self , validated_data):
-        cached_data = cache.get(f'otp_{validated_data['email']}')
+        cached_data = cache.get(f"otp_{validated_data['email']}")
         user = User.objects.create(
 
             username = cached_data['username'],

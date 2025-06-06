@@ -46,10 +46,11 @@ class TimeSlotSerializer(serializers.ModelSerializer) :
         logger.info(f'getting slot obj {obj.id}')
         slot = TimeSlot.objects.get(id =obj.id )
         logger.info(f'time slot {slot.id}')
-        show = ShowSlot.objects.filter(slot = obj ).select_related('slot').first()
-        if show.calculated_end_time :
-            logger.info(f' show slot recieved {show.calculated_end_time}')
-            return show.calculated_end_time.strftime('%H:%M')
+        show = ShowSlot.objects.filter(slot = obj ).select_related('slot')
+        show_obj = show.first()
+        if show.exists() :
+            logger.info(f' show slot recieved {show_obj.calculated_end_time}')
+            return show_obj.calculated_end_time.strftime('%H:%M')
         return None
     
 class CreateScreenSerializer(serializers.ModelSerializer):

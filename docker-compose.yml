@@ -1,15 +1,40 @@
-version: '3.8'
-
 services:
-  backend:
-    build: ./backend
+  web:
+    build: 
+      context: ./Backend
+      dockerfile : Dockerfile
+    container_name: django_backend
     ports:
       - "8000:8000"
     depends_on:
-      - db
+        db:
+          condition: service_healthy
+    restart : always   
     env_file:
-      - fileName
+      - .env
+    networks:
+      - backend-network
 
-    
+  db:
+    image: postgres:14
+    container_name: postgres_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend-network
 
-    
+volumes:
+  db_data:
+
+networks:
+  backend-network:
+    driver: bridge
