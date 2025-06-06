@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Nav from "../../components/Navbar/Nav";
-import Footer from "../../components/Footer/footer";
+import Footer from "../../components/Footer/Footer";
 import { useSelector } from "react-redux";
 import probg from '../../assets/profilebg1.jpg'
 import { TbLogout2 } from "react-icons/tb";
