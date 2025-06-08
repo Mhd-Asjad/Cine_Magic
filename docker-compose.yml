@@ -12,6 +12,11 @@ services:
     restart : always   
     env_file:
       - .env
+
+    volumes :
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+
     networks:
       - backend-network
 
@@ -31,9 +36,12 @@ services:
       retries: 5
     networks:
       - backend-network
+    restart : always
 
 volumes:
   db_data:
+  static_volume:
+  media_volume:
 
 networks:
   backend-network:

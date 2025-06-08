@@ -184,7 +184,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME' , 'movie_ticket'),
         'USER': os.getenv('DB_USER' , 'postgres'),
         'PASSWORD': os.getenv('DB_PASSWORD' , 'asjadk123'),
-        'HOST': 'localhost',
+        'HOST':'db',
         'PORT': os.getenv('DB_PORT' , '5432'),
     }
 }
@@ -269,6 +269,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "mhdasjad877@gmail.com"
 EMAIL_HOST_PASSWORD = "vllo agwr vqln ewkq"
+
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {"SCOPE": ["profile", "email"], "AUTH_PARAMS": {"access_type": "online"} , "APP" : {

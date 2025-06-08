@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import TheatreNav from "./TheatreNav";
 import Layout from "./Layout";
-import Sections from "./sections";
+import Sections from "./Sections";
 
 const TheatreOwner = () => {
   return (

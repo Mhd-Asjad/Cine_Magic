@@ -2,7 +2,6 @@ import React from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import TheatreDashboard from '@/Pages/Theatreowner/TheatreDashboard';
 import ListTheatre from '@/Pages/Theatreowner/TheatreManagement/ListTheatre';
-import PrivateRoute from '@/Pages/Theatreowner/Routes/PrivateRoute';
 import PendingTheatres from '@/Pages/Theatreowner/TheatreManagement/pendingTheatres';
 import AddScreen from '@/Pages/Theatreowner/TheatreManagement/AddScreen';
 import ShowScreen from '@/Pages/Theatreowner/TheatreManagement/ShowScreen';
