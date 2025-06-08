@@ -13,7 +13,6 @@ import Select from '@mui/material/Select';
 import not_found from '../../assets/not-found.png'
 import apiMovies from '@/Axios/Moviesapi';
 import qs from 'qs';
-import Tooltip from '@/components/ToolTip';
 
 const AvailableShowDetails = () => {
 
