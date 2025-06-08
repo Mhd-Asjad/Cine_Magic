@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import apiReview from "@/Axios/Reviewapi";
-import CustomAlert from "@/Components/CustomAlert";
+import CustomAlert from "@/components/CustomAlert";
 
 export default function RaiseComplaint({ userId , chatId , closeForm }) {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();

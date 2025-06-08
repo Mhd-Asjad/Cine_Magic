@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, CloudDownload, Tags, DeleteIcon, CheckCircle } from 'lucide-react';
-import Nav from '@/Components/Navbar/Nav';
+import Nav from '@/components/Navbar/Nav';
 // import ShinyText from '../ReactBits/ShinyButton';
 import apiBlogs from '@/Axios/Blogapi';
 import { useNavigate } from 'react-router-dom';

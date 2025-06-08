@@ -9,7 +9,7 @@ import { lockseats } from '@/Redux/Features/selectedseats';
 import Checkout from '../userbooking/Checkout';
 import { useToast } from '@/hooks/use-toast';
 import apiMovies from '@/Axios/Moviesapi';
-import Modal from '@/Components/Modals/Modal';
+import Modal from '@/components/Modals/Modal';
 import LoginForm from '../userauth/LoginForm';
 import AuthContainer from '../userauth/AuthContainer';
 function Seats() {

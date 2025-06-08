@@ -2,11 +2,11 @@ import React, { useState , useEffect } from 'react'
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 import apiAdmin from '../../../Axios/api';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import Swal from 'sweetalert2';
 import { CandlestickChart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import SearchBar from '@/Components/search/SearchBar';
+import SearchBar from '@/components/search/SearchBar';
 
 function ListMovies() {
     const navigate = useNavigate();

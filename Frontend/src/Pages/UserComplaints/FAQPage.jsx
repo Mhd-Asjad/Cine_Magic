@@ -1,6 +1,6 @@
 import React, { useEffect, useState , useRef } from 'react'
 import apiReview from '@/Axios/Reviewapi'
-import Nav from '@/Components/Navbar/Nav'
+import Nav from '@/components/Navbar/Nav'
 import { FaCommentDots, FaTimes } from "react-icons/fa";
 import ChatBotUi from './ChatBotUi';
 import RaiseComplaint from './RaiseComplaint';

@@ -1,5 +1,5 @@
-import Footer from '@/Components/Footer/Footer';
-import Nav from '@/Components/Navbar/Nav';
+import Footer from '@/components/Footer/Footer';
+import Nav from '@/components/Navbar/Nav';
 import axios from 'axios';
 import { CloudDownload, Ticket, Tickets } from 'lucide-react';
 import React, { useState, useEffect } from 'react';

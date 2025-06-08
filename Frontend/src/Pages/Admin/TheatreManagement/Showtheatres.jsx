@@ -1,7 +1,7 @@
 import apiAdmin from '@/Axios/api'
 import React, { useEffect , useState } from 'react'
 import { ChevronDown, Film, MapPin, User, Info, Check, X } from 'lucide-react';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import Swal from 'sweetalert2';
 import { useToast } from '@/hooks/use-toast';
 

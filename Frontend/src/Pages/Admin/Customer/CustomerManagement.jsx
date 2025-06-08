@@ -5,7 +5,7 @@ import apiAdmin from '../../../Axios/api';
 import Button from "@mui/material/Button";
 import { useNavigate } from 'react-router-dom';
 import { FaListOl } from "react-icons/fa";
-import SearchBar from '@/Components/search/SearchBar';
+import SearchBar from '@/components/search/SearchBar';
 
 function CustomerManagement() {
   const [users, setUsers] = useState([]);

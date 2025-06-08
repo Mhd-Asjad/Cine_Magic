@@ -1,7 +1,7 @@
 import React , {useState} from 'react'
 import { SquarePen } from 'lucide-react'
-import { Label } from '@/Components/ui/label';
-import { Button } from '@/Components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { 
   Sheet ,
   SheetClose,
@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger
 
-} from '@/Components/ui/sheet';
+} from '@/components/ui/sheet';
 import { Input } from '@/Components/ui/input';
 import { useSelector } from 'react-redux';
 import TheatreApi from '@/Axios/theatreapi';

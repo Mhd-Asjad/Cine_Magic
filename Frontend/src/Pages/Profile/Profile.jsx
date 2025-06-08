@@ -13,7 +13,7 @@ import { useDispatch } from "react-redux";
 import { setUsername , setEmail } from "@/Redux/Features/UserSlice";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, CheckCircle, DeleteIcon,  User , CalendarRange , Trash, X , ShieldAlert } from 'lucide-react';
-import LocationPicker from "@/Components/Map/LocationPicker";
+import LocationPicker from "@/components/Map/LocationPicker";
 import 'leaflet/dist/leaflet.css';
 import { Link, useNavigate } from "react-router-dom";
 import apiBlogs from "@/Axios/Blogapi";
@@ -27,7 +27,7 @@ import {
   AlertDialogDescription , 
   AlertDialogFooter 
 } 
-from "@/Components/ui/alert-dialog";
+from "@/components/ui/alert-dialog";
 import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
 import { set } from "date-fns";
 import userApi from "@/Axios/userApi";

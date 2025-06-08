@@ -6,7 +6,7 @@ import {
     CardHeader, 
     CardTitle, 
 } from "@/components/ui/card";
-import Modal from '@/Components/Modals/Modal';
+import Modal from '@/components/Modals/Modal';
 import AddLayout from './AddLayout';
 import { TbLayoutGridAdd } from "react-icons/tb";
 import EditLayout from './EditLayout';

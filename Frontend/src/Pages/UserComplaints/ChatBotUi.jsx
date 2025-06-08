@@ -3,9 +3,9 @@ import { useChat } from "ai/react"
 import { ChatMessages } from '@/components/ui/chat'
 import { ChatContainer } from '@/components/ui/chat'
 import { ChatForm } from '@/components/ui/chat'
-import { MessageInput } from '@/Components/ui/message-input'
-import { MessageList } from '@/Components/ui/message-list'
-import { PromptSuggestions } from '@/Components/ui/prompt-suggestions'
+import { MessageInput } from '@/components/ui/message-input'
+import { MessageList } from '@/components/ui/message-list'
+import { PromptSuggestions } from '@/components/ui/prompt-suggestions'
 import { sentToChatBot } from './Chatbotapi'
 import apiReview from '@/Axios/Reviewapi'
 

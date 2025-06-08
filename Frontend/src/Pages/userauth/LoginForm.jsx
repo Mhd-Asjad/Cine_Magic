@@ -6,7 +6,6 @@ import * as Yup from "yup";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-// import { Form, FormField, FormItem, FormMessage } from "@/components/ui/log";
 import { Eye, EyeOff } from "lucide-react";
 import login from "./AuthService";
 import userApi from "@/Axios/userApi";

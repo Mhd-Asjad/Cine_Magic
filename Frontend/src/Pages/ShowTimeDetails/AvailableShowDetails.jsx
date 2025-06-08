@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Info, Sliders } from 'lucide-react';
-import Nav from '@/Components/Navbar/Nav';
-import Footer from '@/Components/Footer/Footer';
+import Nav from '@/components/Navbar/Nav';
+import Footer from '@/components/Footer/Footer';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { selectCityId } from '@/Redux/Features/Location.slice';
@@ -13,7 +13,7 @@ import Select from '@mui/material/Select';
 import not_found from '../../assets/not-found.png'
 import apiMovies from '@/Axios/Moviesapi';
 import qs from 'qs';
-import Tooltip from '@/Components/ToolTip';
+import Tooltip from '@/Ccomponents/ToolTip';
 
 const AvailableShowDetails = () => {
 

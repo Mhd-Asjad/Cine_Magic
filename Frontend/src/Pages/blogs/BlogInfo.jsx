@@ -1,13 +1,13 @@
 import apiBlogs from '@/Axios/Blogapi';
 import React, { useEffect , useState } from 'react'
 import { useParams } from 'react-router-dom';
-import Nav from '@/Components/Navbar/Nav';
+import Nav from '@/components/Navbar/Nav';
 import { User , Tag , MessageCircle , Calendar , Eye  } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import LikeDislikeButton from './LikeDislikeButton';
 import { Avatar } from '@mui/material';
 import {Stack} from '@mui/material';
-import Modal from '@/Components/Modals/Modal';
+import Modal from '@/components/Modals/Modal';
 import AuthContainer from '../userauth/AuthContainer';
 import { Send , Clock1 , Heart , Share2 } from 'lucide-react';
 import { getDate, getDay } from 'date-fns';

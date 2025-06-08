@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import Nav from '@/Components/Navbar/Nav'
+import Nav from '@/components/Navbar/Nav'
 import { useSelector } from 'react-redux'
 import notFound from '../../assets/no-booking.png'
 import { useNavigate } from 'react-router-dom'
 import apiBooking from '@/Axios/Bookingapi'
 import axios from 'axios'
 import { Star } from 'lucide-react'
-import CustomAlert from '@/Components/CustomAlert'
+import CustomAlert from '@/components/CustomAlert'
 import { 
     Dialog,
     DialogContent,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from '@/Components/ui/dialog'
+} from '@/components/ui/dialog'
 import Rating from '@mui/material/Rating';
 import Box from '@mui/material/Box';
 import StarIcon from '@mui/icons-material/Star';
