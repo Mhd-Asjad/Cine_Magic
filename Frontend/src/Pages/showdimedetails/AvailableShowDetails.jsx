@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Info, Sliders } from 'lucide-react';
-import Nav from '@/components/Navbar/Nav';
-import Footer from '@/components/Footer/Footer';
-import axios from 'axios';
+import Nav from '@/components/navbar/Nav';
+import Footer from '@/components/footer/Footer';
 import { useSelector } from 'react-redux';
-import { selectCityId } from '@/Redux/Features/Location.slice';
+import { selectCityId } from '@/redux/features/Location.slice';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import not_found from '../../assets/not-found.png'
-import apiMovies from '@/Axios/Moviesapi';
+import apiMovies from '@/axios/Moviesapi';
 import qs from 'qs';
 
 const AvailableShowDetails = () => {

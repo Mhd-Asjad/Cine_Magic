@@ -1,12 +1,12 @@
 import React , {useEffect, useState} from 'react'
 import axios from 'axios'
 import { IoIosAddCircleOutline } from "react-icons/io";
-import Modal from '../../../components/Modals/Modal';
-import Addcity from '@/Pages/Admin/CityManagement/Addcity';
+import Modal from '../../../components/modals/Modal';
+import Addcity from '@/pages/admin/CityManagement/Addcity';
 import { MdDelete } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import TheatreApi from '@/Axios/theatreapi';
+import TheatreApi from '@/axios/theatreapi';
 import { CiEdit } from "react-icons/ci";
 import Swal from "sweetalert2";
 

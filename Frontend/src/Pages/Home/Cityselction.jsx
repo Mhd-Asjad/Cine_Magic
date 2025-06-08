@@ -1,9 +1,9 @@
 import React , {useEffect, useState} from 'react'
 import { MapPin , Locate } from 'lucide-react';
-import apiMovies from '@/Axios/Moviesapi';
+import apiMovies from '@/axios/Moviesapi';
 import { useDispatch } from 'react-redux';
-import { setMovies } from '@/Redux/Features/MovieSlice';
-import { setLocation , setSelectedCity } from '@/Redux/Features/Location.slice';
+import { setMovies } from '@/redux/features/MovieSlice';
+import { setLocation , setSelectedCity } from '@/redux/features/Location.slice';
 function Cityselction({ oncityselect }) {
   
     const [ cities , setCities ] = useState([]);

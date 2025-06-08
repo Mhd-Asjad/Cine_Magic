@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import seatsApi from '@/Axios/seatsaApi'
+import seatsApi from '@/axios/seatsaApi'
 import { RockingChair } from 'lucide-react'
 function LayoutCards() {
     const owner_id = useSelector((state) => state.theatreOwner.theatreId)

@@ -1,5 +1,5 @@
-import Footer from '@/components/Footer/Footer';
-import Nav from '@/components/Navbar/Nav';
+import Footer from '@/components/footer/Footer';
+import Nav from '@/components/navbar/Nav';
 import axios from 'axios';
 import { CloudDownload, Ticket, Tickets } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
@@ -10,7 +10,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogCancel , AlertDialogAction 
 import { Button } from "@/components/ui/button";
 import { useToast } from '@/hooks/use-toast';
 import ShowRefundStatus from './ShowRefundStatus';
-import apiBooking from '@/Axios/Bookingapi';
+import apiBooking from '@/axios/Bookingapi';
 
 function TicketView() {
   const { id } = useParams();

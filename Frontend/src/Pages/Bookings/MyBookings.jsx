@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import Nav from '@/components/Navbar/Nav'
+import Nav from '@/components/navbar/Nav'
 import { useSelector } from 'react-redux'
 import notFound from '../../assets/no-booking.png'
 import { useNavigate } from 'react-router-dom'
-import apiBooking from '@/Axios/Bookingapi'
+import apiBooking from '@/axios/Bookingapi'
 import axios from 'axios'
 import { Star } from 'lucide-react'
 import CustomAlert from '@/components/CustomAlert'
@@ -18,7 +18,7 @@ import Rating from '@mui/material/Rating';
 import Box from '@mui/material/Box';
 import StarIcon from '@mui/icons-material/Star';
 import { useToast } from '@/hooks/use-toast'
-import apiReview from '@/Axios/Reviewapi'
+import apiReview from '@/axios/Reviewapi'
 
 const labels = {
   0.5: 'Useless',

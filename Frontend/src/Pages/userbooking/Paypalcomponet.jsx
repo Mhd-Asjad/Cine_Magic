@@ -1,7 +1,7 @@
 import React from 'react'
 import { PayPalButtons , usePayPalScriptReducer } from '@paypal/react-paypal-js'
 import axios from 'axios';
-import apiBooking from '@/Axios/Bookingapi';
+import apiBooking from '@/axios/Bookingapi';
 function Paypalcomponet({ amount , onPaymentSuccess }) {
     const styles = {
         color : 'blue'

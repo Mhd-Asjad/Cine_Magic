@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 import login from "./AuthService";
-import userApi from "@/Axios/userApi";
+import userApi from "@/axios/userApi";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 

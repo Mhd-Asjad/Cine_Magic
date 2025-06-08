@@ -1,4 +1,4 @@
-import apiAdmin from '@/Axios/api'
+import apiAdmin from '@/axios/api'
 import React, { useEffect , useState } from 'react'
 import { ChevronDown, Film, MapPin, User, Info, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';

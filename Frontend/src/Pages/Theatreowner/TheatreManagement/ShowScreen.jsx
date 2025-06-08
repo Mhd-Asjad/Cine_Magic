@@ -21,7 +21,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import TheatreApi from '@/Axios/theatreapi';
+import TheatreApi from '@/axios/theatreapi';
 
 import {
     Carousel,
@@ -36,9 +36,9 @@ import { ToastAction } from '@radix-ui/react-toast';
 import { Eye , X } from 'lucide-react';
 import { TbClockPlus } from "react-icons/tb";
 import Swal from 'sweetalert2';
-import apiAdmin from '@/Axios/api';
+import apiAdmin from '@/axios/api';
 import { Terminal } from 'lucide-react';
-import seatsApi from '@/Axios/seatsaApi';
+import seatsApi from '@/axios/seatsaApi';
 import screenimg from '../../../assets/screen.png'
 
 function ShowScreen() {

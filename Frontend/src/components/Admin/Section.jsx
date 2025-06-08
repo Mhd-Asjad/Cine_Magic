@@ -1,21 +1,21 @@
 import React from 'react'
 import {BrowserRouter as Router , Route , Routes} from 'react-router-dom'
-import PrivateRoute from '@/Pages/Routes/PrivateRoute'
-import Dashboard from '@/Pages/Admin/Dashboard/Dashboard';
-import CustomerManagement from '@/Pages/Admin/Customer/CustomerManagement';
-import ListMovies from "@/Pages/Admin/MovieManagement/ListMovies";
-import AddMovies from "@/Pages/Admin/MovieManagement/AddMovies";
-import Enquery from "@/Pages/Admin/Customer/Enquery";
-import EditTheatre from "@/Pages/Theatreowner/TheatreManagement/EditTheatre";
-import ShowRequest from '@/Pages/Admin/TheatreManagement/ShowRequest';
-import EditMovie from '@/Pages/Admin/MovieManagement/EditMovie';
-import ShowTheatres from '@/Pages/Admin/TheatreManagement/Showtheatres';
-import { AdminRoute } from '@/Pages/Routes/ProtectedRoute';
-import PendingRefund from '@/Pages/Admin/BookingManagement/PendingRefund';
-import ShowBookings from '@/Pages/Theatreowner/BookingManagement/ShowBookings';
-import ExcelDownloadComponent from '@/Pages/Admin/Dashboard/ExcelDownloadComponent';
-import ShowComplaints from '@/Pages/Admin/ComplaintsManagement/ShowComplaints';
-import RespondComplaint from '@/Pages/Admin/ComplaintsManagement/RespondComplaint';
+import PrivateRoute from '@/pages/routes/PrivateRoute'
+import Dashboard from '@/pages/admin/Dashboard/Dashboard';
+import CustomerManagement from '@/pages/admin/Customer/CustomerManagement';
+import ListMovies from "@/pages/admin/MovieManagement/ListMovies";
+import AddMovies from "@/pages/admin/MovieManagement/AddMovies";
+import Enquery from "@/pages/admin/Customer/Enquery";
+import EditTheatre from "@/pages/theatreowner/theatreManagement/EditTheatre";
+import ShowRequest from '@/pages/admin/TheatreManagement/ShowRequest';
+import EditMovie from '@/pages/admin/MovieManagement/EditMovie';
+import ShowTheatres from '@/pages/admin/TheatreManagement/Showtheatres';
+import { AdminRoute } from '@/pages/routes/ProtectedRoute';
+import PendingRefund from '@/pages/admin/BookingManagement/PendingRefund';
+import ExcelDownloadComponent from '@/pages/admin/Dashboard/ExcelDownloadComponent';
+import ShowComplaints from '@/pages/admin/ComplaintsManagement/ShowComplaints';
+import RespondComplaint from '@/pages/admin/ComplaintsManagement/RespondComplaint';
+
 function Section() {
   return (
     <div>

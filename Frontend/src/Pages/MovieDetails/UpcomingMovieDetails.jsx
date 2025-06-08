@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Star, Calendar, Globe, Clock, Share2, User , Bookmark } from 'lucide-react';
-import Nav from '@/components/Navbar/Nav';
+import Nav from '@/components/navbar/Nav';
 const UpcomingMovieDetails = () => {
   const { movieId } = useParams(); 
   const navigate = useNavigate();

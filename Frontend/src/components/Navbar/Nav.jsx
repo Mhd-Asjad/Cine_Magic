@@ -1,20 +1,20 @@
 import React , {useEffect, useState} from 'react'
 import logo from '../../assets/logopic2.png'
-import Modal from '../Modals/Modal';
-import OtpVerificationForm from '../../Pages/userauth/OtpVerificationForm';
+import Modal from '../modals/Modal';
+import OtpVerificationForm from '../../pages/userauth/OtpVerificationForm';
 import { MdOutlineAddLocation } from "react-icons/md";
-import Cityselction from '../../Pages/Home/Cityselction';
+import Cityselction from '../../pages/home/Cityselction';
 import { useDispatch , useSelector } from 'react-redux';
-import { setMovies } from '../../Redux/Features/MovieSlice';
-import { setLocation, setSelectedCity , clearLocation } from '../../Redux/Features/Location.slice';
+import { setMovies } from '../../redux/features/MovieSlice';
+import { setLocation, setSelectedCity , clearLocation } from '../../redux/features/Location.slice';
 import { HiUser } from "react-icons/hi2";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { resetUser } from '../../Redux/Features/UserSlice';
-import AuthContainer from '../../Pages/userauth/AuthContainer';
+import { resetUser } from '../../redux/features/UserSlice';
+import AuthContainer from '../../pages/userauth/AuthContainer';
 import { useNavigate } from 'react-router-dom';
-import { selectCityId } from '../../Redux/Features/Location.slice';
-import { logout } from '@/Pages/userauth/AuthService';
-import apiMovies from '@/Axios/Moviesapi';
+import { selectCityId } from '../../redux/features/Location.slice';
+import { logout } from '@/pages/userauth/AuthService';
+import apiMovies from '@/axios/Moviesapi';
 import { MessageCircle , LayoutDashboard , UserIcon , LogOut, User } from 'lucide-react';
 
 function Nav() {

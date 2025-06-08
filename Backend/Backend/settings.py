@@ -174,7 +174,6 @@ AUTH_USER_MODEL = 'useracc.User'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 USE_DOCKER = config('USE_DOCKER') == 'yes'
-print(USE_DOCKER , 'docker')
 
 
 DATABASES = {

@@ -1,12 +1,12 @@
 import React, { useEffect, useState , useRef } from 'react'
-import apiReview from '@/Axios/Reviewapi'
-import Nav from '@/components/Navbar/Nav'
+import apiReview from '@/axios/Reviewapi'
+import Nav from '@/components/navbar/Nav'
 import { FaCommentDots, FaTimes } from "react-icons/fa";
 import ChatBotUi from './ChatBotUi';
 import RaiseComplaint from './RaiseComplaint';
 import { useSelector } from 'react-redux';
 import { IoMdArrowDropdown , IoMdArrowDropup } from "react-icons/io";
-import BlurText from '../ReactBits/BlurText';
+import BlurText from '../reactBits/BlurText';
 
 function FAQPage() {
 

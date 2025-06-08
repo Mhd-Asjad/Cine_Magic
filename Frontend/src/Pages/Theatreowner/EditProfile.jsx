@@ -13,11 +13,11 @@ import {
   SheetTrigger
 
 } from '@/components/ui/sheet';
-import { Input } from '@/Components/ui/input';
+import { Input } from '@/components/ui/input';
 import { useSelector } from 'react-redux';
-import TheatreApi from '@/Axios/theatreapi';
+import TheatreApi from '@/axios/theatreapi';
 import { useDispatch } from 'react-redux';
-import { setTheatreOwner } from '@/Redux/Features/Theatreownerslice';
+import { setTheatreOwner } from '@/redux/features/Theatreownerslice';
 import { useToast } from '@/hooks/use-toast';
 function EditProfile() {
     const dispatch = useDispatch();

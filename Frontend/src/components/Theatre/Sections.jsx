@@ -1,19 +1,20 @@
 import React from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import TheatreDashboard from '@/Pages/Theatreowner/TheatreDashboard';
-import ListTheatre from '@/Pages/Theatreowner/TheatreManagement/ListTheatre';
-import PendingTheatres from '@/Pages/Theatreowner/TheatreManagement/pendingTheatres';
-import AddScreen from '@/Pages/Theatreowner/TheatreManagement/AddScreen';
-import ShowScreen from '@/Pages/Theatreowner/TheatreManagement/ShowScreen';
-import AddTheatre from '@/Pages/Theatreowner/TheatreManagement/AddTheatre';
-import EditTheatre from '@/Pages/Theatreowner/TheatreManagement/EditTheatre';
-import SeatHome from '@/Pages/Theatreowner/SeatManagement/SeatHome';
-import LayoutCards from '@/Pages/Theatreowner/SeatManagement/LayoutCards';
-import Addshowtime from '@/Pages/Theatreowner/ShowManagement/Addshowtime';
-import EditShow from '@/Pages/Theatreowner/ShowManagement/EditShow';
-import { TheatreRoute } from '@/Pages/Routes/ProtectedRoute';
-import ShowBookings from '@/Pages/Theatreowner/BookingManagement/ShowBookings';
-import TicketDetails from '@/Pages/Theatreowner/BookingManagement/TicketDetails';
+import TheatreDashboard from '@/pages/theatreowner/TheatreDashboard';
+import ListTheatre from '@/pages/theatreowner/theatreManagement/ListTheatre';
+import PendingTheatres from '@/pages/theatreowner/theatreManagement/PendingTheatres';
+import AddScreen from '@/pages/theatreowner/theatreManagement/AddScreen';
+import ShowScreen from '@/pages/theatreowner/theatreManagement/ShowScreen';
+import AddTheatre from '@/pages/theatreowner/theatreManagement/AddTheatre';
+import EditTheatre from '@/pages/theatreowner/theatreManagement/EditTheatre';
+import SeatHome from '@/pages/theatreowner/seatManagement/SeatHome';
+import LayoutCards from '@/pages/theatreowner/seatManagement/LayoutCards';
+import Addshowtime from '@/pages/theatreowner/showmanagement/Addshowtime';
+import EditShow from '@/pages/theatreowner/showmanagement/EditShow';
+import { TheatreRoute } from '@/pages/routes/ProtectedRoute';
+import ShowBookings from '@/pages/theatreowner/bookingmanagement/ShowBookings';
+import TicketDetails from '@/pages/theatreowner/bookingmanagement/TicketDetails';
+
 function Sections() {
     return (
         <div>

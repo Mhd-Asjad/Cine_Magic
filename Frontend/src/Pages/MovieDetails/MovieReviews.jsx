@@ -1,4 +1,4 @@
-import apiReview from '@/Axios/Reviewapi';
+import apiReview from '@/axios/Reviewapi';
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";

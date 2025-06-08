@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 import { useNavigate } from 'react-router-dom';
-import Squares from '../ReactBits/Squares';
+import Squares from '../reactBits/Squares';
 import login from '../userauth/AuthService';
 function Loginpage() {
   

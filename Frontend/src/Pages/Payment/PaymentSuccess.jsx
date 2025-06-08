@@ -1,8 +1,8 @@
 import { Card } from "@/components/ui/card"
 import { Link, useParams } from "react-router-dom"
 import React , {useState , useEffect} from "react";
-import Nav from "@/components/Navbar/Nav";
-import apiBooking from "@/Axios/Bookingapi";
+import Nav from "@/components/navbar/Nav";
+import apiBooking from "@/axios/Bookingapi";
 function PaymentSuccess() {
     const [isLoading, setIsLoading] = useState(true);
     const {booking_id} = useParams()

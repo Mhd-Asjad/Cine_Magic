@@ -1,7 +1,7 @@
 import { TrendingDownIcon, TrendingUpIcon } from "lucide-react"
 import { useEffect , useState} from "react";
 import { Badge } from "@/components/ui/badge"
-import apiAdmin from "@/Axios/api";
+import apiAdmin from "@/axios/api";
 import { IoPersonCircle } from "react-icons/io5";
 import { Theater , Coins } from "lucide-react";
 import {
@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import apiBooking from "@/Axios/Bookingapi";
+import apiBooking from "@/axios/Bookingapi";
 
 export function SectionCards() {
 

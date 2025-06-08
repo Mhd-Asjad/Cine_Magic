@@ -4,7 +4,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
-import userApi from '@/Axios/userApi';
+import userApi from '@/axios/userApi';
 import { Eye, EyeOff, User, Mail, Lock, CheckCircle } from 'lucide-react';
 import bg from '../../assets/cinelogo.png'
 

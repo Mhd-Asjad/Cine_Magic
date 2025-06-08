@@ -7,7 +7,7 @@ import { MessageInput } from '@/components/ui/message-input'
 import { MessageList } from '@/components/ui/message-list'
 import { PromptSuggestions } from '@/components/ui/prompt-suggestions'
 import { sentToChatBot } from './Chatbotapi'
-import apiReview from '@/Axios/Reviewapi'
+import apiReview from '@/axios/Reviewapi'
 
 export function ChatBotUi({ setLastMessageId}) {
     const current_user = localStorage.getItem('current_user_type');

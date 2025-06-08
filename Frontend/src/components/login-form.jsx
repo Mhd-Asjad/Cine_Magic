@@ -8,11 +8,11 @@ import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import userApi from "@/Axios/userApi";
+import userApi from "@/axios/userApi";
 import toastr from "toastr";
 import { cn } from "@/lib/utils"
 import { GoogleLogin } from "@react-oauth/google";
-import login from "@/Pages/userauth/AuthService";
+import login from "@/pages/userauth/AuthService";
 import {
   Card,
   CardContent,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AiFillLike, AiOutlineLike, AiFillDislike, AiOutlineDislike } from 'react-icons/ai';
 import {motion} from 'framer-motion'
-import apiBlogs from '@/Axios/Blogapi';
+import apiBlogs from '@/axios/Blogapi';
 
 function LikeDislikeButton({ postId, like_count, unlike_count, onChangeReactions }) {
   const [liked, setLiked] = useState(false);

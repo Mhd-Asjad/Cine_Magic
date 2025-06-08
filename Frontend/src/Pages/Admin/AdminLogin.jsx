@@ -1,5 +1,5 @@
 import React , {useState} from 'react'
-import apiAdmin from '../../Axios/api'
+import apiAdmin from '../../axios/api'
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN , REFRESH_TOKEN } from '../../constants';
 import login from '../userauth/AuthService';

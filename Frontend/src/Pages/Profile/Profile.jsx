@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import Nav from "../../components/Navbar/Nav";
-import Footer from "../../components/Footer/Footer";
+import Nav from "../../components/navbar/Nav";
+import Footer from "../../components/footer/Footer";
 import { useSelector } from "react-redux";
 import probg from '../../assets/profilebg1.jpg'
 import { TbLogout2 } from "react-icons/tb";
@@ -10,13 +10,13 @@ import { FaUserEdit } from "react-icons/fa";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import { useDispatch } from "react-redux";
-import { setUsername , setEmail } from "@/Redux/Features/UserSlice";
+import { setUsername , setEmail } from "@/redux/features/UserSlice";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, CheckCircle, DeleteIcon,  User , CalendarRange , Trash, X , ShieldAlert } from 'lucide-react';
-import LocationPicker from "@/components/Map/LocationPicker";
+import LocationPicker from "@/components/map/LocationPicker";
 import 'leaflet/dist/leaflet.css';
 import { Link, useNavigate } from "react-router-dom";
-import apiBlogs from "@/Axios/Blogapi";
+import apiBlogs from "@/axios/Blogapi";
 import {
   AlertDialog , 
   AlertDialogTrigger , 
@@ -30,8 +30,8 @@ import {
 from "@/components/ui/alert-dialog";
 import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
 import { set } from "date-fns";
-import userApi from "@/Axios/userApi";
-import TheatreApi from "@/Axios/theatreapi";
+import userApi from "@/axios/userApi";
+import TheatreApi from "@/axios/theatreapi";
 const Profile = () => {
 
   toastr.options = {

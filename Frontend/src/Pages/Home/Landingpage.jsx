@@ -1,8 +1,8 @@
 import React from 'react'
-import Nav from '../../components/Navbar/Nav'
-import Upcoming_Carosel from '../../components/MovieCarousel/Upcoming_Carosel'
-import Footer from '../../components/Footer/Footer'
-import MovieGrid from '../../components/MovieCards/MovieList'
+import Nav from '../../components/navbar/Nav'
+import Upcoming_Carosel from '../../components/moviecarousel/Upcoming_Carosel'
+import Footer from '../../components/footer/Footer'
+import MovieGrid from '../../components/moviecards/MovieList'
 function Landingpage() {
 
 

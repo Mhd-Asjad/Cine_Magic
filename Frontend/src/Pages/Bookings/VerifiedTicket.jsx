@@ -1,5 +1,5 @@
-import apiBooking from '@/Axios/Bookingapi';
-import Nav from '@/components/Navbar/Nav';
+import apiBooking from '@/axios/Bookingapi';
+import Nav from '@/components/navbar/Nav';
 import React, { useEffect, useState } from 'react';
 import { useParams , useNavigate } from 'react-router-dom';
 

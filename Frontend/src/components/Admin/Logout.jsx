@@ -1,9 +1,9 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CiLogout } from "react-icons/ci";
-import { logout } from '@/Pages/userauth/AuthService';
+import { logout } from '@/pages/userauth/AuthService';
 import { useDispatch  } from 'react-redux';
-import { resetUser } from '@/Redux/Features/UserSlice';
+import { resetUser } from '@/redux/features/UserSlice';
 function Logout() {
 
     const navigate = useNavigate();

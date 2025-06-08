@@ -7,9 +7,9 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { useToast } from '@/hooks/use-toast';
 import { useSelector } from 'react-redux';
 import { ToastAction } from '@radix-ui/react-toast';
-import TheatreApi from '@/Axios/theatreapi';
+import TheatreApi from '@/axios/theatreapi';
 import { useNavigate } from 'react-router-dom';
-import apiMovies from '@/Axios/Moviesapi';
+import apiMovies from '@/axios/Moviesapi';
 
 function AddTheatre( ) {
     const [theatreName , setTheatreName] = useState('');

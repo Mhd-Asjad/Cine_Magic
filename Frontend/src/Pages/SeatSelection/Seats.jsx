@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { X } from 'lucide-react';
 import screenimg from '../../assets/screen.png'
-import seatsApi from '@/Axios/seatsaApi';
+import seatsApi from '@/axios/seatsaApi';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
-import { lockseats } from '@/Redux/Features/selectedseats';
+import { lockseats } from '@/redux/features/selectedseats';
 import Checkout from '../userbooking/Checkout';
 import { useToast } from '@/hooks/use-toast';
-import apiMovies from '@/Axios/Moviesapi';
-import Modal from '@/components/Modals/Modal';
+import apiMovies from '@/axios/Moviesapi';
+import Modal from '@/components/modals/Modal';
 import LoginForm from '../userauth/LoginForm';
 import AuthContainer from '../userauth/AuthContainer';
 function Seats() {
@@ -26,7 +26,6 @@ function Seats() {
   const dispatch = useDispatch();
   const {toast} = useToast();
   const username1 = useSelector((state) => state.user.username)
-  const selectedCity = useSelector((state) => state.location.location)
   const [priceCategories , setPriceCategories ] = useState([])
   const [searchparams]  = useSearchParams()
   const slotId = searchparams.get('slot_id') || null;

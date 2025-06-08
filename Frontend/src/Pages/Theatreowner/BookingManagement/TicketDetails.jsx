@@ -1,4 +1,4 @@
-import apiBooking from '@/Axios/Bookingapi';
+import apiBooking from '@/axios/Bookingapi';
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import { Calendar , LanguagesIcon , Clock1 , Clapperboard , LollipopIcon , RockingChairIcon, LaptopMinimal , MailCheck } from 'lucide-react';

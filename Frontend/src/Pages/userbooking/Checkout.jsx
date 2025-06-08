@@ -1,13 +1,13 @@
-import Nav from '@/components/Navbar/Nav';
+import Nav from '@/components/navbar/Nav';
 import axios from 'axios'
 import React ,{useEffect, useState} from 'react'
 import { useSelector } from 'react-redux'
 import { Info, ChevronDown, ChevronUp } from 'lucide-react';
 import Paypalcomponet from './Paypalcomponet';
-import CountDownTimer from '../SeatSelection/CountDownTimer';
-import seatsApi from '@/Axios/seatsaApi';
+import CountDownTimer from '../seatselection/CountDownTimer';
+import seatsApi from '@/axios/seatsaApi';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import apiBooking from '@/Axios/Bookingapi';
+import apiBooking from '@/axios/Bookingapi';
 
 
 function Checkout() {

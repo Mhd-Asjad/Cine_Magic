@@ -1,4 +1,4 @@
-import seatsApi from '@/Axios/seatsaApi';
+import seatsApi from '@/axios/seatsaApi';
 import { useToast } from '@/hooks/use-toast';
 import React ,{useEffect, useState} from 'react'
 

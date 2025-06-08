@@ -1,5 +1,5 @@
 import React , {useEffect, useState} from 'react'
-import apiAdmin from '../../../Axios/api';
+import apiAdmin from '../../../axios/api';
 import { 
   Card, 
   CardContent, 

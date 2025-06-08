@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import TheatreApi from '@/Axios/theatreapi';
+import TheatreApi from '@/axios/theatreapi';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { updateOwnershipStatus } from '@/Redux/Features/Theatreownerslice';
-import seatsApi from '@/Axios/seatsaApi';
+import { updateOwnershipStatus } from '@/redux/features/Theatreownerslice';
+import seatsApi from '@/axios/seatsaApi';
 import { useToast } from '@/hooks/use-toast';
 // import remove
 function AddScreen() {

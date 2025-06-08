@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Api from "@/Axios/api";
+import Api from "@/axios/api";
 import { Coins } from "lucide-react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";

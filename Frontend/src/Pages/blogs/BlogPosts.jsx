@@ -1,10 +1,10 @@
 import React ,{useState , useEffect} from 'react'
 import blog_bg from '../../assets/blogbg.jpg'
 import { Clock, User, ArrowRight, BookOpen, Calendar, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import apiBlogs from '@/Axios/Blogapi'
-import Nav from '@/components/Navbar/Nav'
+import apiBlogs from '@/axios/Blogapi'
+import Nav from '@/components/navbar/Nav'
 import { useNavigate, useLocation } from 'react-router-dom';
-import TextPressure from '../ReactBits/TextPressure';
+import TextPressure from '../reactBits/TextPressure';
 
 import {
   Pagination,

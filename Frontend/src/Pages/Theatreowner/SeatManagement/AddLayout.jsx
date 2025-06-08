@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import seatsApi from '@/Axios/seatsaApi';
+import seatsApi from '@/axios/seatsaApi';
 import { useToast } from '@/hooks/use-toast';
 function AddLayout({ closeModal }) {
     const [name , setName] = useState('');

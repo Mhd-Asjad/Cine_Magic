@@ -1,10 +1,10 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import movieReducer from '../Redux/Features/MovieSlice'
-import LocationReducer from '../Redux/Features/Location.slice'
-import userReducer from '../Redux/Features/UserSlice'
-import theatreOwnerReducer from '../Redux/Features/Theatreownerslice'
-import selectedSeatsReducer from '../Redux/Features/selectedseats'
-import BlogPostsReducer from '../Redux/Features/BlogSlice'
+import movieReducer from './features/MovieSlice'
+import LocationReducer from './features/Location.slice'
+import userReducer from './features/UserSlice'
+import theatreOwnerReducer from './features/Theatreownerslice'
+import selectedSeatsReducer from './features/selectedseats'
+import BlogPostsReducer from './features/BlogSlice'
 import {persistStore , persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage';
 

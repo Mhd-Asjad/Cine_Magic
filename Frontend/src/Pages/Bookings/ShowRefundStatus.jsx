@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import apiBooking from '@/Axios/Bookingapi';
+import apiBooking from '@/axios/Bookingapi';
 import { X } from 'lucide-react';
 function ShowRefundStatus({ refundId , openStatus }) {
     const [refundStatus, setRefundStatus] = useState(null);

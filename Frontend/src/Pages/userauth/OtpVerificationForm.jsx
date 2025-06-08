@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 import { Formik, Form } from 'formik';
-import { setUsername, setEmail, setUser_id } from '../../Redux/Features/UserSlice';
+import { setUsername, setEmail, setUser_id } from '../../redux/features/UserSlice';
 import { useDispatch } from 'react-redux';
-import userApi from '@/Axios/userApi';
+import userApi from '@/axios/userApi';
 
 import {
   InputOTP,
@@ -13,7 +13,7 @@ import {
   InputOTPSlot,
   InputOTPSeparator,
 } from "@/components/ui/input-otp";
-import CountDownTimer from '../SeatSelection/CountDownTimer';
+import CountDownTimer from '../seatselection/CountDownTimer';
 
 function OtpVerificationForm({ email, setMessage, closeModal }) {
   const navigate = useNavigate();

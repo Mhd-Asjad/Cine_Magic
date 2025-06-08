@@ -1,4 +1,4 @@
-import TheatreApi from '@/Axios/theatreapi';
+import TheatreApi from '@/axios/theatreapi';
 import { useToast } from '@/hooks/use-toast';
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'

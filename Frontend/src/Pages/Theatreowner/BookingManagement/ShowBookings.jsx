@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import TheatreApi from '@/Axios/theatreapi'
+import TheatreApi from '@/axios/theatreapi'
 import { useEffect , useState } from 'react'
 import { Coins } from "lucide-react";
 import { useNavigate } from 'react-router-dom';

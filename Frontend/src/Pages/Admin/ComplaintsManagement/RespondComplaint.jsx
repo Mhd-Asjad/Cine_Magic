@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, ArrowLeft, AlertCircle, CheckCircle, Clock, MessageSquare, Tag, MessageCircleDashed, BotMessageSquare, User } from 'lucide-react';
-import apiReview from '@/Axios/Reviewapi';
+import apiReview from '@/axios/Reviewapi';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const AdminResponsePage = ({ onBack }) => {

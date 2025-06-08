@@ -6,8 +6,8 @@ import {
 } from "@/components/ui/hover-card";
 import axios from 'axios'
 import logo from '../../assets/logopic2.png'
-import Logout from '../Admin/Logout';
-import TheatreApi from '@/Axios/theatreapi';
+import Logout from '../admin/Logout';
+import TheatreApi from '@/axios/theatreapi';
 
 const TheatreNav = () => {
   const [ movies , setMovies ] = useState([]);

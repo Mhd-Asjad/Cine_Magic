@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { useNavigate, useParams } from 'react-router-dom';
-import apiAdmin from '../../../Axios/api';
+import apiAdmin from '../../../axios/api';
 
 function EditMovie() {
     const { movie_id } = useParams(); 

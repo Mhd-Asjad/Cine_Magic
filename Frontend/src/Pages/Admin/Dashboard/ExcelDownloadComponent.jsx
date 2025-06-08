@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Download, Calendar, Building, Filter, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import apiAdmin from '@/Axios/api';
+import apiAdmin from '@/axios/api';
 import { useToast } from '@/hooks/use-toast';
 const ExcelDownloadComponent = () => {
     const [isDownloading, setIsDownloading] = useState(false);

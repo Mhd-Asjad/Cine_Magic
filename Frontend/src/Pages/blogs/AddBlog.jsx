@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, CloudDownload, Tags, DeleteIcon, CheckCircle } from 'lucide-react';
-import Nav from '@/components/Navbar/Nav';
+import Nav from '@/components/navbar/Nav';
 // import ShinyText from '../ReactBits/ShinyButton';
-import apiBlogs from '@/Axios/Blogapi';
+import apiBlogs from '@/axios/Blogapi';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useToast } from '@/hooks/use-toast';

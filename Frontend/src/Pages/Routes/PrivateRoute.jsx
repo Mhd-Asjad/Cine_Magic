@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect , useState } from "react";
 import { Navigate , useNavigate } from 'react-router-dom'
 import {jwtDecode} from 'jwt-decode'
-import userApi from "@/Axios/userApi";
+import userApi from "@/axios/userApi";
 
 function PrivateRoute({ children , allowedTypes }) {
     

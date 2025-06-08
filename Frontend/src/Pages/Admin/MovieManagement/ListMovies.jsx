@@ -1,7 +1,7 @@
 import React, { useState , useEffect } from 'react'
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
-import apiAdmin from '../../../Axios/api';
+import apiAdmin from '../../../axios/api';
 import { Button } from '@/components/ui/button';
 import Swal from 'sweetalert2';
 import { CandlestickChart } from 'lucide-react';

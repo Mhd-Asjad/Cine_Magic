@@ -1,12 +1,12 @@
 import React, { useEffect , useState } from 'react'
-import seatsApi from '@/Axios/seatsaApi'
+import seatsApi from '@/axios/seatsaApi'
 import {
     Card, 
     CardContent, 
     CardHeader, 
     CardTitle, 
 } from "@/components/ui/card";
-import Modal from '@/components/Modals/Modal';
+import Modal from '@/components/modals/Modal';
 import AddLayout from './AddLayout';
 import { TbLayoutGridAdd } from "react-icons/tb";
 import EditLayout from './EditLayout';

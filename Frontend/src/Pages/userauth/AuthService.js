@@ -1,6 +1,6 @@
-import userApi from "@/Axios/userApi"
-import { setUsername , setEmail , setUser_id , setPrevilage } from "@/Redux/Features/UserSlice"
-import { setTheatreOwner } from '../../Redux/Features/Theatreownerslice';
+import userApi from "@/axios/userApi"
+import { setUsername , setEmail , setUser_id , setPrevilage } from "@/redux/features/UserSlice"
+import { setTheatreOwner } from '../../redux/features/Theatreownerslice';
 import {jwtDecode} from 'jwt-decode';
 
 const TOKEN_KEYS = {

@@ -1,11 +1,11 @@
 import React ,{useEffect, useState} from 'react'
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import Sidebar from '../../../components/Admin/Sidebar';
-import Navbar from '../../../components/Admin/Navbar';
+import Sidebar from '../../../components/admin/Sidebar';
+import Navbar from '../../../components/admin/Navbar';
 import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom';
-import TheatreApi from '@/Axios/theatreapi';
+import TheatreApi from '@/axios/theatreapi';
 
 
 function EditTheatre( ) {

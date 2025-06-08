@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from "../ui/sidebar";
-import  {AppSidebar} from "../Theatre/AppSidebar";
+import  {AppSidebar} from "./AppSidebar";
 
 export default function Layout({ children }) {
     return (

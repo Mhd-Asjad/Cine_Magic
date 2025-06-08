@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import Navbar from '../../../components/Admin/Navbar'
-import Sidebar from '../../../components/Admin/Sidebar'
-import apiAdmin from '../../../Axios/api';
+import Navbar from '../../../components/admin/Navbar'
+import Sidebar from '../../../components/admin/Sidebar'
+import apiAdmin from '../../../axios/api';
 import Button from "@mui/material/Button";
 import { useNavigate } from 'react-router-dom';
 import { FaListOl } from "react-icons/fa";

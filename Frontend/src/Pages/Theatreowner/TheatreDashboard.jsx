@@ -5,7 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Film, Users, MapPin, Tickets, Theater } from "lucide-react";
 import { IoIosAddCircleOutline } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
-import TheatreApi from '@/Axios/theatreapi';
+import TheatreApi from '@/axios/theatreapi';
 import { useToast } from '@/hooks/use-toast';
 import { TicketSlash , DollarSign , TheaterIcon , Coins } from 'lucide-react';
 import EditProfile from './EditProfile';

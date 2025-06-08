@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import TheatreApi from '@/Axios/theatreapi'
+import TheatreApi from '@/axios/theatreapi'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useFormik } from 'formik'
 import TimePicker from 'react-time-picker'

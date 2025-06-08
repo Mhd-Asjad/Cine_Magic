@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import apiReview from "@/Axios/Reviewapi";
+import apiReview from "@/axios/Reviewapi";
 import CustomAlert from "@/components/CustomAlert";
 
 export default function RaiseComplaint({ userId , chatId , closeForm }) {

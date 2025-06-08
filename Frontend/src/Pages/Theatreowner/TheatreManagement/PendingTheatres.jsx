@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import TheatreApi from "@/Axios/theatreapi";
+import TheatreApi from "@/axios/theatreapi";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { updateOwnershipStatus } from "@/Redux/Features/Theatreownerslice";
+import { updateOwnershipStatus } from "@/redux/features/Theatreownerslice";
 
 function PendingTheatres() {
   const [pendingTheatres, setPendingTheatres] = useState([]);

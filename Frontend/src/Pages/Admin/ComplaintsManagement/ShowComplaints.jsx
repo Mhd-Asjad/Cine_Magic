@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Eye, MessageSquare, Calendar, User, CircleArrowRight, AlertCircle, CheckCircle, Clock, Loader } from 'lucide-react';
-import apiReview from '@/Axios/Reviewapi';
+import apiReview from '@/axios/Reviewapi';
 import { useNavigate } from 'react-router-dom';
 
 const ShowComplaints = () => {
