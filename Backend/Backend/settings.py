@@ -24,7 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-w1yrvmroq#oen00ryywu_7^*sg9+1^vb=s4_o4d-_lxokw5(do'
+
+SECRET_KEY= "django-insecure-w1yrvmroq#oen00ryywu_7^*sg9+1^vb=s4_o4d-_lxokw5(do"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -64,12 +65,12 @@ LOGGING = {
     }
 }
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['172-31-46-199' , ]
 
 # Application definition
 
 INSTALLED_APPS = [
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -145,9 +146,6 @@ AUTHENTICATION_BACKENDS = [
     
 ]
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-print(SECRET_KEY)
-
 
 ROOT_URLCONF = 'Backend.urls'
 
@@ -175,17 +173,18 @@ AUTH_USER_MODEL = 'useracc.User'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-USE_DOCKER = os.getenv('USE_DOCKER', 'no') == 'yes'
+USE_DOCKER = config('USE_DOCKER') == 'yes'
+print(USE_DOCKER , 'docker')
 
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME' , 'movie_ticket'),
-        'USER': os.getenv('DB_USER' , 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD' , 'asjadk123'),
-        'HOST':'db',
-        'PORT': os.getenv('DB_PORT' , '5432'),
+        'NAME': config('DB_NAME' , 'movie_ticker'),
+        'USER': config('DB_USER' ,  'postgres'),
+        'PASSWORD': config('DB_PASSWORD' , 'asjadk123'),
+        'HOST':'db' if USE_DOCKER else 'localhost',
+        'PORT': config('DB_PORT' , '5432')
     }
 }
 
@@ -247,6 +246,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
 ]
+
 CORS_ALLOW_ORIGINS = [
     "http://localhost:5173",
 ]
