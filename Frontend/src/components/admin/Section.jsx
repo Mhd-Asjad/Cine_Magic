@@ -1,20 +1,20 @@
 import React from 'react'
 import {BrowserRouter as Router , Route , Routes} from 'react-router-dom'
 import PrivateRoute from '@/pages/routes/PrivateRoute'
-import Dashboard from '@/pages/admin/Dashboard/Dashboard';
-import CustomerManagement from '@/pages/admin/Customer/CustomerManagement';
-import ListMovies from "@/pages/admin/MovieManagement/ListMovies";
-import AddMovies from "@/pages/admin/MovieManagement/AddMovies";
-import Enquery from "@/pages/admin/Customer/Enquery";
+import Dashboard from '@/pages/admin/dashboard/Dashboard';
+import CustomerManagement from '@/pages/admin/customer/CustomerManagement';
+import ListMovies from "@/pages/admin/moviemanagement/ListMovies";
+import AddMovies from "@/pages/admin/moviemanagement/AddMovies";
+import Enquery from "@/pages/admin/customer/Enquery";
 import EditTheatre from "@/pages/theatreowner/theatreManagement/EditTheatre";
-import ShowRequest from '@/pages/admin/TheatreManagement/ShowRequest';
-import EditMovie from '@/pages/admin/MovieManagement/EditMovie';
-import ShowTheatres from '@/pages/admin/TheatreManagement/Showtheatres';
+import ShowRequest from '@/pages/admin/theatremanagement/ShowRequest';
+import EditMovie from '@/pages/admin/moviemanagement/EditMovie';
+import ShowTheatres from '@/pages/admin/theatremanagement/Showtheatres';
 import { AdminRoute } from '@/pages/routes/ProtectedRoute';
-import PendingRefund from '@/pages/admin/BookingManagement/PendingRefund';
-import ExcelDownloadComponent from '@/pages/admin/Dashboard/ExcelDownloadComponent';
-import ShowComplaints from '@/pages/admin/ComplaintsManagement/ShowComplaints';
-import RespondComplaint from '@/pages/admin/ComplaintsManagement/RespondComplaint';
+import PendingRefund from '@/pages/admin/bookingmanagement/PendingRefund';
+import ExcelDownloadComponent from '@/pages/admin/dashboard/ExcelDownloadComponent';
+import ShowComplaints from '@/pages/admin/complaintsmanagement/ShowComplaints';
+import RespondComplaint from '@/pages/admin/complaintsmanagement/RespondComplaint';
 
 function Section() {
   return (
