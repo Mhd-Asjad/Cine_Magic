@@ -1,29 +1,30 @@
 import React from "react"
-import Landingpage from "./Pages/Home/Landingpage";
+import Landingpage from "./pages/home/Landingpage";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import AdminLogin from "./Pages/Admin/AdminLogin";
+import AdminLogin from "./pages/admin/AdminLogin";
 import 'toastr/build/toastr.min.css';
-import MovieSpecification from "./Pages/MovieDetails/MovieSpecification";
-import Profile from "./Pages/Profile/Profile";
-import Admin_Pages from "./components/Admin/Admin_Pages";
-import Loginpage from "./Pages/Theatreowner/Loginpage";
-import TheatreOwner from "./components/Theatre/TheatreOwner";
-import AvailableShowDetails from "./Pages/ShowTimeDetails/AvailableShowDetails";
-import Seats from "./Pages/SeatSelection/Seats";
-import Checkout from "./Pages/userbooking/Checkout";
+import MovieSpecification from "./pages/moviedetails/MovieSpecification";
+import Profile from "./pages/profile/Profile";
+import Admin_Pages from "./components/admin/Admin_Pages";
+import Loginpage from "./pages/theatreowner/Loginpage";
+import TheatreOwner from "./components/theatre/TheatreOwner";
+import AvailableShowDetails from "./pages/showdimedetails/AvailableShowDetails";
+import Seats from "./pages/seatselection/Seats";
+import Checkout from "./pages/userbooking/Checkout";
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
-import MyBookings from "./Pages/Bookings/MyBookings";
-import TicketView from "./Pages/Bookings/TicketView";
-import BlogPosts from "./Pages/blogs/BlogPosts";
-import AddBlog from "./Pages/blogs/AddBlog";
-import PrivateRoute from "./Pages/Routes/PrivateRoute";
-import BlogInfo from "./Pages/blogs/BlogInfo";
-import VerifiedTicket from "./Pages/Bookings/VerifiedTicket";
-import ResetPassword from "./Pages/userauth/ResetPassword";
-import FAQPage from "./Pages/UserComplaints/FAQPage";
-import UpcomingMovieDetails from "./Pages/MovieDetails/UpcomingMovieDetails";
+import PaymentSuccess from "./pages/payment/PaymentSuccess";
+import MyBookings from "./pages/bookings/MyBookings";
+import TicketView from "./pages/bookings/TicketView";
+import BlogPosts from "./pages/blogs/BlogPosts";
+import AddBlog from "./pages/blogs/AddBlog";
+import PrivateRoute from "./pages/routes/PrivateRoute";
+import BlogInfo from "./pages/blogs/BlogInfo";
+import VerifiedTicket from "./pages/bookings/VerifiedTicket";
+import ResetPassword from "./pages/userauth/ResetPassword";
+import FAQPage from "./pages/usercomplaints/FAQPage";
+import UpcomingMovieDetails from "./pages/moviedetails/UpcomingMovieDetails";
+
 function App() {
 
     return (

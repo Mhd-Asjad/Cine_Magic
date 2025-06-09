@@ -1,8 +1,6 @@
 services:
   web:
-    build: 
-      context: ./Backend
-      dockerfile : Dockerfile
+    image: mhdasjad/movie_ticket-web:latest
     container_name: django_backend
     ports:
       - "8000:8000"
@@ -13,6 +11,14 @@ services:
     env_file:
       - .env
 
+    environment:
+    - SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=${SOCIAL_AUTH_GOOGLE_OAUTH2_KEY}
+    - SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=${SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET}
+    - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+    - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+    - PALPAL_API_URL=${PALPAL_API_URL}
+    - GEMINI_API_SECRET=${GEMINI_API_SECRET}
+
     volumes :
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -21,10 +27,14 @@ services:
       - backend-network
 
   db:
-    image: postgres:14
+    image: mhdasjad/postgres-db:14
     container_name: postgres_db
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data/
+    restart : always
+    ports:
+      - "5432:5432"
+
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -36,7 +46,6 @@ services:
       retries: 5
     networks:
       - backend-network
-    restart : always
 
 volumes:
   db_data:

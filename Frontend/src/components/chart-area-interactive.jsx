@@ -23,8 +23,8 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
-import apiAdmin from "@/Axios/api"
-import TheatreApi from "@/Axios/theatreapi"
+import apiAdmin from "@/axios/api"
+import TheatreApi from "@/axios/theatreapi"
 
 const chartConfig = {
   visitors: {
