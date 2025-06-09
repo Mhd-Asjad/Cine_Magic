@@ -33,9 +33,7 @@ function Section() {
             <Route path='bookings' element={<PendingRefund/>} ></Route>
             <Route path='complaints' element={<ShowComplaints/>} />
             <Route path='complaint/action/:id' element={<RespondComplaint onBack={'/admin/complaints'} />} />
-            
         </Routes>
-      
     </div>
   )
 }
