@@ -4,7 +4,7 @@ import { Clock, User, ArrowRight, BookOpen, Calendar, Eye, ChevronLeft, ChevronR
 import apiBlogs from '@/axios/Blogapi'
 import Nav from '@/components/navbar/Nav'
 import { useNavigate, useLocation } from 'react-router-dom';
-import TextPressure from '../reactBits/TextPressure';
+import TextPressure from '../reactbits/TextPressure';
 
 import {
   Pagination,

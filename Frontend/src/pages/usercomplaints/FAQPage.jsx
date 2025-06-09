@@ -6,7 +6,7 @@ import ChatBotUi from './ChatBotUi';
 import RaiseComplaint from './RaiseComplaint';
 import { useSelector } from 'react-redux';
 import { IoMdArrowDropdown , IoMdArrowDropup } from "react-icons/io";
-import BlurText from '../reactBits/BlurText';
+import BlurText from '../reactbits/BlurText';
 
 function FAQPage() {
 
