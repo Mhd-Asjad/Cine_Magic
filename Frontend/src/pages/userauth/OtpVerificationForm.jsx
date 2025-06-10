@@ -29,12 +29,19 @@ function OtpVerificationForm({ email, setMessage, closeModal }) {
     }
 
     try {
+
       const response = await userApi.post('verify_otp/', {
         email,
         otp: values.otp,
       });
+
       console.log('otp' , response )
 
+      const { refresh_token , access_token , user_type  } = response.data.user;
+
+      localStorage.setItem('current_user_type' , user_type)
+      localStorage.setItem(`${user_type}_token` , access_token)
+      localStorage.setItem(`${user_type}_token_refresh` , refresh_token)
       setMessage(response.data.message);
       dispatch(setUser_id(response.data.user.id));
       dispatch(setUsername(response.data.user.username));

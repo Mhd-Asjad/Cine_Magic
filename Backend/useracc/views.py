@@ -42,13 +42,18 @@ class VerifyOtpView(APIView) :
         serializer = OtpVerificationSerializer(data = request.data)
         if serializer.is_valid():
             user = serializer.save()
-            data = serializer.validated_data
+            user = User.objects.get(id=user.id)
+            refresh = RefreshToken.for_user(user)
             
             user_data = {
                 'id' : user.id ,
                 'username' : user.username , 
-                'email' : user.email
+                'email' : user.email ,
+                'user_type' : 'user',
+                'access_token' : str(refresh.access_token),
+                'refresh_token' : str(refresh),
             }
+            
             print(user_data)
             return Response({'user' : user_data , "message" : "OTP Verified Successfully "}, status=status.HTTP_200_OK )
         print(serializer.errors)

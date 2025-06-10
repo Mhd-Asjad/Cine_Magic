@@ -226,6 +226,7 @@ class Show_Bookings(APIView):
             
             data = []
             for booking in bookings :
+                show_slot  = ShowSlot.objects.filter(showtime = booking.show,slot = booking.slot).first()
                 seats = [ bs.seat.row + str(bs.seat.number) for bs in booking.bookingseats.all()]
                 data.append({
                     'id' : booking.id,
@@ -233,8 +234,8 @@ class Show_Bookings(APIView):
                     'show': {
                     'movie' : booking.show.movie.title,
                     'show_date' : booking.show.show_date.strftime('%Y-%m-%d'),
-                    'start_time' : booking.slot.start_time.strftime("%H:%M"),
-                    'end_time' : booking.show.end_time.strftime('%H:%M')
+                    'start_time' : show_slot.slot.start_time.strftime("%H:%M"),
+                    'end_time' : show_slot.calculated_end_time.strftime('%H:%M') if show_slot.calculated_end_time else None
                         
                     },                    
                     'seats' : seats ,
@@ -248,6 +249,7 @@ class Show_Bookings(APIView):
             return Response({'bookings':data},status=status.HTTP_200_OK)
         
         except Exception as e :
+            print('error my boookings', str(e))
             return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 # ticket detailed view for the booking id

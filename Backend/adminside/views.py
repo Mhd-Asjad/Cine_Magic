@@ -198,7 +198,7 @@ class ShowTheatreRequest(APIView):
         print('hello')
         try :
             
-            theatres = Theatre.objects.filter(  screens__is_approved = False )
+            theatres = Theatre.objects.filter()
         except Theatre.DoesNotExist:
             return Response({'message' : 'pending theatres not found'},status=status.HTTP_404_NOT_FOUND)
         

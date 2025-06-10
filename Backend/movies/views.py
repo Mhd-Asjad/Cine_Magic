@@ -77,53 +77,57 @@ class DetailedMovieView(APIView) :
     
     permission_classes = [permissions.AllowAny]
     def get(self , request  , id ) :
-        print('inside views')
-        print(id , 'got the id hrere')
-        try :
+        try:
+            print('inside views')
+            print(id , 'got the id hrere')
+            try :
 
-            movie = Movie.objects.get(id = id)
-        except Movie.DoesNotExist :
-            return Response({"message" : 'movie does not exist'} , status=status.HTTP_404_NOT_FOUND)
-        
-        tmdb_url = "https://api.themoviedb.org/3/search/movie"
-        tmdb_params = {
-            "api_key" : settings.TMDB_API_KEY , 
-            "query" : movie.title,
-            "include_adult" : False ,
-            "language" : "ml",
-            "region" : "IN",
-            "page" : 1 , 
-        }
-
-        movie_id = 0
-        backdrop_url = ''
-        try :
-            tmdb_response = requests.get(tmdb_url , params=tmdb_params,timeout=5)
-            tmdb_response.raise_for_status()    
-            tmdb_data = tmdb_response.json()
-            results = tmdb_data.get("results",[])
+                movie = Movie.objects.get(id = id)
+            except Movie.DoesNotExist :
+                return Response({"message" : 'movie does not exist'} , status=status.HTTP_404_NOT_FOUND)
             
-            if results :
-                movie_id = results[0]['id']
-                backdrop_url = results[0]['backdrop_path'] or results[0]['poster_path']
-        
-            print('respose status' ,tmdb_response.status_code)
+            tmdb_url = "https://api.themoviedb.org/3/search/movie"
+            tmdb_params = {
+                "api_key" : settings.TMDB_API_KEY , 
+                "query" : movie.title,
+                "include_adult" : False ,
+                "language" : "ml",
+                "region" : "IN",
+                "page" : 1 , 
+            }
 
-                    
-        except requests.exceptions.RequestException as e:
-            print(f'error fetching tmdb data {e}')
-        movie_data = {
-            'movie_id' : movie_id,
-            'bg_image' : backdrop_url,
-            "title": movie.title,
-            "language": movie.language,
-            "duration": movie.duration,
-            "release_date": movie.release_date,
-            "description": movie.description,
-            "genre": movie.genre,
-            "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
-        }
-        return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
+            movie_id = 0
+            backdrop_url = ''
+            try :
+                tmdb_response = requests.get(tmdb_url , params=tmdb_params,timeout=5)
+                tmdb_response.raise_for_status()    
+                tmdb_data = tmdb_response.json()
+                results = tmdb_data.get("results",[])
+                
+                if results :
+                    movie_id = results[0]['id']
+                    backdrop_url = results[0]['backdrop_path'] or results[0]['poster_path']
+            
+                print('respose status' ,tmdb_response.status_code)
+
+                        
+            except requests.exceptions.RequestException as e:
+                print(f'error fetching tmdb data {e}')
+            movie_data = {
+                'movie_id' : movie_id,
+                'bg_image' : backdrop_url,
+                "title": movie.title,
+                "language": movie.language,
+                "duration": movie.duration,
+                "release_date": movie.release_date,
+                "description": movie.description,
+                "genre": movie.genre,
+                "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
+            }
+            return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
+        except Exception as e:
+            print(f'exception {str(e)}')
+            return Response({'error' : str(e)},status=status.HTTP_400_BAD_REQUEST)
         # movie_data = {
         #     "title": movie.title,
         #     "language": movie.language,

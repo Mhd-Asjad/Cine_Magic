@@ -30,7 +30,7 @@ export default function LoginForm({ isModalClose }) {
   });
 
   const checkUserType = async (username, password) => {
-    try {
+    try { 
       const res = await userApi.post("get-usertype/", { username, password });
       return res.data.user_type;
     } catch (e) {

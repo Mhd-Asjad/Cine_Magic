@@ -65,7 +65,7 @@ LOGGING = {
     }
 }
 
-ALLOWED_HOSTS = ['172-31-46-199' , ]
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -173,7 +173,6 @@ AUTH_USER_MODEL = 'useracc.User'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-USE_DOCKER = config('USE_DOCKER') == 'yes'
 
 
 DATABASES = {
@@ -182,7 +181,7 @@ DATABASES = {
         'NAME': config('DB_NAME' , 'movie_ticker'),
         'USER': config('DB_USER' ,  'postgres'),
         'PASSWORD': config('DB_PASSWORD' , 'asjadk123'),
-        'HOST':'db' if USE_DOCKER else 'localhost',
+        'HOST':'localhost',
         'PORT': config('DB_PORT' , '5432')
     }
 }
