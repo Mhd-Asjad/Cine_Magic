@@ -8,7 +8,7 @@ import TheatreApi from '../../../axios/theatreapi';
 import { useToast } from '@/hooks/use-toast';
 function Enquery() {
 
-    const [ enquery , setEnquery ] = useState([])
+    const [ enquery , setEnquery ] = useState([]);
     const [ isLoading , setIsLoading ] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
@@ -30,17 +30,20 @@ function Enquery() {
     const handleAccept = async (ownerProfile_id , user_id) => {
       try {
         setIsLoading(true)
-        setError  
+        setError(null)
         const res = await TheatreApi.post('theatreowners/', {
             'id' :  ownerProfile_id ,
             'ownership_status' : 'confirmed',
             'userId' : user_id
         })
-        setSuccessMessage({title : `${res.data.message}✅`})
+        setSuccessMessage(res.data.message)
         setTimeout(() => setSuccessMessage(''), 3000);
 
         }catch(e){
             console.log(e.response?.error || 'unexpected error occurs ')
+        }finally{
+          setIsLoading(false)
+          setError(null)
         }
 
     }
@@ -48,7 +51,7 @@ function Enquery() {
     const handleDecline = async (ownerId , userId) => {
         
       try {
-          setIsLoading(true)
+        setIsLoading(true)
             setError(null)
             const res = await TheatreApi.post('theatreowners/', {
                 'id' : ownerId  ,
@@ -56,8 +59,8 @@ function Enquery() {
                 'ownership_status' : 'rejected'
             })
             console.log(res.data)
-            setSuccessMessage({ title  :`${res.data.message}❌`})
-            // setTimeout(() => setSuccessMessage(''), 3000);
+            setSuccessMessage(`${res.data.message}❌`)
+            setTimeout(() => setSuccessMessage(''), 3000);
 
         }catch(e){
             setError(e.response?.data || 'unexpected error occurs ')
@@ -72,12 +75,12 @@ function Enquery() {
             <h2 className='text-center font-semibold text-2xl mb-8'>Theatre Owners</h2>
 
             {successMessage && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center">
-                        <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                        <span className="text-green-700">{successMessage}</span>
-                    </div>
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                    <span className="text-green-700">{successMessage}</span>
                 </div>
+              </div>
             )}
 
             {error && (

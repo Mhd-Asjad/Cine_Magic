@@ -43,15 +43,13 @@ class TimeSlotSerializer(serializers.ModelSerializer) :
         fields= ['id' , 'start_time' , 'end_time' ]
         
     def get_end_time(self , obj):
-        logger.info(f'getting slot obj {obj.id}')
-        slot = TimeSlot.objects.get(id =obj.id )
-        logger.info(f'time slot {slot.id}')
-        show = ShowSlot.objects.filter(slot = obj ).select_related('slot')
-        show_obj = show.first()
-        if show.exists() :
-            logger.info(f' show slot recieved {show_obj.calculated_end_time}')
-            return show_obj.calculated_end_time.strftime('%H:%M')
+        """Get the latest end time among all shows for this slot"""
+        show_slots = ShowSlot.objects.filter(slot=obj).order_by('-calculated_end_time')
+        
+        if show_slots.exists() and show_slots.first().calculated_end_time:
+            return show_slots.first().calculated_end_time.strftime('%H:%M')
         return None
+
     
 class CreateScreenSerializer(serializers.ModelSerializer):
     theatre_name = serializers.CharField(source='theatre.name',read_only=True)
@@ -225,12 +223,11 @@ class FetchShowTimeSerializer(serializers.ModelSerializer):
     def get_poster(self , obj):
         request = self.context.get('request')
         if obj.movie.poster :
-            return request.build_absolute_uri(obj.movie.poster)
+            return request.build_absolute_uri(obj.movie.poster.url)
         return None
     
     def get_showtimes(self , obj):
         
-        logger.info(f'slots {obj.slots}')
         return [
             {
                 'start_time' :slot.start_time

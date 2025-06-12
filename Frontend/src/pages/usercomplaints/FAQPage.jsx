@@ -7,6 +7,7 @@ import RaiseComplaint from './RaiseComplaint';
 import { useSelector } from 'react-redux';
 import { IoMdArrowDropdown , IoMdArrowDropup } from "react-icons/io";
 import BlurText from '../reactbits/BlurText';
+import { useToast } from '@/hooks/use-toast';
 
 function FAQPage() {
 
@@ -16,6 +17,7 @@ function FAQPage() {
     const [ chatLogId , setChatLogId ] = useState(null)
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
+    const {toast} = useToast();
 
     const user = useSelector((state) => state.user)
     const userQueries = [
@@ -45,8 +47,18 @@ function FAQPage() {
         setShowCommonQuestions(prev => (!prev))
     }
 
-    const handleComplaintForm = () => {
-        setRaiseComplaintForm(state => (!state))
+    const handleComplaintForm = async() => {
+        try {
+            const res = await apiReview.get('haveanychats/')
+            const msg = res.data.message;
+            if (msg.includes('tried')) {
+                setRaiseComplaintForm(state => (!state))
+            }else{
+                toast({title : msg })
+            }
+        }catch(e) {
+            console.log(e , 'error while checking chat logs')
+        }
     }
 
     useEffect(() => {

@@ -25,7 +25,7 @@ export default function RaiseComplaint({ userId , chatId , closeForm }) {
         },
       });
       if (response.status === 201 ) {
-          setMessage("complaint provided successfully✅")
+          setMessage("complaint updated successfully take action soon✅")
           closeForm()
           reset();
           console.log(response.data)

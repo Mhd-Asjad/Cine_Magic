@@ -27,7 +27,6 @@ function BlogPosts() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get page from URL params on component mount
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const pageFromUrl = parseInt(urlParams.get('page')) || 1;

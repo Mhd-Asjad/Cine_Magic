@@ -195,10 +195,9 @@ class DeleteMovies(APIView) :
 # show pending theatres view including screens
 class ShowTheatreRequest(APIView):
     def get(self , request) :   
-        print('hello')
         try :
             
-            theatres = Theatre.objects.filter()
+            theatres = Theatre.objects.filter(screens__is_approved=False )
         except Theatre.DoesNotExist:
             return Response({'message' : 'pending theatres not found'},status=status.HTTP_404_NOT_FOUND)
         
@@ -278,7 +277,7 @@ class verify_screen(APIView):
     
 # delete show view
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def Cancel_Show(request , show_id) :
     show = ShowTime.objects.get(id=show_id)
     screen_number = show.screen.screen_number

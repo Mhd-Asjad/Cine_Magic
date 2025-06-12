@@ -203,18 +203,45 @@ class ChatHistoryView(APIView):
 
         except Exception as e :
             print(f"Error fetching chat history: {str(e)}")
-            return Response({'error' : str(e)},status=status.HTTP_404_NOT_FOUND) 
-    
+            return Response({'error' : str(e)},status=status.HTTP_404_NOT_FOUND)
+        
+        
+class check_chatlog(APIView):
+    def get(self , request):
+        try:
+            user = request.user
+            chatlog = ChatLog.objects.filter(user=user)
+            if chatlog.exists():
+                return Response({'message':'user tried chatbot'},status=status.HTTP_200_OK)
+            
+            else :
+                return Response({'message':'would you please raise your complaint through chatbot first?'})
+        except Exception as e :
+            return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        
 class Raisecomplaint_form(APIView):
     permission_classes = [permissions.AllowAny]
     def post(self , request):
-        data = request.data
+        
+        data = request.data.copy()
         print(data)
+        user_id = data.get('user')
+        chat = data.get('chat')
+        if chat == 'null' or chat.isalpha() :
+            try :
+                chat_instance = ChatLog.objects.filter(user_id=user_id).last()
+                if chat_instance :
+                    data['chat'] = chat_instance.id
+            
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+         
+
         serializer = ComplaintSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({'message':'complaint submitted successfully'} ,status=status.HTTP_201_CREATED )
-        
         else :
             print(serializer.errors)
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)

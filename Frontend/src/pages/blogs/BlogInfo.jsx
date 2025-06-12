@@ -79,6 +79,21 @@ function BlogInfo() {
         }
     }
 
+    function formatISODate(isoString) {
+        const date = new Date(isoString);
+
+        const options = {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        };
+
+        return date.toLocaleString('en-IN', options);
+    }
+
     const timeAgo = (timeStamp) => {
         const now = new Date()
         const past = new Date(timeStamp)
@@ -188,11 +203,9 @@ function BlogInfo() {
                             </article>
                         </div>
 
-                        {/* Comments Sidebar */}
                         <div className="lg:col-span-1">
                             <div className="bg-white rounded-2xl shadow-xl border border-blue-100 sticky top-8">
                                 
-                                {/* Comments Header */}
                                 <div className="p-6 border-b border-blue-100">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-3">
@@ -231,14 +244,18 @@ function BlogInfo() {
                                                                 <span className="font-semibold text-gray-900 text-sm">
                                                                     {comment.username}
                                                                 </span>
+                                                              
                                                                 <div className="flex items-center text-xs text-gray-500">
                                                                     <Clock1 className="w-3 h-3 mr-1" />
                                                                     {timeAgo(comment.created_at)}
                                                                 </div>
                                                             </div>
-                                                            <p className="text-gray-700 text-sm leading-relaxed">
+                                                            <p className="text-md text-gray-700 leading-relaxed">
                                                                 {comment.name}
                                                             </p>
+                                                            <div className="flex items-center text-xs text-gray-500">
+                                                              at  {formatISODate(comment.created_at)}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     {index < allComments.length - 1 && (
@@ -260,7 +277,6 @@ function BlogInfo() {
                                     )}
                                 </div>
 
-                                {/* Add Comment */}
                                 <div className="p-4 border-t border-blue-100">
                                     <div className="flex space-x-3">
                                         <div className="flex-1">
@@ -269,13 +285,13 @@ function BlogInfo() {
                                                 value={comment}
                                                 onChange={(e) => setComment(e.target.value)}
                                                 placeholder="Share your thoughts..."
-                                                className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                                                className="w-full px-4 py-3 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent transition-all duration-200 text-sm"
                                                 onKeyPress={(e) => e.key === 'Enter' && handleComment()}
                                             />
                                         </div>
                                         <button 
                                             onClick={handleComment}
-                                            className="px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center group"
+                                            className="px-4 py-3 bg-gradient-to-r from-gray-500 to-black text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center group"
                                         >
                                             <Send className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                                         </button>

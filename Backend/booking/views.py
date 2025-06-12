@@ -131,7 +131,7 @@ class Create_Booking(APIView):
         price = total_amount // len(seat_ids)
         tax_amount = total_amount // 10
         grant_total = tax_amount + total_amount 
-        logger.info('data type' ,type(data)) 
+        logger.info(f'data type {type(data)}') 
         try:
             purchase_units  = paymentdet.get('purchase_units' , [])
             if purchase_units :
@@ -170,7 +170,6 @@ class Create_Booking(APIView):
                 )
                 try : 
                     seat_lock = SeatLock.objects.filter(seat = seat).delete()
-                    print(seat_lock, 'seat lock')
                 except SeatLock.DoesNotExist:
                     pass
 
@@ -183,9 +182,6 @@ class Create_Booking(APIView):
                 payment_method = 'paypal',
             )
         return Response({'message': 'Booking created successfully' , 'booking_id' : booking.id }, status=status.HTTP_201_CREATED)
-        # except Exception as e:
-        #     print('error in booking' , str(e))
-        #     return Response({'error' : str(e)},status=status.HTTP_400_BAD_REQUEST)
         
 # verifying the booking done by the user
 class Verify_Booking(APIView):
@@ -322,10 +318,10 @@ class Calculate_Refund_amount(APIView):
             refund_percentage = 50
         else : 
             refund_percentage = 0
-            
+
 
         refund_amount = (booking.amount * refund_percentage) / 100
-        logger.info(refund_percentage , 'refund amount')
+        logger.info(f'{refund_percentage}  refund amount')
         refund_data= {
             'id' : booking.id ,
             'booking_id' : booking_id ,
