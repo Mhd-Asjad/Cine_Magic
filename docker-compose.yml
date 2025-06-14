@@ -1,16 +1,14 @@
 services:
   web:
     image: mhdasjad/movie_ticket-web:latest
+    command: ["gunicorn", "--bind", ":8000", "Backend.wsgi:application"]
     container_name: django_backend
-    ports:
-      - "8000:8000"
     depends_on:
         db:
           condition: service_healthy
     restart : always   
     env_file:
       - .env
-
     environment:
     - SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=${SOCIAL_AUTH_GOOGLE_OAUTH2_KEY}
     - SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=${SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET}
@@ -18,8 +16,9 @@ services:
     - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
     - PALPAL_API_URL=${PALPAL_API_URL}
     - GEMINI_API_SECRET=${GEMINI_API_SECRET}
-
+    
     volumes :
+      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
 

@@ -16,19 +16,18 @@ from decouple import config
 from corsheaders.defaults import default_headers
 from pythonjsonlogger import jsonlogger
 import os
-# import environ
+import environ
 from datetime import timedelta
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-
-SECRET_KEY= "django-insecure-w1yrvmroq#oen00ryywu_7^*sg9+1^vb=s4_o4d-_lxokw5(do"
-
+SECRET_KEY= os.environ.get('SECRET_KEY' , 'unsafe-defualt-key')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEGUB' ,  True) == 1
 
 LOGGING = {
     'version': 1,
@@ -65,7 +64,7 @@ LOGGING = {
     }
 }
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS =[]
 
 # Application definition
 
@@ -173,16 +172,14 @@ AUTH_USER_MODEL = 'useracc.User'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME' , 'movie_ticker'),
-        'USER': config('DB_USER' ,  'postgres'),
-        'PASSWORD': config('DB_PASSWORD' , 'asjadk123'),
-        'HOST':'localhost',
-        'PORT': config('DB_PORT' , '5432')
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER' ,  'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD' , 'asjadk123'),
+        'HOST': 'localhost' ,
+        'PORT': os.environ.get('DB_PORT' , '5432')
     }
 }
 
@@ -254,12 +251,9 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     "Content-Type",
 ]
 
-
-LOGIN_REDIRECT_URL = '/'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_UNIQUE_EMAIL = True
-
+ACCOUNT_USER_MODEL_EMAIL_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_USERNAME_REQUIRED = False
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
