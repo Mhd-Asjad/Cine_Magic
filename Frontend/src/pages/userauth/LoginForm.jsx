@@ -20,7 +20,8 @@ export default function LoginForm({ isModalClose }) {
     username: Yup.string().required("* username is required"),
     password: Yup.string().required("* password is required"),
   });
-
+  console.log(import.meta.env.VITE_USER_API)
+  console.log(import.meta.env.VITE_USER_API , 'logs env variablleeeeee')
   const form = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
