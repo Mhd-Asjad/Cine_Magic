@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY= os.environ.get('SECRET_KEY' , 'unsafe-defualt-key')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEGUB' ,  True) == 1
+DEBUG = os.environ.get('DEGUB' ,  'True') == 'True'
 
 LOGGING = {
     'version': 1,
@@ -229,6 +229,7 @@ API_TOKEN = 'apify_api_oatUb8skjP3f8lKXalb2PbBaCnYpWX335w02'
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR , 'media')
 
@@ -237,16 +238,19 @@ MEDIA_ROOT = os.path.join(BASE_DIR , 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
+    "https://cine-magic.fun",
+    "https://www.cine-magic.fun",
 ]
 
 CORS_ALLOW_ORIGINS = [
-    "http://localhost:5173",
+    "https://cine-magic.fun",
+    "https://www.cine-magic.fun",
 ]
+
+print(CORS_ALLOW_ORIGINS , 'cors origin varss')
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "X-Requested-With",
@@ -279,6 +283,5 @@ SOCCIALACCOUNT_STORE_TOKENS = True
 PAYPAL_CLIENT_ID = config('PAYPAL_CLIENT_ID')
 PAYPAL_CLIENT_SECRET = config('PAYPAL_CLIENT_SECRET')
 PAYPAL_API_URL = config('PALPAL_API_URL')
-
 GEMINI_API_SECRET = config('GEMINI_API_SECRET')
     

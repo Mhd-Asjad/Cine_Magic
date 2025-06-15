@@ -25,6 +25,7 @@ import "toastr/build/toastr.min.css";
 
 export function LoginForm({ className, isModalClose , handleResetForm,  google_success , ...props }) {
   const [showPassword, setShowPassword] = useState(false);
+
   const dispatch = useDispatch();
 
   const schema = Yup.object().shape({
@@ -39,6 +40,11 @@ export function LoginForm({ className, isModalClose , handleResetForm,  google_s
       password: "",
     },
   });
+
+  const userapi = import.meta.env.VITE_USER_API
+
+  console.log(import.meta.env.VITE_USER_API)
+  console.log(userapi, 'logs env variablleeeeee')
 
   const checkUserType = async (username, password) => {
     try {

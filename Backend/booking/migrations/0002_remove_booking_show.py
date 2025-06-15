@@ -9,9 +9,9 @@ class Migration(migrations.Migration):
         ('booking', '0001_initial'),
     ]
 
-    # operations = [
-    #     # migrations.RemoveField(
-    #     #     model_name='booking',
-    #     #     name='show',
-    #     # ),
-    # ]
+    operations = [
+        migrations.RemoveField(
+            model_name='booking',
+            name='show',
+        ),
+    ]
