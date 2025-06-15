@@ -63,8 +63,10 @@ LOGGING = {
         'propagate': False,
     }
 }
+# allowed Hosts
 
-ALLOWED_HOSTS =[]
+print(os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(","))
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(",")
 
 # Application definition
 
@@ -178,7 +180,7 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME'),
         'USER': os.environ.get('DB_USER' ,  'postgres'),
         'PASSWORD': os.environ.get('DB_PASSWORD' , 'asjadk123'),
-        'HOST': 'localhost' ,
+        'HOST': os.environ.get('DB_HOST'),
         'PORT': os.environ.get('DB_PORT' , '5432')
     }
 }
