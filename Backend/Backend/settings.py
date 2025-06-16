@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY= os.environ.get('SECRET_KEY' , 'unsafe-defualt-key')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEGUB' ,  'True') == 'True'
+DEBUG = os.environ.get('DEBUG' ,  'True') == 'True'
 
 LOGGING = {
     'version': 1,
@@ -68,6 +68,8 @@ LOGGING = {
 print(os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(","))
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(",")
 
+
+print(ALLOWED_HOSTS , 'allowed hosts areee')
 # Application definition
 
 INSTALLED_APPS = [
@@ -229,10 +231,9 @@ API_TOKEN = 'apify_api_oatUb8skjP3f8lKXalb2PbBaCnYpWX335w02'
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = 'app/staticfiles'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR , 'media')
-
+MEDIA_ROOT = 'app/media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -241,16 +242,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://cine-magic.fun",
     "https://www.cine-magic.fun",
+    "https://api.cine-magic.fun"
+
 ]
 
-CORS_ALLOW_ORIGINS = [
-    "https://cine-magic.fun",
-    "https://www.cine-magic.fun",
-]
+print(CSRF_TRUSTED_ORIGINS , 'csrf trusted originnn......')
 
-print(CORS_ALLOW_ORIGINS , 'cors origin varss')
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'https://cine-magic.fun,https://www.cine-magic.fun,https://api.cine-magic.fun,http://localhost:5173/').split(',')
+print(CORS_ALLOWED_ORIGINS, 'cors origin varss')
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "X-Requested-With",

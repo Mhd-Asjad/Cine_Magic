@@ -1,7 +1,6 @@
 services:
   web:
     image: mhdasjad/movie_ticket-web:latest
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     ports:
       - "8000:8000"
     container_name: django_backend
@@ -12,6 +11,9 @@ services:
     env_file:
       - .env
     environment:
+    - DJANGO_ALLOWED_HOSTS=13.48.147.42,api.cine-magic.fun,127.0.0.1,localhost,cine-magic.fun,www.cine-magic.fun
+    - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+    - CORS_ALLOW_CREDENTIALS=True
     - SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=${SOCIAL_AUTH_GOOGLE_OAUTH2_KEY}
     - SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=${SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET}
     - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
@@ -20,7 +22,6 @@ services:
     - GEMINI_API_SECRET=${GEMINI_API_SECRET}
     
     volumes :
-      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
 

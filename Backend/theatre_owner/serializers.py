@@ -13,7 +13,7 @@ class TheatreOwnerSerialzers(serializers.ModelSerializer) :
     
     class Meta :
         model = TheaterOwnerProfile
-        fields = ['id' , 'user' , 'theatre_name' ,'owner_photo' , 'location' , 'state' , 'pincode' ,'latitude' , 'longitude' , 'user_message']
+        fields = ['id' , 'user' , 'theatre_name' , 'location' , 'state' , 'pincode' ,'latitude' , 'longitude' , 'user_message']
 
     def create(self, validated_data) :
         
