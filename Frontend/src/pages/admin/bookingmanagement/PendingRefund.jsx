@@ -3,6 +3,7 @@ import Api from "@/axios/api";
 import { Coins } from "lucide-react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
+import apiBooking from "@/axios/Bookingapi";
 const PendingRefund = () => {
   const [refunds, setRefunds] = useState([]);
   const { toast } = useToast();
@@ -54,7 +55,7 @@ const PendingRefund = () => {
   const onRefund = async (refund_id) => {
     setLoadingRefundId(refund_id)
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/booking/process-refund/${refund_id}/`)
+      const res = await apiBooking.post(`process-refund/${refund_id}/`)
       console.log(res.data)
       if (res.status === 200) {
         setRefunds((prevRefunds) =>
@@ -146,6 +147,7 @@ const PendingRefund = () => {
                           onClick={() => onRefund(refund.id)}
                           className="inline-flex items-center px-3 py-2 border-dashed border-2 text-sm leading-4 font-medium rounded-md  hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
+
                           <Coins className="w-4 h-4 mr-1" />
                           {loadingRefundId === refund.id ? 'processing......' : 'process refund'}
                         </button>
@@ -177,6 +179,5 @@ const PendingRefund = () => {
     </div>
   );
 };
-
 
 export default PendingRefund;
