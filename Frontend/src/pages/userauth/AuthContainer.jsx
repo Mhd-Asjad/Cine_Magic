@@ -54,9 +54,6 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined })
                 is_approved : is_approved,
                 is_theatre : is_theatre_owner,
             }))
-
-
-
             console.log("Google Auth Response:", res.data);
             if (res.data.success) {
                 isModalClose()
@@ -86,7 +83,6 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined })
                         setMessage={() => {}}
                         setIsOtpSent={setIsOtpSent}
                         setUserEmail={setUserEmail}
-                        setUserPrevillage={setPrevilage}
                     />
 
                 ) }

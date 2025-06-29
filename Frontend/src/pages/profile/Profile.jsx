@@ -32,6 +32,7 @@ import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
 import { set } from "date-fns";
 import userApi from "@/axios/userApi";
 import TheatreApi from "@/axios/theatreapi";
+import apiAdmin from "@/axios/api";
 const Profile = () => {
 
   toastr.options = {
@@ -76,7 +77,12 @@ const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   console.log(user)
-  const handleToggleForm = () => {
+  const handleToggleForm = async() => {
+    const isRegisteration = await checkAdminSettings()
+    if(!isRegisteration.allow_registration) {
+      alert('theater registration temperorly closed now')
+      return;
+    }
     setShowContactForm(!showContactForm);
   };
   const handleToggleForm1 = () => {
@@ -323,6 +329,15 @@ const Profile = () => {
       images: [],
     }));
     setImageError('please add a media file')
+  }
+
+  const checkAdminSettings = async() => {
+    try {
+      const res = await apiAdmin.get('admin-settings/')
+      return res.data ;
+    }catch(e) {
+      console.log('error while fetching admin notification',e)
+    }
   }
   console.log(editBlog , 'edit blog preview')
   return (  

@@ -7,7 +7,7 @@ const UserSlice = createSlice({
         username : '' ,
         email : '' ,
         is_theatre_owner : false,
-        is_approved : false,
+        is_approved : false,    
         is_admin : false
     },
     reducers : {

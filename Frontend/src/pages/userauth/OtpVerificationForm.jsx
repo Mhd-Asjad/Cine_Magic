@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 import { Formik, Form } from 'formik';
-import { setUsername, setEmail, setUser_id } from '../../redux/features/UserSlice';
+import { setUsername, setEmail, setUser_id , setPrevilage } from '../../redux/features/UserSlice';
 import { useDispatch } from 'react-redux';
 import userApi from '@/axios/userApi';
 
@@ -42,6 +42,12 @@ function OtpVerificationForm({ email, setMessage, closeModal }) {
       dispatch(setUser_id(response.data.user.id));
       dispatch(setUsername(response.data.user.username));
       dispatch(setEmail(response.data.user.email));
+      dispatch(setPrevilage({
+          is_approved : false ,
+          is_admin : false ,
+          is_theatre : false 
+      }))
+
       toastr.success(response.data.message);
       closeModal();
       navigate('/');

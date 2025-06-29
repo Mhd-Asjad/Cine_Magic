@@ -121,16 +121,16 @@ function BlogPosts() {
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-white relative overflow-hidden'>
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
+      {/* <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 25% 25%, #3b82f6 2px, transparent 2px), 
                            radial-gradient(circle at 75% 75%, #1e293b 1px, transparent 1px)`,
           backgroundSize: '60px 60px',
           backgroundPosition: '0 0, 30px 30px'
         }}></div>
-      </div>
-
+      </div> */}
       <Nav/>
+
       
       <div className="relative max-w-7xl mx-auto px-4 py-12">
         

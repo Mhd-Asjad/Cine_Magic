@@ -6,11 +6,9 @@ import seatsApi from '@/axios/seatsaApi';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { lockseats } from '@/redux/features/selectedseats';
-import Checkout from '../userbooking/Checkout';
 import { useToast } from '@/hooks/use-toast';
 import apiMovies from '@/axios/Moviesapi';
 import Modal from '@/components/modals/Modal';
-import LoginForm from '../userauth/LoginForm';
 import AuthContainer from '../userauth/AuthContainer';
 function Seats() {
   const {screenId , showId } = useParams();
@@ -122,7 +120,7 @@ function Seats() {
     return rowMap;
   }
 
-  console.log(seats , 'seats')
+  console.log(selectedSeats , 'seats' , showId , 'showid')
 
   useEffect(() => {
     const price = selectedSeats.reduce((sum , seat) => sum + seat.price,0);
@@ -148,6 +146,8 @@ function Seats() {
       'show_id': showId,
       'seats_ids': selectedSeatsIds
     }
+
+    // to set lock if user is proceed to checkout
     try {
       const res = await seatsApi.post('lock-seats/', payload )
       console.log(res.data , 'response from checkout')
@@ -186,7 +186,7 @@ function Seats() {
     )
   }
   const formatTime = (timeString) => {
-    const [hours , minutes] = timeString.split(':');
+    const [hours , minutes] = timeString?.split(':');
     const date = new Date();
     date.setHours(hours , minutes)
     return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
@@ -199,7 +199,7 @@ function Seats() {
         <div className='' >
 
           <h2 className='ml-[12%] text-xl font-bold text-gray-800' >{show.movie_title}</h2>
-          < p className='font-medium ml-[12%] mt-3' >◉ {show.show_date} , {formatTime(show?.slot?.start_time)}  { show.slot.end_time ? `to ${formatTime(show.slot.end_time)}`:''} {show.theatre_name} {show.theatre_details}</p>
+          < p className='font-medium ml-[12%] mt-3' >◉ {show.show_date} , {formatTime(show?.slot?.start_time)}  { show.slot.end_time ? `to ${formatTime(show.slot?.end_time)}`:''} {show.theatre_name} {show.theatre_details}</p>
 
         </div>
       <div className="flex justify-end px-10  space-x-8 pt-5 ">

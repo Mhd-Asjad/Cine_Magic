@@ -98,7 +98,7 @@ function ShowSeats() {
             </CardContent>
         </Card>
         <Modal isOpen={isModalOpen} closeModal={closeModal} >
-            <AddLayout closeModal={closeModal} />
+            <AddLayout closeModal={closeModal} fetchLayouts={fetchLayouts} />
         </Modal >
 
         <Modal isOpen={isEditModalOpen} closeModal={() => closeEditModal(false)} >

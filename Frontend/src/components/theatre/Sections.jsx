@@ -14,7 +14,7 @@ import EditShow from '@/pages/theatreowner/showmanagement/EditShow';
 import { TheatreRoute } from '@/pages/routes/ProtectedRoute';
 import ShowBookings from '@/pages/theatreowner/bookingmanagement/ShowBookings';
 import TicketDetails from '@/pages/theatreowner/bookingmanagement/TicketDetails';
-
+import TheatreSettings from '@/pages/theatreowner/TheaterSettings';
 function Sections() {
     return (
         <div>
@@ -34,6 +34,7 @@ function Sections() {
                 <Route path="cards/" element={<TheatreRoute><LayoutCards/></TheatreRoute>} />
                 <Route path='theatres/bookings' element={<TheatreRoute><ShowBookings/></TheatreRoute>} />
                 <Route path='show/booking/:id' element={<TheatreRoute><TicketDetails/></TheatreRoute>} />
+                <Route path="/profile-settings" element={<TheatreRoute><TheatreSettings/></TheatreRoute>}/>
 
             </Routes>
 

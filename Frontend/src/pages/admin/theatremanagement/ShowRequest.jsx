@@ -45,7 +45,7 @@ function ShowRequest() {
             const res = await apiAdmin.post(`theatre_owners/`, {
                 "action" : status,
                 'theatre_id' : theatre_id
-            } );
+            });
             console.log(res.data.message)
 
             toast({

@@ -24,11 +24,14 @@ const seatSelectionSlice  = createSlice({
             state.showId = ''
             state.lockExpiry = null
             state.isLocked = false
+        },
+        expireLock(state) {
+            state.lockExpiry = new Date().toISOString();
         }
     }
 
 
 });
 
-export const { lockseats , clearSelection } = seatSelectionSlice.actions;
+export const { lockseats , clearSelection , expireLock } = seatSelectionSlice.actions;
 export default seatSelectionSlice.reducer;

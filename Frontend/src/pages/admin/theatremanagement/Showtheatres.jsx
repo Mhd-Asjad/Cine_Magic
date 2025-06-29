@@ -41,10 +41,12 @@ function ShowTheatres() {
   };
   console.log(expandedScreens , 'expanded')
 
-  const handleApprove = async(screen_id) => {
+  const handleApprove = async(screen_id , ownerId) => {
     console.log(screen_id)
     try{
-      const res = await apiAdmin.post(`handle-screen/${screen_id}/`)
+      const res = await apiAdmin.post(`handle-screen/${screen_id}/`,{
+        'owner_id' : ownerId,
+      })
       toast({title : res.data.message})
       setExpandedScreens({})
     }catch(e) {
@@ -84,6 +86,7 @@ function ShowTheatres() {
       <div className='flex justify-center items-center' >Loading.....</div>
     )
   }
+  console.log(expandedScreens)
 
   return (
 
@@ -280,7 +283,7 @@ function ShowTheatres() {
                                            <Button
                                              variant="outline"
                                              size="icon"
-                                             onClick={() => handleApprove(screen.id)}
+                                             onClick={() => handleApprove(screen.id , theatre.owner.id)}
                                            >
                                              <Check className="h-4 w-4 text-green-500" />
                                            </Button>
@@ -300,23 +303,43 @@ function ShowTheatres() {
                              </div>
                            
                              <div>
-                               <p className="text-gray-600 font-medium mb-2">Available seats:</p>
-                               <div className="flex flex-wrap gap-2">
-                                 {screen.seats.map((seat) => (
-                                   seat?.label ? (
-                                     <div 
-                                       key={seat.id}
-                                       className="w-10 h-10 bg-green-500 text-white flex items-center justify-center rounded text-xs"
-                                     >
-                                       {seat.label}
+                                <p className="text-gray-600 font-medium mb-2">Available seats:</p>
+                                <div className="flex flex-col items-center gap-2">
+                                  {Object.entries(
+                                    screen.seats.reduce((acc, seat) => {
+                                      acc[seat.row] = acc[seat.row] || [];
+                                      acc[seat.row].push(seat);
+                                      return acc;
+                                    }, {})
+                                  ).map(([row, rowSeats]) => (
+                                    <div key={row} className="flex items-center gap-2">
+                                      <div className="w-6 font-bold">{row}</div>
 
-                                     </div>
-                                   ) : (
-                                     <div key={seat.id} className="w-10 h-10" />
-                                   )
-                                 ))}
-                               </div>
-                             </div>
+                                      <div className="flex gap-2">
+                                        {Array.from({ length: parseInt(screen.seat_in_a_row) }).map((_, index) => {
+                                          const seat = rowSeats.find(
+                                            s => s.number === index + 1
+                                          );
+
+                                          if (seat && seat.label && seat.is_active) {
+                                            return (
+                                              <div
+                                                key={seat.id}
+                                                className="w-10 h-10 bg-green-500 text-white flex items-center justify-center rounded text-xs"
+                                              >
+                                                {seat.label}
+                                              </div>
+                                            );
+                                          }
+
+                                          return <div key={index} className="w-10 h-10" />;
+                                        })}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
                            </div>
                             )}
                           </div>

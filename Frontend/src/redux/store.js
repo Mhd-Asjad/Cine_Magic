@@ -5,6 +5,7 @@ import userReducer from './features/UserSlice'
 import theatreOwnerReducer from './features/Theatreownerslice'
 import selectedSeatsReducer from './features/selectedseats'
 import BlogPostsReducer from './features/BlogSlice'
+import notificationReducer from './features/notificationSlice'
 import {persistStore , persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage';
 
@@ -12,7 +13,7 @@ const persistCofig = {
 
     key : 'root' ,
     storage , 
-    whitelist : ['location' , 'movie' , 'user' , 'theatreOwner' , 'selectedSeats']
+    whitelist : ['location' , 'notifications' , 'movie' , 'user' , 'theatreOwner' , 'selectedSeats']
 }   
 
 const rootReducer = combineReducers({
@@ -21,7 +22,8 @@ const rootReducer = combineReducers({
     user : userReducer,
     theatreOwner : theatreOwnerReducer ,
     selectedSeats : selectedSeatsReducer,
-    blogPosts : BlogPostsReducer
+    blogPosts : BlogPostsReducer,
+    notifications : notificationReducer,
 
 })
 const persistedReducer = persistReducer(persistCofig , rootReducer)

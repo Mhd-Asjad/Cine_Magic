@@ -7,13 +7,13 @@ import 'toastr/build/toastr.min.css';
 import userApi from '@/axios/userApi';
 import { Eye, EyeOff, User, Mail, Lock, CheckCircle } from 'lucide-react';
 import bg from '../../assets/cinelogo.png'
+import { useSelector } from 'react-redux';
 
-function RegistrationForm({ setMessage, setUserPrevillage ,  setIsOtpSent, setUserEmail }) {
+function RegistrationForm({ setMessage ,  setIsOtpSent, setUserEmail }) {
     const [touched, setTouched] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [confirmPassword, setConfirmPassword] = useState('');
-
+    const user = useSelector(state => state.user)
     
     const [ errors , setErrors ] = useState('')
     toastr.options = {
@@ -80,7 +80,7 @@ function RegistrationForm({ setMessage, setUserPrevillage ,  setIsOtpSent, setUs
             }
         },
     });
-
+    console.log('is_owner ',user.is_theatre_owner , 'is approved' , user.is_approved)
     return (
         <div className="border p-5 shadow-lg w-full max-w-6xl grid grid-cols-1 md:grid-cols-2">
             <div>

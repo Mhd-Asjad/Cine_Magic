@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import seatsApi from '@/axios/seatsaApi';
 import { useToast } from '@/hooks/use-toast';
-function AddLayout({ closeModal }) {
+function AddLayout({ closeModal , fetchLayouts }) {
     const [name , setName] = useState('');
     const [ cols , setCols] = useState('');
     const [ rows , setRows ] = useState('');
@@ -15,6 +15,7 @@ function AddLayout({ closeModal }) {
                 'rows' : rows
             })
             console.log(res.data)
+            fetchLayouts()
             closeModal()
             toast({
                 title : 'layout added successfylly',

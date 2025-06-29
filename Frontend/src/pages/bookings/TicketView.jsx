@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from '@/hooks/use-toast';
 import ShowRefundStatus from './ShowRefundStatus';
 import apiBooking from '@/axios/Bookingapi';
+import useBookingWebSocket from '@/contexts/useNotificationSocket';
+import { useSelector } from 'react-redux';
 
 function TicketView() {
   const { id } = useParams();
@@ -22,8 +24,8 @@ function TicketView() {
   const [ refundInfo , setRefundInfo ] = useState(null);
   const [ open , setOpen ] = useState(false)
   const {toast} = useToast();
-  const navigate = useNavigate();
-  
+  const userId = useSelector((state) => state.user.id)
+  useBookingWebSocket(userId)
   useEffect(() => {
       const fetchRefundInfo = async() => {
 

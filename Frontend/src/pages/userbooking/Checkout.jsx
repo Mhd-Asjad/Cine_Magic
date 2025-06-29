@@ -6,9 +6,10 @@ import { Info, ChevronDown, ChevronUp } from 'lucide-react';
 import Paypalcomponet from './Paypalcomponet';
 import CountDownTimer from '../seatselection/CountDownTimer';
 import seatsApi from '@/axios/seatsaApi';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { clearSelection , expireLock } from '@/redux/features/selectedseats';
 import apiBooking from '@/axios/Bookingapi';
-
+import { useDispatch } from 'react-redux';
 
 function Checkout() {
   const [checkoutItems , setCheckoutItems] = useState({});
@@ -20,7 +21,7 @@ function Checkout() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [taxesOpen, setTaxesOpen] = useState(false);
   const navigate = useNavigate()
-  const location = useLocation();
+  const dispatch = useDispatch()
   const TAX_RATE = 0.1;
   const cleanedExpairyTime = lockExpiry.replace(/\.\d{6}/, '')
   const lockExpiryTime = new Date(cleanedExpairyTime)
@@ -51,6 +52,35 @@ function Checkout() {
     checkout()
   },[])
 
+    useEffect(() => {
+    const handleBackButton = async(event) => {
+      console.log("Back button pressed on Checkout Page");
+        try {
+          const res = await seatsApi.post('/unlock-seats/',{
+          'selected_seats' : selectedSeats ,
+          'show_id' : showId,
+          'action' : 'eventbacked'
+          });
+
+
+          console.log(res.data.message , 'clear seats')
+          dispatch(expireLock());
+          console.log('seat lock cleared on back')
+        }catch(error){
+          
+          console.log('error while seat ublock on click event' , error)
+          
+        }
+      };
+
+    window.addEventListener("popstate", handleBackButton);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackButton);
+    };
+  }, [navigate]);
+
+
   console.log(checkoutItems ,'value')
   const {
     show_det = {},
@@ -70,7 +100,7 @@ function Checkout() {
   };
     
   console.log(show_time.time)
-  function formatTime(timeStr) {  
+  function formatTime(timeStr) {
     if (!timeStr)return
     let [hour, minute, second] = timeStr.split(':').map(Number);
     let ampm = hour >= 12 ? 'PM' : 'AM';
@@ -102,6 +132,8 @@ function Checkout() {
       console.log(e?.response?.data || 'error occurs')
     }
   }
+
+  // ublocking sessions after lock expiry time exeeded throught CountDownTimer component
   const handleSessionExpiry = async() => {
 
     try {

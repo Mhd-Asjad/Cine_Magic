@@ -15,7 +15,7 @@ import PendingRefund from '@/pages/admin/bookingmanagement/PendingRefund';
 import ExcelDownloadComponent from '@/pages/admin/dashboard/ExcelDownloadComponent';
 import ShowComplaints from '@/pages/admin/complaintsmanagement/ShowComplaints';
 import RespondComplaint from '@/pages/admin/complaintsmanagement/RespondComplaint';
-
+import AdminSettings from '@/pages/admin/Settings';
 function Section() {
   return (
     <div>
@@ -33,6 +33,7 @@ function Section() {
             <Route path='bookings' element={<PendingRefund/>} ></Route>
             <Route path='complaints' element={<ShowComplaints/>} />
             <Route path='complaint/action/:id' element={<RespondComplaint onBack={'/admin/complaints'} />} />
+            <Route path='settings' element={<AdminSettings/>} />
         </Routes>
     </div>
   )

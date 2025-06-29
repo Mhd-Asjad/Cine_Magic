@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import Landingpage from "./pages/home/Landingpage";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -24,15 +24,17 @@ import VerifiedTicket from "./pages/bookings/VerifiedTicket";
 import ResetPassword from "./pages/userauth/ResetPassword";
 import FAQPage from "./pages/usercomplaints/FAQPage";
 import UpcomingMovieDetails from "./pages/moviedetails/UpcomingMovieDetails";
-
+import UserNotificationPage from "./pages/notification/UserNotifications"
 function App() {
+
+    
 
     return (
         <>
             <Router>
                 <Routes>
-                    <Route path="/" element={<Landingpage/>} />
-                    <Route path="/movie/:id/details" element={<MovieSpecification/>} />
+                    <Route path="/" element={<Landingpage/>}/>
+                    <Route path="/movie/:id/details" element={<PrivateRoute allowedTypes={'user'} ><MovieSpecification/></PrivateRoute>} />
                     <Route path="/movie/:movieId" element={<UpcomingMovieDetails/>} />
                     <Route path="/profile" element={<Profile/>} />
                     <Route path={`/available-show-details/:id`} element={<AvailableShowDetails/>} />
@@ -43,7 +45,10 @@ function App() {
                                 "clientId" : PAYPAL_CLIENT_ID,
                                 currency : 'USD'
                             }}>
-                                <Checkout/>
+                                <PrivateRoute allowedTypes={'user'}
+                                >
+                                    <Checkout/>
+                                </PrivateRoute>
                             </PayPalScriptProvider>
                             } />
                         
@@ -51,11 +56,12 @@ function App() {
                     <Route path='movies/my-orders' element={<MyBookings/>} />
                     <Route path='booking/:id/ticket' element={<TicketView/>} />
                     <Route path='verify-ticket/:id' element={<VerifiedTicket/>} />
-                    <Route path='/blogs' element={<BlogPosts/>} />
+                    <Route path='/blogs' element={<PrivateRoute allowedTypes={'user'} ><BlogPosts/></PrivateRoute>} />
                     <Route path='/blogs/add' element={<AddBlog/>} />
                     <Route path="/posts/details/:id" element={<BlogInfo/>}/>
                     <Route path="/reset-password" element={<ResetPassword/>} />
                     <Route path="/complaint/assistant" element={<FAQPage/>} />
+                    <Route path="/notifications" element={<UserNotificationPage/>} />
 
                     {/* adminpages */}
                     <Route path="/admin/login" element={<AdminLogin />} />

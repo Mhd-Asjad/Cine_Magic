@@ -1,13 +1,16 @@
 import { Card } from "@/components/ui/card"
 import { Link, useParams } from "react-router-dom"
 import React , {useState , useEffect} from "react";
+import useBookingWebSocket from "@/contexts/useNotificationSocket";
 import Nav from "@/components/navbar/Nav";
 import apiBooking from "@/axios/Bookingapi";
+import { useSelector } from "react-redux";
 function PaymentSuccess() {
     const [isLoading, setIsLoading] = useState(true);
     const {booking_id} = useParams()
     const [ booking , setBookingDetails ] = useState([]);
-
+    const userId = useSelector((state) => state.user.id)
+    const notifications = useSelector((state) => state.notifications.notifications)
     useEffect(() => {
       const fetchBooking = async() => {
         try {
@@ -18,7 +21,8 @@ function PaymentSuccess() {
         }
       }
       fetchBooking()
-    },[])
+    },[booking_id])
+
     useEffect(() => {
       const timer = setTimeout(() => {
         setIsLoading(false);
@@ -26,6 +30,36 @@ function PaymentSuccess() {
   
       return () => clearTimeout(timer);
     }, []);
+
+    
+
+    // useEffect(() => {
+    //   const socket = new WebSocket(`ws://localhost:8000/ws/notifications/${userId}/`);
+
+    //   socket.onopen = () => {
+    //     console.log('websocket is connected');
+    //   };
+
+    //   socket.onmessage = (event) => {
+    //     const data = JSON.parse(event.data);
+    //     console.log(data, 'server sended data while booking created');
+    //     setNotification(data.message);
+    //     setTimeout(() => setNotification(''), 5000);
+    //   };
+
+    //   socket.onclose = () => {
+    //     console.log('websocket disconnected');
+    //   };
+
+    //   socket.onerror = (error) => {
+    //     console.log('WebSocket error', error);
+    //   };
+
+    //   return () => socket.close();
+    // }, [userId]);
+
+  useBookingWebSocket(userId);
+  console.log(notifications)
 
     if (isLoading) {
         return (
@@ -43,7 +77,7 @@ function PaymentSuccess() {
   }
 
 
-    console.log(booking)
+    console.log(window.location.host)
   return (
     <div>
         <Nav/>
@@ -53,8 +87,14 @@ function PaymentSuccess() {
           <CircleCheckIcon className="text-green-500 h-16 w-16" />
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50 mt-4">Payment Successful</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Thank you for your payment. Your booking is being processed.
+            Thank you for your payment
           </p>
+
+          {/* {notification && (
+            <div className="mt-4 p-4 bg-blue-100 text-blue-800 rounded">
+              {notification}
+            </div>
+          )} */}
         </div>
 
 

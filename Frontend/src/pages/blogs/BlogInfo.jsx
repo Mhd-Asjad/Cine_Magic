@@ -2,15 +2,24 @@ import apiBlogs from '@/axios/Blogapi';
 import React, { useEffect , useState } from 'react'
 import { useParams } from 'react-router-dom';
 import Nav from '@/components/navbar/Nav';
-import { User , Tag , MessageCircle , Calendar , Eye  } from 'lucide-react';
+import { User , Tag , Calendar , Eye  } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import LikeDislikeButton from './LikeDislikeButton';
-import { Avatar } from '@mui/material';
-import {Stack} from '@mui/material';
 import Modal from '@/components/modals/Modal';
 import AuthContainer from '../userauth/AuthContainer';
-import { Send , Clock1 , Heart , Share2 } from 'lucide-react';
 import { getDate, getDay } from 'date-fns';
+import { MessageCircle, Clock1, Send, Share2 , MoreHorizontal, Edit, Trash2 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { Avatar, Stack } from "@mui/material"
 
 function BlogInfo() {
     const [postDetails , setPostDetails] = useState(null);
@@ -20,6 +29,8 @@ function BlogInfo() {
     const [reaction , setReaction] = useState(null)
     const [isModalOpen , setIsModalOpen] = useState(false);
     const [isLogin , setIsLogin] = useState(false);
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editingText, setEditingText] = useState("");
     const {id} = useParams();
     const userId = useSelector((state) => state.user.id)
     
@@ -116,9 +127,52 @@ function BlogInfo() {
             </div>
         )
     }
+    const handleEditComment = (commentId , currentText) => {
+    
+    console.log('Edit comment:', commentId);
+    setEditingCommentId(commentId)
+    setEditingText(currentText)
+    };
 
+    const handleDeleteComment = async (commentId) => {
+        
+        try {
+            const res = await apiBlogs.delete(`comment-edit/${commentId}/`)
+            console.log(res.data , 'response from bakcend edit save')
+        }catch(e) {
+            console.log(e , 'error from the edit saving')
+        }finally{
+            getComments()
+        }
+        setEditingCommentId(null);
+        setEditingText("");
+    };
+
+
+    const handleCancelEdit = () => {
+        setEditingCommentId(null);
+        setEditingText("");
+    };
+
+    const saveCommentEdit = async(comment_id) => {
+
+        if (editingText.trim() === "") {
+        return; 
+        }
+
+        try {
+            const res = await apiBlogs.put(`comment-edit/${comment_id}/`,{'name' : editingText })
+            console.log(res.data , 'response from bakcend edit save')
+        }catch(e) {
+            console.log(e , 'error from the edit saving')
+        }finally{
+            getComments()
+        }
+        setEditingCommentId(null);
+        setEditingText("");
+
+    }
     console.log(allComments)
-
     return(
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
             <Nav/>
@@ -240,21 +294,81 @@ function BlogInfo() {
                                                         </Stack>
                                                         
                                                         <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center space-x-2 mb-1">
-                                                                <span className="font-semibold text-gray-900 text-sm">
-                                                                    {comment.username}
-                                                                </span>
-                                                              
-                                                                <div className="flex items-center text-xs text-gray-500">
-                                                                    <Clock1 className="w-3 h-3 mr-1" />
-                                                                    {timeAgo(comment.created_at)}
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <div className="flex items-center space-x-2">
+                                                                    <span className="font-semibold text-gray-900 text-sm">
+                                                                        {comment.username}
+                                                                    </span>
+                                                                    <div className="flex items-center text-xs text-gray-500">
+                                                                        <Clock1 className="w-3 h-3 mr-1" />
+                                                                        {timeAgo(comment.created_at)}
+                                                                    </div>
                                                                 </div>
+                                                            {
+                                                                comment.user === userId &&
+                                                                <DropdownMenu>
+                                                                    <DropdownMenuTrigger asChild>
+                                                                        <Button 
+                                                                            variant="ghost" 
+                                                                            size="sm" 
+                                                                            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-100"
+                                                                            >
+                                                                            <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                                                                        </Button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent align="end" className="w-[160px]">
+                                                                        <DropdownMenuLabel className="text-xs font-medium text-gray-500">
+                                                                            Actions
+                                                                        </DropdownMenuLabel>
+                                                                        <DropdownMenuSeparator />
+                                                                        <DropdownMenuGroup>
+                                                                            <DropdownMenuItem 
+                                                                                className="cursor-pointer focus:bg-blue-50"
+                                                                                onClick={() => handleEditComment(comment.id , comment.name)}
+                                                                                >
+                                                                                <Edit className="mr-2 h-4 w-4 text-blue-500" />
+                                                                                <span className="text-sm">Edit</span>
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuItem 
+                                                                                className="cursor-pointer focus:bg-red-50 text-red-600"
+                                                                                onClick={() => handleDeleteComment(comment.id)}
+                                                                            >
+                                                                                <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                                                                                <span className="text-sm">Delete</span>
+                                                                            </DropdownMenuItem>
+                                                                        </DropdownMenuGroup>
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
+                                                            }
                                                             </div>
-                                                            <p className="text-md text-gray-700 leading-relaxed">
+                                                            
+                                                            {editingCommentId === comment.id ? (
+                                                                <div className="mt-2">
+                                                                <textarea
+                                                                    value={editingText}
+                                                                    onChange={(e) => setEditingText(e.target.value)}
+                                                                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent resize-none text-sm"
+                                                                    rows={3}
+                                                                    autoFocus
+                                                                    onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter' && e.ctrlKey) {
+                                                                        saveCommentEdit(comment.id);
+                                                                    } else if (e.key === 'Escape') {
+                                                                        handleCancelEdit();
+                                                                    }
+                                                                    }}
+                                                                />
+                                                                <div className="mt-2 text-xs text-gray-500">
+                                                                    Press Ctrl+Enter to save, Escape to cancel
+                                                                </div>
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-md text-gray-700 leading-relaxed">
                                                                 {comment.name}
-                                                            </p>
-                                                            <div className="flex items-center text-xs text-gray-500">
-                                                              at  {formatISODate(comment.created_at)}
+                                                                </p>
+                                                            )}                                             
+                                                           <div className="flex items-center text-xs text-gray-500">
+                                                               { editingCommentId == comment.id ? '' : `at ${formatISODate(comment.created_at)}`}
                                                             </div>
                                                         </div>
                                                     </div>

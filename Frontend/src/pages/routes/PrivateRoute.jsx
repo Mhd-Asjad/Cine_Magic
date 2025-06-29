@@ -102,7 +102,7 @@ function PrivateRoute({ children , allowedTypes }) {
     }
 
     if(!isAuthenticated) {
-        console.log('not authenticated')
+        // consider redirecting to login after if tocken expired on user side
         console.log(redirectPath)
         return <Navigate to={redirectPath} replace />;  
     }

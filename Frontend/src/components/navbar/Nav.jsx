@@ -1,5 +1,4 @@
-import React , {useEffect, useState} from 'react'
-import logo from '../../assets/logopic2.png'
+import React , {useEffect, useState, useRef} from 'react'
 import Modal from '../modals/Modal';
 import OtpVerificationForm from '../../pages/userauth/OtpVerificationForm';
 import { MdOutlineAddLocation } from "react-icons/md";
@@ -15,8 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { selectCityId } from '../../redux/features/Location.slice';
 import { logout } from '@/pages/userauth/AuthService';
 import apiMovies from '@/axios/Moviesapi';
-import { MessageCircle , LayoutDashboard , UserIcon , LogOut, User } from 'lucide-react';
-
+import { MessageCircle , LayoutDashboard  , Bell ,  LogOut, User } from 'lucide-react';
 function Nav() {
   const [isModalOpen , setIsModalOpen] = useState(false);
   const [message , setMessage] = useState('');
@@ -30,6 +28,8 @@ function Nav() {
   const [dropdownOpen , setDropdownOpen ] = useState(false);
   const  navigate = useNavigate();
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen)
+  const { unread_count } = useSelector((state) => state.notifications.counts);
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
     setIsModalOpen(false);
@@ -81,8 +81,10 @@ function Nav() {
       console.log(error.response)
       console.log('failed to fetch movie related city'); 
     }
+  } 
 
-  }
+
+
   window.addEventListener('storage', (event) => {
       if (event.key === 'current_user_type') {
           window.location.reload();
@@ -96,7 +98,6 @@ function Nav() {
     navigate('/')
   }
 
-  console.log(user)
   return (
 
     <nav className="bg-white-800 shadow-md">
@@ -135,6 +136,20 @@ function Nav() {
               </span>
             </button>
 
+              <div>
+  
+  
+            <button className="relative p-2 rounded-full hover:bg-gray-100 transition"
+              onClick={() => navigate('/notifications')}
+            >
+              <Bell className="text-gray-700" size={30} />
+              {unread_count > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  {unread_count > 99 ? '99+' : unread_count}
+                </span>
+              )}
+            </button>
+              </div>
           { user.username ? (
 
           <div className='reletive' >
@@ -148,6 +163,7 @@ function Nav() {
 
                <IoMdArrowDropdown className='text-xl text-black gap-3 mx-auto' />
 
+              
             </button>
 
               {dropdownOpen && (
@@ -193,7 +209,10 @@ function Nav() {
                   </a>
                 </div>
               )}
+
             </div>
+
+
 
           ):(
 
