@@ -11,5 +11,6 @@ urlpatterns = [
     path('create-comment/<int:post_id>/',PostComment.as_view(),name='create-comment'),
     path('handle-like/<int:post_id>/like/' , toggle_like.as_view() , name='handle-like'),
     path('handle-like/<int:post_id>/dislike/' , toggle_dislike.as_view() , name='handle-like'),
-    path('post-reaction/<int:post_id>/', get_post_reaction.as_view(),name='post-reaction')
+    path('post-reaction/<int:post_id>/', get_post_reaction.as_view(),name='post-reaction'),
+    path('comment-edit/<int:comment_id>/' , edit_comment.as_view() , name='comment-edit')
 ]

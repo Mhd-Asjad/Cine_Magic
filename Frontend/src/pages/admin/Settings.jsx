@@ -54,7 +54,6 @@ const AdminSettings = () => {
     }
   }
 
-  // handling general settings
   const handleSettingsSubmit = async(e) => {
     e.preventDefault();
     try {

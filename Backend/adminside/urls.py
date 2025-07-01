@@ -22,4 +22,6 @@ urlpatterns = [
     path('revenue-chart/',revenue_chart_data.as_view(),name='revenue-chart'),
     path('report-xldownload/',ExportTheatreReport.as_view(),name='report-xldownload'),
     path('get-active-theatres/',GetTheatres , name='get-active-theatres'),
+    path('admin-settings/', AdminSettingsView.as_view(),name='admin-settings'),
+    path('change-password/',ChangePassword.as_view(),name='change-password')
 ]

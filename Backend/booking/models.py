@@ -3,8 +3,9 @@ from theatres.models import *
 import qrcode
 import io
 from django.core.files.base import ContentFile
-from datetime import datetime
+import logging
 
+logger = logging.getLogger(__name__)
 class Booking(models.Model):
     STATUS_CHOICES = (
         ('pending' , 'Pending') ,
@@ -74,9 +75,29 @@ class Booking(models.Model):
     def __str__(self):
         id = str(self.id)
         return f'{id} - {self.status} - {self.booking_time}'
-        
-class BookingSeat(models.Model) :
+
+    # if created or instance.status == 'confirmed' :
+    #     logger.info(f"Sending group message to {group_name}" )
+    #     async_to_sync(channel_layer.group_send)(
+    #         group_name,
+    #         {
+    #             'type': 'send_notification',
+    #             'event_type': 'booking_confirmed',
+    #             'message': f'your booking {instance.booking_id} is confirmed!'
+    #         }        
+    #     )
+    # elif instance.status == 'cancelled' :
+    #     async_to_sync(channel_layer.group_send)(
+    #         group_name,
+    #         {
+    #             'type': 'send_notification',
+    #             'event_type': 'booking_cancelled',
+    #             'message': f'Your booking {instance.booking_id} has been cancelled.'
+    #         }
+    #     )
     
+class BookingSeat(models.Model) :
+
     SEAT_STATUS_CHOISES = (
         ('booked' , 'Booked'),
         ('cancelled' , 'Cancelled'),
@@ -112,3 +133,26 @@ class SeatLock(models.Model) :
     def is_expired(self ):
         from django.utils import timezone
         return timezone.now() > self.expires_at
+
+class Notifications(models.Model):
+    NOTIFICATION_TYPES = (
+        ('Booking' , 'booking'),
+        ('Cancelled' , 'cancelled'),
+        ('Complaint' , 'complaint')
+    )
+    user = models.ForeignKey('useracc.User', on_delete=models.CASCADE , related_name='notifications')
+    notification_type = models.CharField(max_length=20 , choices=NOTIFICATION_TYPES)
+    message = models.TextField()
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE , null=True , blank=True)
+    complaint = models.ForeignKey('review.Complaints' , on_delete=models.CASCADE , null=True , blank=True)
+    is_read = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    
+    class Meta:
+        unique_together = ('user' , 'booking' , 'notification_type')
+    
+    def __str__(self):
+        return  f'{self.user.username} notification for {self.notification_type}'
+    
+    

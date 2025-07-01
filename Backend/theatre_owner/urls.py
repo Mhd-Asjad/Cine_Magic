@@ -26,6 +26,5 @@ urlpatterns = [
     path('theatre/<int:id>/delete/',DeleteTheatre.as_view() , name='theatre_delete'),
     path('get-theatre-booking/',Get_Theatre_Bookings.as_view() , name='get-theatre-booking'),
     path('theatre-dashboard/<int:owner_id>/', DashboardStatus.as_view(),name='theatre-dashboard'),
-    path('theatre-revenue/',Revenue_Chart.as_view() , name='theatre-revenue')
-
-]
+    path('theatre-revenue/',Revenue_Chart.as_view() , name='theatre-revenue'),
+    path('theatre-profile/', EditTheatreProfile.as_view(), name='edit-theatre-profile'),]

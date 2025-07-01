@@ -11,6 +11,8 @@ from booking.models import SeatLock
 from useracc.permissions import IsAuthenticatedUser
 from booking.models import BookingSeat
 from theatres.models import *
+import logging
+logger = logging.getLogger(__name__)
 class create_layout(APIView):
     def post(self, request  ) :
         data = request.data
@@ -202,24 +204,37 @@ class Unlock_Seats(APIView):
             data = request.data
             seat_ids = data['selected_seats']
             show_id = data['show_id']
-            print(show_id , 'show value')
+            action = data.get('action' , '')
+            logger.info(f'{action} from checkout')
+            
+            now = datetime.now()
+            
             try : 
                 show = ShowTime.objects.get(id=show_id)
+                
             except ShowTime.DoesNotExist:
                 return Response({'eror':'show does not found'} , status=status.HTTP_400_BAD_REQUEST)
+            
+            seats = SeatLock.objects.filter(
+                seat_id__in= seat_ids,
+                show_id = show_id,
+                expires_at__gt = now
+            )
+            
+            if action == 'eventbacked' or seats.exists():
+                seats.delete()
+                return Response({'message' : 'seats has been unloked with user event' },status=status.HTTP_200_OK)
+            
             selected_show = SeatLock.objects.filter(seat_id__in=seat_ids , show_id = show_id).first()
             if selected_show is None :
                 return Response({ 'message' : 'seat lock expired','movie_id' : show.movie.id},status=status.HTTP_200_OK)
                 
-            movie_id = selected_show.show.movie.id  
-            now = datetime.now()
+            movie_id = selected_show.show.movie.id
             SeatLock.objects.filter(
                 seat_id__in= seat_ids,
                 show_id = show_id,
                 expires_at__lt = now
-            ).delete()
-            
-            
+            ).delete()            
             return Response({'message' : 'seats unloacked' , 'movie_id' : movie_id} , status=status.HTTP_200_OK)
         
         except Exception as e :

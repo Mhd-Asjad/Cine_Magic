@@ -15,6 +15,7 @@ import { selectCityId } from '../../redux/features/Location.slice';
 import { logout } from '@/pages/userauth/AuthService';
 import apiMovies from '@/axios/Moviesapi';
 import { MessageCircle , LayoutDashboard  , Bell ,  LogOut, User } from 'lucide-react';
+import { clearNotifications } from '@/redux/features/notificationSlice';
 function Nav() {
   const [isModalOpen , setIsModalOpen] = useState(false);
   const [message , setMessage] = useState('');
@@ -93,6 +94,7 @@ function Nav() {
 
   const handleLogout = () => {
     dispatch(resetUser())
+    dispatch(clearNotifications())
     logout()
     toggleDropdown()
     navigate('/')

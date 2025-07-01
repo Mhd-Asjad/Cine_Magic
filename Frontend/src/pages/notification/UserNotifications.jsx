@@ -20,6 +20,7 @@ const UserNotificationsPage = () => {
             setLoading(true);
             
             const res = await apiBooking.get('notifications/')
+            console.log(res.data.notification)
             dispatch(setNotifications(res.data.notifications));
 
         
@@ -30,17 +31,17 @@ const UserNotificationsPage = () => {
       setLoading(false);
     }
   };
+  console.log(counts)
 
-
-  const getFilteredNotifications = () => {
-    if (activeTab === 'General') {
-      return notifications.filter(n => n.notification_type !== 'complaint');
-    }
-    if (activeTab === 'Complaints') {
-      return notifications.filter(n => n.notification_type === 'complaint');
-    }
-    return notifications;
-  };
+    const getFilteredNotifications = () => {
+        if (activeTab === 'General') {
+            return notifications.filter(n => n.notification_type.toLowerCase() !== 'complaint');
+        }
+        if (activeTab === 'Complaints') {
+            return notifications.filter(n => n.notification_type.toLowerCase() === 'complaint');
+        }
+        return notifications;
+    };
 
   const handleNotificationAction = async (notificationId , action) => {
     try {
@@ -68,16 +69,18 @@ const UserNotificationsPage = () => {
   }
 
 
-  const getNotificationIcon = (type, isRead) => {
-    switch (type) {
-      case 'complaint':
+    const getNotificationIcon = (type, isRead) => {
+    const normalizedType = type?.toLowerCase?.() || '';
+    switch (normalizedType) {
+        case 'complaint':
         return <AlertCircle className={`w-5 h-5 ${isRead ? 'text-red-400' : 'text-red-500'}`} />;
-      case 'booking':
+        case 'booking':
         return <CheckCircle className={`w-5 h-5 ${isRead ? 'text-blue-400' : 'text-blue-500'}`} />;
-      default:
+        default:
         return <Bell className={`w-5 h-5 ${isRead ? 'text-gray-400' : 'text-blue-500'}`} />;
     }
-  };
+    };
+
 
   const getTimeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -94,7 +97,7 @@ const UserNotificationsPage = () => {
     return `${diffInDays}d ago`;
   };
 
-
+  console.log(notifications)
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">

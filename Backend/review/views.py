@@ -12,8 +12,7 @@ from rest_framework.generics import ListAPIView
 import google.generativeai as genai
 from django.http import StreamingHttpResponse
 import time
-from django.core.mail import send_mail
-
+from theatre_owner.tasks import send_response_mail
 class PostReview(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self , request , booking_id):
@@ -293,12 +292,10 @@ class ComplaintResponseView(APIView):
                 f"Our Response : {serializer.data['response_message']}\n\n" \
                 f"Thank you for your patience.\n\nSupport Team"
                 
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [user_email],
-                fail_silently=False
+            send_response_mail.delay(
+                user_email,
+                subject , 
+                message
             )
             return Response(serializer.data , status=status.HTTP_200_OK)
         print(serializer.errors)

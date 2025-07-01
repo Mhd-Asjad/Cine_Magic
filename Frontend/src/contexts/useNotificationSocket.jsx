@@ -1,7 +1,7 @@
-// src/hooks/useBookingWebSocket.js
 import { useEffect } from 'react';
 import { addNotification , updateUnreadCount } from '@/redux/features/notificationSlice';
 import { useDispatch } from 'react-redux';
+
 const WebSocketManager = (() => {
   let socket = null;
   let reconnectTimeout = null;
@@ -12,7 +12,7 @@ const WebSocketManager = (() => {
     if (socket && socket.readyState === WebSocket.OPEN) return;
 
     isConnecting = true;
-    const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+    const WS_URL = import.meta.env.VITE_WS_URL || 'wss://api.cine-magic.fun';
     socket = new WebSocket(`${WS_URL}/ws/notifications/${userId}/`);
 
     socket.onopen = () => {
@@ -36,9 +36,13 @@ const WebSocketManager = (() => {
           dispatch(updateUnreadCount(data.unread_count))
         } else if (eventType === 'unread_count_update') {
           dispatch(updateUnreadCount(data.unread_count));
+        } else {
+          dispatch(updateUnreadCount(data.notification))
+          dispatch(updateUnreadCount(data.unread_count))
+
         }
       } catch (error) {
-        console.error('🚨 Error parsing WebSocket message:', error);
+        console.error('Error parsing WebSocket message:', error);
       }
     };
 
@@ -53,7 +57,7 @@ const WebSocketManager = (() => {
     };
 
     socket.onerror = (error) => {
-      console.error('🚨 Booking WebSocket error:', error);
+      console.error('Booking WebSocket error:', error);
       socket.close();
     };
   };

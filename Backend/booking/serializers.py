@@ -9,7 +9,6 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = ['id' ,'booking_id' , 'show' , 'theatre_name' ,  'customer_name' , 'slot', 'show_date' , 'show_time' ,'customer_email' , 'status' , 'amount' , 'refund_amount' , 'refunt_status']
         
-        
 class TicketViewSerializer(serializers.ModelSerializer):
     show_name = serializers.CharField(source='show.movie.title')
     class Meta :

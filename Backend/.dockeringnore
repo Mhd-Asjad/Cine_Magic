@@ -14,3 +14,4 @@ venv/
 media/
 staticfiles/
 Frontend/
+.sql

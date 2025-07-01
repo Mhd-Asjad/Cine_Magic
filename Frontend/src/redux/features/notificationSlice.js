@@ -27,7 +27,7 @@ const notificationsSlice = createSlice({
             state.notifications.unshift(action.payload);
             state.counts = {
                 booking_count: state.notifications.filter(n => ['Booking', 'Cancelled'].includes(n.notification_type)).length,
-                complaint_count: state.notifications.filter(n => n.notification_type === 'complaint').length,
+                complaint_count: state.notifications.filter(n => n.notification_type?.toLowerCase() === 'complaint').length,
                 unread_count: state.notifications.filter(n => !n.is_read).length,
       };
     },
@@ -37,10 +37,18 @@ const notificationsSlice = createSlice({
     setLoading(state, action) {
       state.loading = action.payload;
     },
+    clearNotifications(state) {
+      state.notifications = [];
+      state.counts = {
+        booking_count: 0,
+        complaint_count: 0,
+        unread_count: 0,
+      };
+    },
 
   },
 
 })
 
-export const { setNotifications , addNotification, updateUnreadCount, setLoading } = notificationsSlice.actions;
+export const { setNotifications , addNotification, updateUnreadCount, setLoading , clearNotifications } = notificationsSlice.actions;
 export default notificationsSlice.reducer;

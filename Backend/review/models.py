@@ -1,14 +1,13 @@
 from django.db import models
 from useracc.models import User
 from movies.models import Movie
-from booking.models import Booking
 from django.utils import timezone
 # Create your models here.
 
 class Rating(models.Model):
     user = models.ForeignKey(User , on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie , on_delete=models.CASCADE)
-    booking = models.ForeignKey(Booking , on_delete=models.CASCADE ,related_name='ratings')
+    booking = models.ForeignKey('booking.Booking' , on_delete=models.CASCADE ,related_name='ratings')
     rating = models.FloatField()
     review = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

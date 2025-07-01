@@ -1,47 +1,42 @@
-#builder stage
+# Stage 1: Builder
 FROM python:3.10-slim AS builder
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 
 
 WORKDIR /app
 
-COPY requirements.txt ./
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN python -m venv /opt/venv \
-    && . /opt/venv/bin/activate \
-    && pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install --user -r requirements.txt && rm -rf /root/.cache
 
+# Stage 2: Final
 FROM python:3.10-slim
 
-# Install runtime system dependencies (e.g., for psycopg2)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 curl && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/home/appuser/.local/bin:$PATH"
 
-# Create non-root user and set up directories
-RUN useradd -m -r appuser && \
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user and set permissions
+RUN useradd -m appuser && \
     mkdir -p /app/staticfiles /app/media && \
     chown -R appuser:appuser /app
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/opt/venv/bin:$PATH"
-
-# Copy virtual environment from builder
-COPY --from=builder /opt/venv /opt/venv
-
-# Copy application code with correct ownership
 WORKDIR /app
+
+# Copy dependencies and application code
+COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
 COPY --chown=appuser:appuser . .
 
-# Switch to non-root user
+# Collect static files
 USER appuser
 
-# Expose port
-EXPOSE 8000
-
-# Run Gunicorn with optimized settings
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--log-level", "info", "Backend.wsgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "Backend.asgi:application"]

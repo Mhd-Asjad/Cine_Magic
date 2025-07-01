@@ -2,11 +2,15 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import apiReview from "@/axios/Reviewapi";
 import CustomAlert from "@/components/CustomAlert";
+import useBookingWebSocket from "@/contexts/useNotificationSocket";
+import { useSelector } from "react-redux";
 
 export default function RaiseComplaint({ userId , chatId , closeForm }) {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [message , setMessage ] = useState('');
-
+  const user = useSelector((state => state.user))
+  const notifications = useSelector((state) => state.notifications.notifications)
+  
   const onSubmit = async (data) => {
     try {
 
@@ -34,6 +38,9 @@ export default function RaiseComplaint({ userId , chatId , closeForm }) {
       console.error(err);
     }
   };
+  useBookingWebSocket(user.id)
+  console.log(notifications)
+  
 
   return (
     <div>

@@ -1,0 +1,81 @@
+version: "3.8"
+
+services:
+  web:
+    command: daphne -b 0.0.0.0 -p 8000 Backend.asgi:application
+    ports:
+      - "8000:8000"
+
+    image: mhdasjad/movie_ticket-web:latest
+
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    volumes:
+      - ./Backend:/app 
+      - movie_ticket_static:/app/staticfiles
+      - movie_ticket_media:/app/media
+    networks:
+      - backend-network
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - backend-network
+
+  channels_worker:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    command: python manage.py runworker
+    volumes:
+      - ./Backend:/app 
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    networks:
+      - backend-network
+
+  celery_worker:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    command: celery -A Backend worker --loglevel=info
+    volumes:
+      - ./Backend:/app 
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+    networks:
+      - backend-network
+
+  db:
+    image: postgres:14
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: asjadk123
+      POSTGRES_DB: movie_ticket
+    volumes:
+      - db_data_local:/var/lib/postgresql/data
+    networks:
+      - backend-network
+
+volumes:
+  db_data_local:
+  movie_ticket_static:
+  movie_ticket_media:
+
+networks:
+  backend-network:
+    driver: bridge

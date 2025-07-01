@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status , permissions
 from django.contrib.auth import authenticate
 from .models import TheaterOwnerProfile
-from .serializers import TheatreOwnerSerialzers , FetchMovieSerializer , CreateScreenSerializer , Createshowtimeserializers , TimeSlotSerializer , UpdateTheatreOwnerSeriailizer , FetchShowTimeSerializer
+from .serializers import TheatreOwnerSerialzers , FetchMovieSerializer , CreateScreenSerializer , Createshowtimeserializers , TimeSlotSerializer , UpdateTheatreOwnerSeriailizer , FetchShowTimeSerializer , UpdateTheatreOwnerSerializer
 from rest_framework.permissions import IsAuthenticated , AllowAny
 from django.core.mail import send_mail
 from django.conf import settings
@@ -22,7 +22,9 @@ from seats.models import *
 from booking.models import Booking , BookingSeat
 from django.db.models import Sum , Count , Subquery , OuterRef
 import logging
+from rest_framework.parsers import MultiPartParser, FormParser
 
+from .tasks import send_response_mail
 logger = logging.getLogger(__name__)
 
 # Create your views here.
@@ -166,13 +168,10 @@ class ConfirmTheatreOwner(APIView) :
                     Login here: http://localhost:5173/theatre/login
                 '''
 
-                send_mail(
-
-                    email_subject,
-                    email_message,
-                    'mhdasjad877@gmail.com', 
-                    [user.email],
-                    fail_silently=True
+                send_response_mail.delay(
+                    user.email , 
+                    email_subject ,
+                    email_message
                 )
 
 
@@ -193,13 +192,11 @@ class ConfirmTheatreOwner(APIView) :
                     Thank you for letting know
                 '''
                 
-                send_mail(
+                send_response_mail.delay(
 
+                    user.email,
                     email_subject,
                     email_message,
-                    settings.EMAIL_HOST_USER,
-                    [user.email],
-                    fail_silently=True
                 )
                 
                 return Response(
@@ -286,7 +283,8 @@ class CreateScreen(APIView):
         screen_no = data['screen_number']
         Screen_type = list(data['screen_type'])
         time_slots = data['time_slots']
-    
+        theatre = Theatre.objects.get(id = theatre_id)
+        owner_email = theatre.owner.user.email
         Screen_Occurs = Screen.objects.filter(theatre=theatre_id ,screen_number =  screen_no)
         if Screen_Occurs.exists():
             return Response({'error' : f'Screen {screen_no} already exist'} , status=status.HTTP_400_BAD_REQUEST)
@@ -308,7 +306,7 @@ class CreateScreen(APIView):
         if serializers.is_valid():
             serializers.save()
             return Response({'message':'screen for theatre is created'},status=status.HTTP_201_CREATED)
-        
+
         print(serializers.errors)
         return Response(serializers.errors , status=status.HTTP_400_BAD_REQUEST)
 
@@ -414,7 +412,6 @@ class Add_Show_Time(APIView):
         logger.info(f"Received slot IDs: {slot_ids}")
         timeslot = TimeSlot.objects.filter(id__in = slot_ids)
         logger.info(f"Filtered timeslot: {timeslot}")
-
             
         
         try :
@@ -424,6 +421,8 @@ class Add_Show_Time(APIView):
         except:
             return Response({'Error' : ' time slot does not exist'} , status=status.HTTP_400_BAD_REQUEST)
         
+        if not timeslot.exists():
+            return Response({'Error' : 'atleast select 1 showtime'}, status=status.HTTP_400_BAD_REQUEST)
         each_slot = timeslot.first()
         date_time = show_date + ' ' + str(each_slot.start_time)
         
@@ -910,3 +909,48 @@ class Revenue_Chart(APIView):
             current_date += timedelta(days=1)
 
         return Response(data , status=status.HTTP_200_OK)
+    
+    
+class EditTheatreProfile(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request):
+        try:
+            
+            profile = TheaterOwnerProfile.objects.get(user=request.user)
+            profile_pic = request.build_absolute_uri(profile.owner_photo.url) if profile.owner_photo else None
+            data = {
+                'profile_pic': profile_pic,
+                'avatar_config': profile.avatar_config if profile.avatar_config else None
+            }
+            logger.info(f"Retrieved profile for user {request.user.id}")
+            return Response(data, status=status.HTTP_200_OK)
+        except TheaterOwnerProfile.DoesNotExist:
+            logger.warning(f"TheaterOwnerProfile not found for user {request.user.id}")
+            return Response({'error': 'Owner profile does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error retrieving profile for user {request.user.id}: {str(e)}")
+            return Response({'error': 'Internal server error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        try:
+            logger.info(f'data from settings theater: {request.data}')
+            profile = TheaterOwnerProfile.objects.get(user=request.user)
+        except TheaterOwnerProfile.DoesNotExist:
+            logger.warning(f"TheaterOwnerProfile not found for user {request.user.id}")
+            return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UpdateTheatreOwnerSerializer(profile, data=request.data , partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            profile_pic = request.build_absolute_uri(profile.owner_photo.url) if profile.owner_photo else None
+            logger.info(f"Profile updated for user {request.user.id}")
+            return Response({
+                "message": "Profile updated successfully",
+                "profile_pic": profile_pic,
+                "avatar_config": profile.avatar_config
+            }, status=status.HTTP_200_OK)
+        else:
+            logger.error(f"Serializer errors for user {request.user.id}: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -3,7 +3,7 @@ export async function sentToChatBot(messages){
     const token = localStorage.getItem(`${current_user}_token`);
     console.log('sending to the backed')
     try {
-        const response = await fetch("http://127.0.0.1:8000/review/chatbot/", {
+        const response = await fetch("https://api.cine-magic.fun/review/chatbot/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

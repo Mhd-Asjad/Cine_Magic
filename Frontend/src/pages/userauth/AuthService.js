@@ -2,13 +2,13 @@ import userApi from "@/axios/userApi"
 import { setUsername , setEmail , setUser_id , setPrevilage } from "@/redux/features/UserSlice"
 import { setTheatreOwner } from '../../redux/features/Theatreownerslice';
 import {jwtDecode} from 'jwt-decode';
+import { clearNotifications } from "@/redux/features/notificationSlice";
 
 const TOKEN_KEYS = {
     user: 'user_token',
     admin: 'admin_token',
     theatre: 'theatre_token'
 }
-
 export const login  = async ( dispatch ,  username , password , loginType ) => {
     
     try {
@@ -71,7 +71,7 @@ export const logout = async() => {
     }catch(e){
         console.log('error on logout',e.response?.data || 'error occurs' )
     }finally{
-       
+       dispatch()
     }
     if (userType) {
         localStorage.removeItem(TOKEN_KEYS[userType]);

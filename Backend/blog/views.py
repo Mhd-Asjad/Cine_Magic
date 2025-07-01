@@ -271,4 +271,26 @@ class get_post_reaction(APIView):
             return Response({'is_like' : post_reaction.is_like},status=status.HTTP_200_OK)
         except PostReaction.DoesNotExist:
             return Response({'error' : None},status=status.HTTP_404_NOT_FOUND)
+
+class edit_comment(APIView):
+    def put(self , request , comment_id):
+        data = request.data
+        try :
+            comment = Comment.objects.get(id = comment_id)    
+        except Comment.DoesNotExist:
+            return Response({'error':'comment is not found'},status=status.HTTP_404_NOT_FOUND)
         
+        serializer = CommentSerializer(instance = comment , data = data , partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data , status=status.HTTP_200_OK)
+        return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self , request , comment_id) :
+        try :
+            comment = Comment.objects.get(id = comment_id)    
+        except Comment.DoesNotExist:
+            return Response({'error':'comment is not found'},status=status.HTTP_404_NOT_FOUND)
+
+        comment.delete()
+        return Response({'message': 'comment deleted successfully'},status=status.HTTP_200_OK)

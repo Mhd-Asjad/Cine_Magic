@@ -65,16 +65,13 @@ LOGGING = {
 }
 # allowed Hosts
 
-print(os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(","))
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1").split(",")
-
-
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,api.cine-magic.fun").split(",")
 print(ALLOWED_HOSTS , 'allowed hosts areee')
 # Application definition
 
 INSTALLED_APPS = [
-    
-    'django.contrib.admin',
+    'daphne',
+    'django.contrib.admin',d
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -86,7 +83,7 @@ INSTALLED_APPS = [
     'theatres',
     'adminside',
     'seats',
-    'booking',
+    'booking.apps.BookingConfig',
     'theatre_owner',
     'blog',
     'review',
@@ -101,6 +98,7 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
+    'channels',
 ]
 
 SITE_ID = 1
@@ -149,7 +147,6 @@ AUTHENTICATION_BACKENDS = [
     
 ]
 
-
 ROOT_URLCONF = 'Backend.urls'
 
 TEMPLATES = [
@@ -170,23 +167,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Backend.wsgi.application'
 
-AUTH_USER_MODEL = 'useracc.User'
+ASGI_APPLICATION = 'Backend.asgi.application'
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
+
+AUTH_USER_MODEL = 'useracc.User'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
+print(os.environ.get('DB_HOST') , 'postgres docker')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
+        'NAME': os.environ.get('DB_NAME','movie_ticket'),
         'USER': os.environ.get('DB_USER' ,  'postgres'),
         'PASSWORD': os.environ.get('DB_PASSWORD' , 'asjadk123'),
-        'HOST': os.environ.get('DB_HOST'),
+        'HOST': os.environ.get('DB_HOST' , 'db'),
         'PORT': os.environ.get('DB_PORT' , '5432')
     }
 }
 
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -230,10 +239,10 @@ API_TOKEN = 'apify_api_oatUb8skjP3f8lKXalb2PbBaCnYpWX335w02'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = 'app/staticfiles'
+STATIC_URL = '/static/'
+STATIC_ROOT =  '/app/staticfiles'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = 'app/media'
+MEDIA_ROOT = '/app/media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -241,21 +250,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://www.cine-magic.fun",
-    "https://api.cine-magic.fun"
+CORS_ALLOW_ALL_ORIGINS = False
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://cine-magic.fun",
+    "https://www.cine-magic.fun",
+    "https://api.cine-magic.fun",
 ]
 
 print(CSRF_TRUSTED_ORIGINS , 'csrf trusted originnn......')
 
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'https://cine-magic.fun,https://www.cine-magic.fun,https://api.cine-magic.fun,http://localhost:5173/').split(',')
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'https://cine-magic.fun,https://www.cine-magic.fun,https://api.cine-magic.fun,http://localhost:5173').split(',')
 print(CORS_ALLOWED_ORIGINS, 'cors origin varss')
-
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    "X-Requested-With",
-    "Content-Type",
-]
 
 ACCOUNT_USER_MODEL_EMAIL_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = False

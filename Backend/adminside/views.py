@@ -8,7 +8,7 @@ from rest_framework import status , permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from useracc.models import User
 from django.http import JsonResponse
-from .serilizers import TheatreSerializer , MovieSerializers
+from .serilizers import TheatreSerializer , MovieSerializers , AdminSettingsSerializer
 from movies.models import City , Movie
 from theatres.models import *
 from theatre_owner.models import *
@@ -28,7 +28,9 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
 from django.db.models import ExpressionWrapper, FloatField
-
+from theatre_owner.tasks import send_response_mail
+from .models import AdminSettings
+ 
 # Create your views here.
 
 logger = logging.getLogger(__name__)
@@ -225,8 +227,14 @@ class ShowTheatreRequest(APIView):
                     for screen in screen_data :
                         screen.is_approved = True
                         screen.save()
-
-                
+                        
+                subject = f"{theatre_det.name} screen was approved by admin"
+                msg = f"thank you for being part of cinemagic" 
+                send_response_mail(
+                    theatre_det.owner.user.email,
+                    subject,
+                    msg
+                )
                 return Response(
                     {'message' : 'theatre verified successfully'},
                     status=status.HTTP_200_OK
@@ -251,12 +259,22 @@ def Verified_Theatres(request):
 # check theatre verfication view
 class verify_screen(APIView):
     def post(self , request,screen_id):
-        print('view check✅')
-        print(screen_id)
+        data = request.data
+        owner = data.get('owner_id')
+        owner = TheaterOwnerProfile.objects.get(id=owner)
         try :
             screen = Screen.objects.get(id=screen_id)
             screen.is_approved = True
             screen.save()
+            subject = f"{screen.theatre.name} screen {screen.screen_number} was approved by admin"
+            email_msg = f'screen updated by cineMagic admins \n\n wish you a good start🎉'
+
+            send_response_mail(
+                owner.user.email,
+                subject , 
+                email_msg
+                
+            )
             return Response({'message' : 'approved successfully'},status=status.HTTP_200_OK)
         
         except Screen.DoesNotExist:
@@ -937,3 +955,37 @@ def GetTheatres(request):
     
     
     return JsonResponse(data , safe=False, status=200)
+
+    
+class AdminSettingsView(APIView):
+    def get(self , request):
+        settings_ob , created = AdminSettings.objects.get_or_create(id=1)
+        serializer = AdminSettingsSerializer(settings_ob)
+        return Response(serializer.data , status=status.HTTP_200_OK)
+    
+    
+    def post(self, request):
+        settings_obj, created = AdminSettings.objects.get_or_create(id=1)
+        serializer = AdminSettingsSerializer(settings_obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Settings updated successfully!', 'data': serializer.data},status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ChangePassword(APIView):
+    def post(self , request ):
+        try:
+            user = request.user
+            username = user.username
+            old_password = request.data.get('old_password')
+            new_password = request.data.get('new_password')
+            user = authenticate(username=username , password=old_password)
+            
+            if user and user.is_superuser:
+                user.set_password(new_password)
+                user.save()
+                return Response({'message':'password changed'},status=status.HTTP_200_OK)
+            return Response({'message':'invalid password or not a superuser'})
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    

@@ -13,7 +13,7 @@ class TheatreOwnerSerialzers(serializers.ModelSerializer) :
     
     class Meta :
         model = TheaterOwnerProfile
-        fields = ['id' , 'user' , 'theatre_name' , 'location' , 'state' , 'pincode' ,'latitude' , 'longitude' , 'user_message']
+        fields = ['id' , 'user' , 'theatre_name' , 'location' , 'state' , 'owner_photo' , 'pincode' ,'latitude' , 'longitude' , 'user_message']
 
     def create(self, validated_data) :
         
@@ -238,6 +238,17 @@ class FetchShowTimeSerializer(serializers.ModelSerializer):
 class UpdateTheatreOwnerSeriailizer(serializers.ModelSerializer):
     class Meta :
         model = TheaterOwnerProfile
-        fields = ['id' , 'user' , 'theatre_name' , 'location' , 'state' , 'pincode' , 'ownership_status']
-        
-        
+        fields = ['id' , 'user' ,'owner_photo' , 'theatre_name' , 'location' , 'state' , 'pincode' , 'ownership_status']
+
+class UpdateTheatreOwnerSerializer(serializers.ModelSerializer):
+    avatar_config = serializers.JSONField(allow_null=True, required=False)
+    owner_photo = serializers.ImageField(allow_null=True, required=False)
+
+    class Meta:
+        model = TheaterOwnerProfile
+        fields = ['owner_photo', 'avatar_config']
+
+    def validate(self, data):
+        if not data.get('owner_photo') and not data.get('avatar_config'):
+            raise serializers.ValidationError("At least one of owner_photo or avatar_config must be provided.")
+        return data

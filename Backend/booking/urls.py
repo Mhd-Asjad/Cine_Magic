@@ -14,5 +14,7 @@ urlpatterns = [
     path('cancel-ticket/<int:booking_id>/',Cancel_Ticket.as_view(),name='cancel-ticket'),
     path('process-refund/<int:booking_id>/',process_refund.as_view(),name='process-refund'),
     path('booking-status/<int:booking_id>/',Get_Booking_Status.as_view(),name='booking-status'),
-    
+    path('notifications/',list_notification.as_view(),name='notifications'),
+    path('notification-actions/<int:notification_id>/',notification_actions.as_view(),name='notification-actions'),
+    path('markall-asread/',mark_all_asread.as_view(),name='mark-all-asread')
 ]

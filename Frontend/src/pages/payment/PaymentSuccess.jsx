@@ -6,7 +6,6 @@ import Nav from "@/components/navbar/Nav";
 import apiBooking from "@/axios/Bookingapi";
 import { useSelector } from "react-redux";
 function PaymentSuccess() {
-    const [isLoading, setIsLoading] = useState(true);
     const {booking_id} = useParams()
     const [ booking , setBookingDetails ] = useState([]);
     const userId = useSelector((state) => state.user.id)
@@ -23,51 +22,9 @@ function PaymentSuccess() {
       fetchBooking()
     },[booking_id])
 
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 1000); 
   
-      return () => clearTimeout(timer);
-    }, []);
-
-    
-
-    // useEffect(() => {
-    //   const socket = new WebSocket(`ws://localhost:8000/ws/notifications/${userId}/`);
-
-    //   socket.onopen = () => {
-    //     console.log('websocket is connected');
-    //   };
-
-    //   socket.onmessage = (event) => {
-    //     const data = JSON.parse(event.data);
-    //     console.log(data, 'server sended data while booking created');
-    //     setNotification(data.message);
-    //     setTimeout(() => setNotification(''), 5000);
-    //   };
-
-    //   socket.onclose = () => {
-    //     console.log('websocket disconnected');
-    //   };
-
-    //   socket.onerror = (error) => {
-    //     console.log('WebSocket error', error);
-    //   };
-
-    //   return () => socket.close();
-    // }, [userId]);
-
   useBookingWebSocket(userId);
   console.log(notifications)
-
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="loader" ></div>
-            </div>
-        )
-    }
 
   const formatTime = (timeString) => {
     const [hours , minutes] = timeString.split(':');
@@ -109,7 +66,7 @@ function PaymentSuccess() {
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500 dark:text-gray-400">Date &amp; Time:</span>
-            <span className="font-medium text-gray-900 dark:text-gray-50">{booking.show_date} at {formatTime(booking.show_time)} </span>
+            <span className="font-medium text-gray-900 dark:text-gray-50">{booking.show_date}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500 dark:text-gray-400">Payment Status :</span>

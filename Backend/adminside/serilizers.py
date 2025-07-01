@@ -5,6 +5,7 @@ from theatres.models import *
 from theatre_owner.models import *
 from useracc.models import User
 from seats.models import seats
+from .models import *
 from django.db.models.functions import Concat
 
 
@@ -103,3 +104,7 @@ class MovieSerializers(serializers.ModelSerializer) :
         movie = Movie.objects.create(**validated_data)
         return movie
     
+class AdminSettingsSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = AdminSettings
+        fields = ['id' , 'allow_registration']

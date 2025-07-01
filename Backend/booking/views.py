@@ -20,6 +20,8 @@ from movies.models import Movie
 import paypalrestsdk
 from useracc.permissions import IsAuthenticatedUser
 import logging
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 paypalrestsdk.configure({
     'mode' : 'sandbox',
     'client_id' : settings.PAYPAL_CLIENT_ID,
@@ -434,3 +436,92 @@ class ticket_view(APIView):
             return Response(serializer.data , status=status.HTTP_200_OK)
         except Exception as e :
             return Response({'error' : str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class list_notification(APIView):
+    def get(self , request):
+        try :
+            notifications = Notifications.objects.filter(user=request.user).order_by('-created')
+            unread_count = notifications.filter(is_read=False).count()
+            return Response({
+                'notifications': [
+                    {
+                        'id': n.id,
+                        'notification_type': n.notification_type if n.notification_type else None ,
+                        'message': n.message,
+                        'is_read': n.is_read,
+                        'created': n.created.isoformat(),
+                        'booking_id': n.booking.booking_id if n.booking else None,
+                        'complaint_id': n.complaint.id if n.complaint else None
+                    } for n in notifications
+                ],
+                'unread_count': unread_count
+            },status=status.HTTP_200_OK)
+
+        except Notifications.DoesNotExist:
+            return Response({'message':'notifications not found'},status=status.HTTP_404_NOT_FOUND)
+        
+class notification_actions(APIView):
+    def post(self , request , notification_id):
+        try:
+            data = request.data
+            action = data.get('action')
+            user = request.user
+            notification = get_object_or_404(
+                request.user.notifications , 
+                id = notification_id
+            )
+            
+            if action == 'mark_read':
+                notification.is_read = True
+                notification.save()
+                unread_count = Notifications.objects.filter(
+                    user=user,
+                    is_read=False
+                ).count()
+                
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    f'user_{user.id}',
+                    {
+                        'type': 'send_notification',
+                        'event_type': 'unread_count_update',
+                        'unread_count': unread_count,
+                    }
+                )
+
+                
+                return Response({'message' : 'marked as read'},status=status.HTTP_200_OK)
+                                    
+            else :
+                return Response({'message' : 'notification deleted'},status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e :
+            print( 'error on not actions' ,str(e))
+            return Response({'error' : str(e)} , status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+class mark_all_asread(APIView):
+    def post(self , request):
+        try :
+            user = request.user
+            updated_count = Notifications.objects.filter(
+                user=user , is_read=False
+            ).update(is_read=True)
+            
+            unread_count = Notifications.objects.filter(
+                user=user , is_read=False
+            ).count()
+            
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'user_{user.id}',
+                {
+                    'type': 'send_notification',
+                    'event_type': 'unread_count_update',
+                    'unread_count': unread_count,
+                }
+            )           
+            return Response({'message' : f'marked {updated_count} notification as read'},status=status.HTTP_200_OK)
+        
+        except Exception as e :
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
