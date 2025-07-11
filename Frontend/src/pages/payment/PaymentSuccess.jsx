@@ -32,9 +32,6 @@ function PaymentSuccess() {
     date.setHours(hours , minutes)
     return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
   }
-
-
-    console.log(window.location.host)
   return (
     <div>
         <Nav/>

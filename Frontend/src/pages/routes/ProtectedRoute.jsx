@@ -10,34 +10,33 @@ export const UserRoute = ({children}) => {
     if (!user){
         return <Navigate to={'/'} />
     }
-
-    if (user.userType === 'user' || user.userType === 'theatre' || user.userType === 'admin' ){
-        return children
+    if (['user', 'theatre', 'admin'].includes(user.userType)){
+        return children;
     }
 }
 
-
 export const TheatreRoute = ({ children }) => {
     const user = getCurrentUser();
-    console.log(!user)
+    console.log(user)
     
     console.log('inside theatre route')
     if (!user) {
+        return <Navigate to="/theatre/login" />;
+    }
+
+    if (user.userType !== 'theatre') {
         return <Navigate to="/theatre/login" />;
     }
     
     if (user.userType === 'theatre') {
         return children;
     }
-    if (user.userType !== 'theatre') {
-        return <Navigate to="/theatre/login" />;
-    }
     
 }
 
 export const AdminRoute = ({ children }) => {
     const user = getCurrentUser();
-    
+    console.log(user)
     if (!user) {
         return <Navigate to="/admin/login" />;
     }

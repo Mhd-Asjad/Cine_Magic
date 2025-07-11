@@ -6,16 +6,19 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('theatres', '0008_alter_showtime_unique_together_alter_showtime_movie_and_more'),
+        (
+            "theatres",
+            "0008_alter_showtime_unique_together_alter_showtime_movie_and_more",
+        ),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='showtime',
+            name="showtime",
             unique_together=set(),
         ),
         migrations.RemoveField(
-            model_name='showtime',
-            name='slot',
+            model_name="showtime",
+            name="slot",
         ),
     ]

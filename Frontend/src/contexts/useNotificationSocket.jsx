@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { addNotification , updateUnreadCount } from '@/redux/features/notificationSlice';
 import { useDispatch } from 'react-redux';
+import {toast} from 'sonner'
+import { CircleCheckBig } from 'lucide-react';
 
 const WebSocketManager = (() => {
   let socket = null;
@@ -18,12 +20,12 @@ const WebSocketManager = (() => {
     socket.onopen = () => {
       console.log('✅ Booking WebSocket connected');
       isConnecting = false;
-      clearTimeout(reconnectTimeout);
-      setInterval(() => {
-        if (socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify({ type: 'ping' }));
-        }
-      }, 30000);
+      // clearTimeout(reconnectTimeout);
+      // setInterval(() => {
+      //   if (socket.readyState === WebSocket.OPEN) {
+      //     socket.send(JSON.stringify({ type: 'ping' }));
+      //   }
+      // }, 30000);
     };
 
     socket.onmessage = (event) => {
@@ -34,12 +36,17 @@ const WebSocketManager = (() => {
         if (eventType === 'booking_confirmed' || eventType === 'booking_cancelled') {
           dispatch(addNotification(data.notification));
           dispatch(updateUnreadCount(data.unread_count))
+          toast(data.notification.message, {
+            icon: <CircleCheckBig/>
+          });
         } else if (eventType === 'unread_count_update') {
           dispatch(updateUnreadCount(data.unread_count));
         } else {
-          dispatch(updateUnreadCount(data.notification))
+          dispatch(addNotification(data.notification))
           dispatch(updateUnreadCount(data.unread_count))
-
+          toast(data.notification.message ,{
+            icon: <CircleCheckBig/>
+          })
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);

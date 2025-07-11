@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('theatre_owner', '0005_remove_theaterownerprofile_city_and_more'),
+        ("theatre_owner", "0005_remove_theaterownerprofile_city_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='theaterownerprofile',
-            name='owner_photo',
-            field=models.ImageField(blank=True, null=True, upload_to='owner_photos'),
+            model_name="theaterownerprofile",
+            name="owner_photo",
+            field=models.ImageField(blank=True, null=True, upload_to="owner_photos"),
         ),
     ]

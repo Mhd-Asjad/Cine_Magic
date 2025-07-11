@@ -6,7 +6,6 @@ import { ChatForm } from '@/components/ui/chat'
 import { MessageInput } from '@/components/ui/message-input'
 import { MessageList } from '@/components/ui/message-list'
 import { PromptSuggestions } from '@/components/ui/prompt-suggestions'
-import { sentToChatBot } from './Chatbotapi'
 import apiReview from '@/axios/Reviewapi'
 
 export function ChatBotUi({ setLastMessageId}) {
@@ -16,7 +15,7 @@ export function ChatBotUi({ setLastMessageId}) {
 
     const [historyLoaded , setHistoryLoaded ] = useState(false)
     const { messages, input, handleInputChange, append , setMessages ,  handleSubmit, isLoading, stop } = useChat({
-        api : 'https://api.cine-magic.fun/review/chatbot/',
+        api : 'http://localhost:8000/review/chatbot/',
         streamProtocol : 'text',
         headers :  {
             "Authorization" : `Bearer ${token}`

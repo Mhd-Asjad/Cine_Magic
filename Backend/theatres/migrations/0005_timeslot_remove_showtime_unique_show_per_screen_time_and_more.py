@@ -7,47 +7,65 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('theatres', '0004_screen_layout'),
+        ("theatres", "0004_screen_layout"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TimeSlot',
+            name="TimeSlot",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_time', models.TimeField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("start_time", models.TimeField()),
             ],
         ),
         migrations.RemoveConstraint(
-            model_name='showtime',
-            name='unique_show_per_screen_time',
+            model_name="showtime",
+            name="unique_show_per_screen_time",
         ),
         migrations.AddField(
-            model_name='showtime',
-            name='show_date',
+            model_name="showtime",
+            name="show_date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='showtime',
-            name='end_time',
+            model_name="showtime",
+            name="end_time",
             field=models.TimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='timeslot',
-            name='screen',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_slot', to='theatres.screen'),
+            model_name="timeslot",
+            name="screen",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="time_slot",
+                to="theatres.screen",
+            ),
         ),
         migrations.AddField(
-            model_name='showtime',
-            name='slot',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='showtimes', to='theatres.timeslot'),
+            model_name="showtime",
+            name="slot",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="showtimes",
+                to="theatres.timeslot",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='showtime',
-            unique_together={('screen', 'slot', 'show_date')},
+            name="showtime",
+            unique_together={("screen", "slot", "show_date")},
         ),
         migrations.RemoveField(
-            model_name='showtime',
-            name='start_time',
+            model_name="showtime",
+            name="start_time",
         ),
     ]

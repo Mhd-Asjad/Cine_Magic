@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('theatres', '0009_alter_showtime_unique_together_remove_showtime_slot'),
+        ("theatres", "0009_alter_showtime_unique_together_remove_showtime_slot"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='theatre',
-            name='latitude',
+            model_name="theatre",
+            name="latitude",
             field=models.FloatField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='theatre',
-            name='longitude',
+            model_name="theatre",
+            name="longitude",
             field=models.FloatField(blank=True, null=True),
         ),
     ]

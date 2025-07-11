@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import apiBooking from '@/axios/Bookingapi';
 import { X } from 'lucide-react';
 function ShowRefundStatus({ refundId , openStatus }) {
     const [refundStatus, setRefundStatus] = useState(null);
-    const { toast } = useToast();
 
     useEffect(() => {
         if (refundId) {
@@ -14,11 +13,9 @@ function ShowRefundStatus({ refundId , openStatus }) {
 
     useEffect(() => {
         if (refundStatus) {
-            toast({
-                title: "Refund Status Update",
-                description: `Your refund status is: ${refundStatus.refund_status}`,
-                variant: "default",
-            });
+            toast(
+                `Your refund status is: ${refundStatus.refund_status}`,
+            );
         }
     }, [refundStatus]);
 
@@ -29,11 +26,9 @@ function ShowRefundStatus({ refundId , openStatus }) {
             setRefundStatus(response.data.status);
         } catch (e) {
             console.error("Error fetching refund status:", e);
-            toast({
-                title: "Error",
-                description: "Could not fetch refund status.",
-                variant: "destructive",
-            });
+            toast(
+             "Could not fetch refund status.",
+            );
         }
     };
 

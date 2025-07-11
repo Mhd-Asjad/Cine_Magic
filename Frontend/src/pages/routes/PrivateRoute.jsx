@@ -2,11 +2,24 @@ import React, { useCallback, useEffect , useState } from "react";
 import { Navigate , useNavigate } from 'react-router-dom'
 import {jwtDecode} from 'jwt-decode'
 import userApi from "@/axios/userApi";
-
+import { useDispatch } from "react-redux";
+import { logout } from "../userauth/AuthService";
+import { performLogout } from "./performLogout";
+import SessionExpiredDialog from "./SessionExpiredDialog";
 function PrivateRoute({ children , allowedTypes }) {
     
     const [isAuthenticated , setIsAuthenticated ] = useState(false);
     const [loading , setLoading ] = useState(true)
+    const [showDialog, setShowDialog] = useState(false);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    useEffect(() => {
+        if (!isAuthenticated) {
+            setShowDialog(true);
+        }
+    }, [isAuthenticated]);
+
+
     const currentRole = localStorage.getItem('current_user_type')
 
     const refreshToken = useCallback(async () => {
@@ -92,19 +105,17 @@ function PrivateRoute({ children , allowedTypes }) {
 
 
     console.log('user is authenticated :',isAuthenticated )
-    console.log(allowedTypes , 'allowed before checking validation')
-
-    const redirectPath = allowedTypes === 'user' ? '/' : `/${allowedTypes}/login`;
     
     if (loading) {
-        console.log('not authenticated, redirecting to:', redirectPath);
         return <div className="flex justify-center h-screen" >Loading.....</div>
     }
 
+    const handleDialogConfirm = () => {
+        performLogout(dispatch,navigate)
+    }
+
     if(!isAuthenticated) {
-        // consider redirecting to login after if tocken expired on user side
-        console.log(redirectPath)
-        return <Navigate to={redirectPath} replace />;  
+        return <SessionExpiredDialog open={showDialog} onConfirm={handleDialogConfirm} />
     }
 
     return children;

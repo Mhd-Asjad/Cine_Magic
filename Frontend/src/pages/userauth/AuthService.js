@@ -2,13 +2,46 @@ import userApi from "@/axios/userApi"
 import { setUsername , setEmail , setUser_id , setPrevilage } from "@/redux/features/UserSlice"
 import { setTheatreOwner } from '../../redux/features/Theatreownerslice';
 import {jwtDecode} from 'jwt-decode';
-import { clearNotifications } from "@/redux/features/notificationSlice";
 
 const TOKEN_KEYS = {
     user: 'user_token',
     admin: 'admin_token',
     theatre: 'theatre_token'
 }
+const SESSION_ID = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+sessionStorage.setItem('auth_session_id', SESSION_ID);
+
+if (!sessionStorage.getItem('auth_session_id')) {
+  sessionStorage.setItem(
+    'auth_session_id',
+    `${Date.now()}_${Math.random().toString(36).substring(2)}`
+  );
+}
+
+window.addEventListener('storage', (event) => {
+  if (event.key === 'auth_event_source') {
+    const sourceTab = event.newValue;
+    const currentTab = sessionStorage.getItem('auth_session_id');
+
+    if (sourceTab !== currentTab) {
+
+        window.location.reload();
+        
+    }
+  }
+});
+
+export const checkUserBlocked = async (userId) => {
+    try {
+     const res = await userApi.get(`auth/status/${userId}/`);
+     return res
+    } catch (err) {
+     console.error("Status check failed:", err);
+     return err
+    }
+};
+
+
 export const login  = async ( dispatch ,  username , password , loginType ) => {
     
     try {
@@ -23,6 +56,7 @@ export const login  = async ( dispatch ,  username , password , loginType ) => {
         const tokenKey = TOKEN_KEYS[loginType]
         if (res.status == 200 ){
             const { refresh_token , access_token , id ,  username , email , is_admin  , is_theatre_owner , is_approved , theatre_profile  } = res.data.user
+            localStorage.setItem('auth_event_source', sessionStorage.getItem('auth_session_id'));
             localStorage.setItem(tokenKey , access_token )
             localStorage.setItem(`${tokenKey}_refresh`,refresh_token)
             localStorage.setItem('current_user_type' , loginType)
@@ -48,6 +82,8 @@ export const login  = async ( dispatch ,  username , password , loginType ) => {
                 is_approved : is_approved
                 
             }))
+
+            window.dispatchEvent(new Event('autoChange'))
             return {
                 token : access_token,
             };
@@ -60,9 +96,11 @@ export const login  = async ( dispatch ,  username , password , loginType ) => {
 }
 
 export const logout = async() => {
-
+    console.log('entering to the logout function')
     const userType = localStorage.getItem('current_user_type');
-    const refreshToken = localStorage.getItem(`${userType}_refresh_token`);
+    const refreshToken = localStorage.getItem(`${TOKEN_KEYS[userType]}_refresh`);
+    localStorage.setItem('auth_event_source', sessionStorage.getItem('auth_session_id'));
+
     try {
         const res = await userApi.post('userlogout/',{
             'refresh' : refreshToken
@@ -70,8 +108,6 @@ export const logout = async() => {
         console.log(res.data)
     }catch(e){
         console.log('error on logout',e.response?.data || 'error occurs' )
-    }finally{
-       dispatch()
     }
     if (userType) {
         localStorage.removeItem(TOKEN_KEYS[userType]);
@@ -81,7 +117,7 @@ export const logout = async() => {
         clearAllTokens();
     }
     
-    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new Event('autoChange'));
 };
 
 
@@ -119,6 +155,7 @@ export const clearAllTokens = () => {
         localStorage.removeItem(`${value}_refresh`)
     })
     localStorage.removeItem('current_user_type')
+
 }
 
 export default login

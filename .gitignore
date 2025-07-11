@@ -1,0 +1,73 @@
+# ====================
+# 🔧 GENERAL SETTINGS
+# ====================
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.env
+.env.*
+_pycache_/
+*.db
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ====================
+# 📦 VIRTUAL ENVIRONMENT
+# ====================
+env/
+venv/
+ENV/
+.venv/
+.Python
+pip-log.txt
+
+# ====================
+# 🐍 DJANGO SPECIFIC
+# ====================
+*.pyc
+db.sqlite3
+/media/
+/staticfiles/
+/static_root/
+/local_settings.py
+instance/
+settings/local.py
+.mypy_cache/
+.coverage
+htmlcov/
+pytest_cache/
+celerybeat-schedule
+celerybeat.pid
+logs/
+*.mo
+
+# ====================
+# ⚛ REACT SPECIFIC
+# ====================
+/frontend/node_modules/
+/frontend/build/
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.development
+/frontend/.env.production
+/frontend/.env.test
+
+# ====================
+# 📁 OS-SPECIFIC FILES
+# ====================
+.DS_Store
+*.swp
+*.swo
+ehthumbs.db
+Icon?.env

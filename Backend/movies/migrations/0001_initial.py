@@ -8,32 +8,60 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='City',
+            name="City",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True)),
-                ('state', models.CharField(max_length=100)),
-                ('pincode', models.CharField(blank=True, max_length=10, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("state", models.CharField(max_length=100)),
+                ("pincode", models.CharField(blank=True, max_length=10, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Movie',
+            name="Movie",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=100)),
-                ('language', models.CharField(max_length=50)),
-                ('duration', models.IntegerField()),
-                ('release_date', models.DateField()),
-                ('description', models.TextField()),
-                ('genre', models.CharField(max_length=50)),
-                ('poster', models.ImageField(blank=True, max_length=500, null=True, upload_to='posters/')),
-                ('created_at', models.DateTimeField(default=datetime.datetime(2025, 1, 21, 18, 9, 16, 443601))),
-                ('cities', models.ManyToManyField(related_name='movies', to='movies.city')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=100)),
+                ("language", models.CharField(max_length=50)),
+                ("duration", models.IntegerField()),
+                ("release_date", models.DateField()),
+                ("description", models.TextField()),
+                ("genre", models.CharField(max_length=50)),
+                (
+                    "poster",
+                    models.ImageField(
+                        blank=True, max_length=500, null=True, upload_to="posters/"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        default=datetime.datetime(2025, 1, 21, 18, 9, 16, 443601)
+                    ),
+                ),
+                (
+                    "cities",
+                    models.ManyToManyField(related_name="movies", to="movies.city"),
+                ),
             ],
         ),
     ]

@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import Sidebar from '../../../components/admin/Sidebar';
-import Navbar from '../../../components/admin/Navbar';
-import axios from 'axios';
 import apiAdmin from '../../../axios/api';
-import { FormatIndentDecreaseSharp } from '@mui/icons-material';
 import { useToast } from '@/hooks/use-toast';
-
+import { useNavigate } from 'react-router-dom';
 function AddMovies() {
     
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
     const {toast} = useToast()
     const initialValues = {
         title: '',
@@ -66,6 +63,8 @@ function AddMovies() {
                 variant : 'success'
             })
             resetForm();
+            navigate('/admin/movies/')
+
         } catch (error) {
             console.error('Error adding movie:', error);
         }finally{

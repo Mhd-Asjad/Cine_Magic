@@ -4,4 +4,5 @@ from movies.models import City
 from .models import Theatre
 from rest_framework.views import APIView
 from movies.models import *
+
 # Create your views here.

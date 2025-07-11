@@ -40,20 +40,20 @@ function ListMovies() {
     if (result.isConfirmed){
 
       try {
-        const res = await apiAdmin.delete(`movies/${movie_id}/delete`)
+        const res = await apiAdmin.delete(`movies/${movie_id}/delete/`)
         fetchMovies()
         toast({
           title : res.data.message,
           variant : 'success'
         })
       }catch(e){
-        console.log(e.response)
+        console.log(e)
       }
       }
     }
     
     const handleEdit = (movie_id) => {
-      navigate(`/admin/movies/${movie_id}/edit`)
+      navigate(`/admin/movies/${movie_id}/edit/`)
     }
     const addMoviesData = () =>{
         navigate('/admin/add-movies')

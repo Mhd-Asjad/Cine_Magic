@@ -7,13 +7,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('movies', '0001_initial'),
+        ("movies", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='movie',
-            name='created_at',
-            field=models.DateTimeField(default=datetime.datetime(2025, 1, 21, 18, 19, 20, 665110)),
+            model_name="movie",
+            name="created_at",
+            field=models.DateTimeField(
+                default=datetime.datetime(2025, 1, 21, 18, 19, 20, 665110)
+            ),
         ),
     ]

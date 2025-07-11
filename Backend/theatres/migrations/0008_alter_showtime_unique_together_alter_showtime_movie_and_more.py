@@ -7,30 +7,56 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('movies', '0007_remove_movie_cities'),
-        ('theatres', '0007_screen_is_approved'),
+        ("movies", "0007_remove_movie_cities"),
+        ("theatres", "0007_screen_is_approved"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='showtime',
-            name='movie',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='TimeSlotSlot', to='movies.movie'),
+            model_name="showtime",
+            name="movie",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="TimeSlotSlot",
+                to="movies.movie",
+            ),
         ),
         migrations.CreateModel(
-            name='ShowSlot',
+            name="ShowSlot",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('showtime', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='theatres.showtime')),
-                ('slot', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='theatres.timeslot')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "showtime",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="theatres.showtime",
+                    ),
+                ),
+                (
+                    "slot",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="theatres.timeslot",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('showtime', 'slot')},
+                "unique_together": {("showtime", "slot")},
             },
         ),
         migrations.AddField(
-            model_name='showtime',
-            name='slots',
-            field=models.ManyToManyField(blank=True, through='theatres.ShowSlot', to='theatres.timeslot'),
+            model_name="showtime",
+            name="slots",
+            field=models.ManyToManyField(
+                blank=True, through="theatres.ShowSlot", to="theatres.timeslot"
+            ),
         ),
     ]

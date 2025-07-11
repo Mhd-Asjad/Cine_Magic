@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from useracc.models import User 
-from movies.models import City , Movie
+from useracc.models import User
+from movies.models import City, Movie
 from theatres.models import *
 from theatre_owner.models import *
 from useracc.models import User
@@ -10,84 +10,132 @@ from django.db.models.functions import Concat
 
 
 class Userserialzer(serializers.ModelSerializer):
-    class Meta :
+    class Meta:
         model = User
-        fileds = '__all__'
+        fileds = "__all__"
 
 
-class CitySerializers(serializers.ModelSerializer) :
-    class Meta :
+class CitySerializers(serializers.ModelSerializer):
+    class Meta:
         model = City
-        fields = ['name' , 'state' , 'pincode']
+        fields = ["name", "state", "pincode"]
 
+    def validate_pincode(self, data):
+        if len(data) != 6:
+            raise serializers.ValidationError("pincode must be a valid format")
 
-    def validate_pincode(self , data) :
-        if len(data) != 6 : 
-            raise serializers.ValidationError('pincode must be a valid format')
-        
         return data
-    
+
     def create(self, validated_data):
         print(validated_data)
         city = City.objects.create(**validated_data)
-        print(f'created Cities are : {city.name} - {city.state}')
+        print(f"created Cities are : {city.name} - {city.state}")
         return city
-    
-class CitySerializer(serializers.ModelSerializer) :
-    class Meta :
+
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
         model = City
-        fields = ['name' , 'state' , 'pincode']
-        
-        
-class TheatreOwnerSerialzers(serializers.ModelSerializer) :
-    user_name = serializers.CharField(source='user.username')
-    class Meta :
+        fields = ["name", "state", "pincode"]
+
+
+class TheatreOwnerSerialzers(serializers.ModelSerializer):
+    user_name = serializers.CharField(source="user.username")
+
+    class Meta:
         model = TheaterOwnerProfile
-        fields = ['id' , 'user_name' , 'theatre_name' , 'location' , 'state' , 'pincode' , 'ownership_status']
-        
-        
+        fields = [
+            "id",
+            "user_name",
+            "theatre_name",
+            "location",
+            "state",
+            "pincode",
+            "ownership_status",
+        ]
+
+
 class ShowTimeSerializer(serializers.ModelSerializer):
-    start_time = serializers.CharField(source='slot.start_time')
-    movie = serializers.CharField(source='movie.title')
+    start_time = serializers.CharField(source="slot.start_time")
+    movie = serializers.CharField(source="movie.title")
+
     class Meta:
         model = ShowTime
-        fields = [ 'movie', 'start_time' , 'end_time']
-        
+        fields = ["movie", "start_time", "end_time"]
+
+
 class SeatSerializer(serializers.ModelSerializer):
     label = serializers.SerializerMethodField()
+
     class Meta:
         model = seats
-        fields = ['id', 'row', 'number', 'category', 'is_active', 'is_seat' , 'label']
-        
-    
-    def get_label(self , obj):
+        fields = [
+            "id",
+            "screen",
+            "row",
+            "number",
+            "category",
+            "is_active",
+            "is_seat",
+            "label",
+        ]
+
+    def get_label(self, obj):
         if obj.is_seat:
-            return f'{obj.row}{obj.number}'
-        return ''
+            return f"{obj.row}{obj.number}"
+        return ""
+
 
 class ScreenSerializer(serializers.ModelSerializer):
     # showtimes = ShowTimeSerializer(many=True)
-    seats =  SeatSerializer(many=True , read_only=True)
-    seat_in_a_row = serializers.CharField(source='layout.cols' , read_only=True)
-    
-    
+    seats = SeatSerializer(many=True, read_only=True)
+    seat_in_a_row = serializers.CharField(source="layout.cols", read_only=True)
+
     class Meta:
         model = Screen
-        fields = ['id','screen_number', 'capacity', 'screen_type' , 'is_approved' ,'seats' ,'layout' , 'seat_in_a_row']
-        
-    
-class TheatreSerializer(serializers.ModelSerializer) :
+        fields = [
+            "id",
+            "screen_number",
+            "capacity",
+            "screen_type",
+            "is_approved",
+            "is_active",
+            "seats",
+            "layout",
+            "seat_in_a_row",
+        ]
+
+
+class TheatreSerializer(serializers.ModelSerializer):
     owner = TheatreOwnerSerialzers(read_only=True)
     screens = ScreenSerializer(many=True)
     city = CitySerializer(read_only=True)
-    class Meta :
+    total_screens = serializers.SerializerMethodField()
+
+    class Meta:
         model = Theatre
-        fields = ['id' , 'name' , 'city', 'address' , 'is_confirmed', 'has_screen' , 'owner' , 'screens']
-    
+        fields = [
+            "id",
+            "name",
+            "city",
+            "total_screens",
+            "address",
+            "is_confirmed",
+            "has_screen",
+            "owner",
+            "screens",
+        ]
 
-class MovieSerializers(serializers.ModelSerializer) :
+    def get_total_screens(self, obj):
+        screens = Screen.objects.filter(theatre=obj.id)
+        if screens.exists():
+            return screens.count()
+        return None
 
-    class Meta :
+
+class MovieSerializers(serializers.ModelSerializer):
+
+    class Meta:
         model = Movie
         fields = [
             "id",
@@ -99,12 +147,13 @@ class MovieSerializers(serializers.ModelSerializer) :
             "genre",
             "poster",
         ]
-        
-    def create(self, validated_data ):
+
+    def create(self, validated_data):
         movie = Movie.objects.create(**validated_data)
         return movie
-    
+
+
 class AdminSettingsSerializer(serializers.ModelSerializer):
-    class Meta :
+    class Meta:
         model = AdminSettings
-        fields = ['id' , 'allow_registration']
+        fields = ["id", "allow_registration"]

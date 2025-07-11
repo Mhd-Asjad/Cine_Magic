@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react'
 import apiAdmin from '@/axios/api'
 import {
@@ -5,7 +6,6 @@ import {
     CardContent, 
     CardHeader, 
     CardTitle, 
-    CardDescription 
 } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,7 @@ import {
     DialogTitle, 
     DialogTrigger 
 } from "@/components/ui/dialog";
+import { IoMdArrowDropdown , IoMdArrowDropup } from "react-icons/io";
 import { Check, X , Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast"
 import Swal from 'sweetalert2';
@@ -24,6 +25,8 @@ import Swal from 'sweetalert2';
 function ShowRequest() {
     const [ theatreData , setTheatreData ] = useState([])
     const {toast} = useToast();
+    const [seats , setSeats]  = useState({})   
+    const [showSeatLayout , setShowSeatLayout] = useState(false);
     console.log(theatreData)
     useEffect(()=> {
         handleTheatresRequest()
@@ -38,7 +41,32 @@ function ShowRequest() {
         }
     }
     console.log(theatreData)
+    
+    const toggleSeatLayout = async(seats) => {
+        if (!showSeatLayout){
+            const organizeData = organizeByRow(seats)
+            setSeats(organizeData)
 
+        }
+
+        setShowSeatLayout(!showSeatLayout);
+    };
+    const organizeByRow = (seats) => {
+        const rowMap = {}
+        seats.forEach((seat) => {
+          if (!rowMap[seat.row]) {
+            rowMap[seat.row] = []
+          }
+          rowMap[seat.row].push(seat)
+        })
+        Object.values(rowMap).forEach((rowSeats) => {
+          rowSeats.sort((a, b) => a.number - b.number)
+        })
+        return rowMap
+    }
+    const getSeatClass = () => {
+        return 'bg-white text-blue cursor-not-allowed outline outline-1 outline-blue-600'
+    }
     const handleApprove = async (theatre_id) => {
         const status = 'confirmed'
         try {
@@ -106,7 +134,7 @@ function ShowRequest() {
             }
         }
     }
-    console.log(theatreData)
+    console.log(seats)
   return (
     <div className="w-full max-w-screen-xl mx-auto">
 
@@ -167,7 +195,7 @@ function ShowRequest() {
                                                     <div>
                                                         <h3 className="font-semibold mb-2">Theatre Info</h3>
                                                         <div className="mb-2 p-2 border rounded">
-                                                            <p><strong>Name:</strong> {data.name}</p>
+                                                            <p><strong>Name:</strong> {data.name} </p>
                                                             <p><strong>City:</strong> {`${data.city.name}`}</p>
                                                             <p><strong>Address:</strong> {data.address}</p>
 
@@ -179,17 +207,72 @@ function ShowRequest() {
                                                                     screen?.is_approved === false ? (
 
                                                                         <div key={screen.id} className="text-sm pl-2 mb-8 text-center rounded p-2 my-2">
-                                                                            <div className='border py-3 px-2 mx-auto mb-5  w-[80%]'  >
-
-                                                                                <p><strong>Screen {screen.screen_number} - {screen.screen_type || "N/A"}</strong></p>
+                                                                            <div className="border py-3 px-2 mx-auto mb-5 w-[80%]">
+                                                                                <p>
+                                                                                <strong>
+                                                                                    Screen {screen.screen_number} - {screen.screen_type || 'N/A'} ,
+                                                                                </strong>
+                                                                                </p>
                                                                                 <p>Capacity: {screen.capacity}</p>
 
-                                                                                
+                                                                                    {data.total_screens  === 1 ?(
+                                                                                    <button
+                                                                                    onClick={() => toggleSeatLayout(screen.seats)}
+                                                                                    className="mt-3 px-4 py-2 border border-dashed border-gray-500 rounded-md transition duration-200"
+                                                                                    >
+                                                                                    
+                                                                                    {showSeatLayout ? 'Hide Seat Layout' : `${'Show Seat Layout'} `}
+                                                                                    {showSeatLayout ? <IoMdArrowDropup size={30} className='inline' /> : <IoMdArrowDropdown size={30} className='inline' /> }
+                                                                                    </button>
+                                                                                ):null}
                                                                             </div>
-    
-                                                                        </div>
 
-                                                                    ): null
+                                                                            {showSeatLayout && (
+                                                                                <div>
+                                                                                <h1 className="text-lg font-semibold mb-4">Seat Layout </h1>
+                                                                                <div className="mt-5">
+                                                                                    <div className="flex flex-wrap gap-2">
+                                                                                    {Object.entries(seats).map(([row, rowSeats]) => (
+                                                                                        <div key={row} className="flex justify-center w-full mb-4">
+                                                                                        <button
+                                                                                            className="w-6 h-6 font-bold mr-2 rounded bg-gray-200 text-gray-700 cursor-not-allowed"
+                                                                                            disabled
+                                                                                        >
+                                                                                            {row}
+                                                                                        </button>
+                                                                                        <div className="flex space-x-1">
+                                                                                            {rowSeats.map((seat) =>
+                                                                                            seat?.label ? (
+                                                                                                <button
+                                                                                                type="button"
+                                                                                                key={seat.id}
+                                                                                                disabled
+                                                                                                title={`${seat.category_name || 'No Category'} - ₹${seat.price}`}
+                                                                                                className={`w-6 h-6 rounded-sm flex items-center justify-center text-xs ${getSeatClass(
+                                                                                                    seat
+                                                                                                )}`}
+                                                                                                >
+                                                                                                {seat.number}
+                                                                                                </button>
+                                                                                            ) : (
+                                                                                                <div key={seat.id} className="w-6 h-6" />
+                                                                                            )
+                                                                                            )}
+                                                                                        </div>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                    <div className="relative mb-8 pb-28 z-0">
+                                                                                        <div className="flex justify-center">
+                                                                                        {/* Uncomment if you want to include the screen image */}
+                                                                                        {/* <img src={screenimg} className="w-[80%] mt-3" alt="screen image" /> */}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                </div>
+                                                                            )}
+                                                                            </div>
+                                                                        ) : null
 
                                                                 ))
                                                             ) : (

@@ -6,17 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('useracc', '0007_alter_user_username'),
+        ("useracc", "0007_alter_user_username"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='otp',
+            model_name="user",
+            name="otp",
         ),
         migrations.AddField(
-            model_name='user',
-            name='user_type',
-            field=models.CharField(choices=[('normal', 'Normal User'), ('admin', 'Administrator'), ('theatre_owner', 'Theatre Owner')], default='normal', max_length=20),
+            model_name="user",
+            name="user_type",
+            field=models.CharField(
+                choices=[
+                    ("normal", "Normal User"),
+                    ("admin", "Administrator"),
+                    ("theatre_owner", "Theatre Owner"),
+                ],
+                default="normal",
+                max_length=20,
+            ),
         ),
     ]

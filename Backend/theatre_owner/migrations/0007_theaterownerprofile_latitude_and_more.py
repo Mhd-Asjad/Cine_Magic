@@ -6,18 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('theatre_owner', '0006_theaterownerprofile_owner_photo'),
+        ("theatre_owner", "0006_theaterownerprofile_owner_photo"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='theaterownerprofile',
-            name='latitude',
-            field=models.DecimalField(blank=True, decimal_places=5, max_digits=9, null=True),
+            model_name="theaterownerprofile",
+            name="latitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=5, max_digits=9, null=True
+            ),
         ),
         migrations.AddField(
-            model_name='theaterownerprofile',
-            name='longitude',
-            field=models.DecimalField(blank=True, decimal_places=5, max_digits=9, null=True),
+            model_name="theaterownerprofile",
+            name="longitude",
+            field=models.DecimalField(
+                blank=True, decimal_places=5, max_digits=9, null=True
+            ),
         ),
     ]

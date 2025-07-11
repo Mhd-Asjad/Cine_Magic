@@ -5,6 +5,7 @@ import apiBooking from '@/axios/Bookingapi';
 import { setNotifications , setLoading } from '@/redux/features/notificationSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import useBookingWebSocket from '@/contexts/useNotificationSocket';
+import { filter } from 'remeda';
 const UserNotificationsPage = () => {
     const [activeTab, setActiveTab] = useState('General');
     const { notifications, counts, loading } = useSelector((state) => state.notifications);
@@ -17,37 +18,43 @@ const UserNotificationsPage = () => {
     }, []);
     const fetchNotifications = async () => {
         try {
-            setLoading(true);
             
-            const res = await apiBooking.get('notifications/')
-            console.log(res.data.notification)
+            setLoading(true);
+            const res = await apiBooking.get('notifications/');
+            console.log(res.data.notifications);
             dispatch(setNotifications(res.data.notifications));
 
-        
-      } catch (error) {
-      console.error('Error fetching notifications:', error);
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
 
-    } finally {
-      setLoading(false);
-    }
-  };
-  console.log(counts)
+        } finally {
+            setLoading(false);
+        }
+    };
+    console.log(notifications)
 
     const getFilteredNotifications = () => {
-        if (activeTab === 'General') {
-            return notifications.filter(n => n.notification_type.toLowerCase() !== 'complaint');
-        }
-        if (activeTab === 'Complaints') {
-            return notifications.filter(n => n.notification_type.toLowerCase() === 'complaint');
-        }
-        return notifications;
+    if (activeTab === 'General') {
+        return notifications.filter(n =>
+        !n.notification_type.toLowerCase().includes('complaint')
+        );
+    }
+
+    if (activeTab === 'Complaints') {
+        return notifications.filter(n =>
+        n.notification_type.toLowerCase().includes('complaint')
+        );
+    }
+
+    return notifications;
     };
+
 
   const handleNotificationAction = async (notificationId , action) => {
     try {
 
         const res = await apiBooking.post(`notification-actions/${notificationId}/`, {
-            'action':action
+            'action': action
         })
         console.log(res.data.message);
     }catch(error) {

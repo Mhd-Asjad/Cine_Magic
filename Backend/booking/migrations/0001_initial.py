@@ -10,67 +10,184 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('seats', '0006_alter_seats_unique_together'),
-        ('theatres', '0009_alter_showtime_unique_together_remove_showtime_slot'),
+        ("seats", "0006_alter_seats_unique_together"),
+        ("theatres", "0009_alter_showtime_unique_together_remove_showtime_slot"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Booking',
+            name="Booking",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('booking_id', models.CharField(max_length=20, unique=True)),
-                ('qr_code', models.ImageField(blank=True, null=True, upload_to='qrcodes/')),
-                ('customer_name', models.CharField(max_length=100)),
-                ('customer_email', models.EmailField(max_length=254)),
-                ('booking_time', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('payment_initiated', 'payment Initiated'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')], default='pending', max_length=20)),
-                ('payment_id', models.CharField(blank=True, max_length=100, null=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('cancelled_at', models.DateField(blank=True, null=True)),
-                ('refund_amount', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('refunt_status', models.CharField(choices=[('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed'), ('not_applicable', 'Not Applicable')], default='not-applicable', max_length=20)),
-                ('show', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='theatres.showtime')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("booking_id", models.CharField(max_length=20, unique=True)),
+                (
+                    "qr_code",
+                    models.ImageField(blank=True, null=True, upload_to="qrcodes/"),
+                ),
+                ("customer_name", models.CharField(max_length=100)),
+                ("customer_email", models.EmailField(max_length=254)),
+                ("booking_time", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("payment_initiated", "payment Initiated"),
+                            ("confirmed", "Confirmed"),
+                            ("cancelled", "Cancelled"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("payment_id", models.CharField(blank=True, max_length=100, null=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("cancelled_at", models.DateField(blank=True, null=True)),
+                (
+                    "refund_amount",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=10, null=True
+                    ),
+                ),
+                (
+                    "refunt_status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("completed", "Completed"),
+                            ("failed", "Failed"),
+                            ("not_applicable", "Not Applicable"),
+                        ],
+                        default="not-applicable",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "show",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="theatres.showtime",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Payment',
+            name="Payment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order_id', models.CharField(max_length=100)),
-                ('payer_id', models.CharField(max_length=100)),
-                ('payment_method', models.CharField(default='paypal', max_length=50)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('currency', models.CharField(default='USD', max_length=4)),
-                ('payment_date', models.DateTimeField(auto_now_add=True)),
-                ('capture_id', models.CharField(blank=True, max_length=100, null=True)),
-                ('booking', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='payment', to='booking.booking')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("order_id", models.CharField(max_length=100)),
+                ("payer_id", models.CharField(max_length=100)),
+                ("payment_method", models.CharField(default="paypal", max_length=50)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("currency", models.CharField(default="USD", max_length=4)),
+                ("payment_date", models.DateTimeField(auto_now_add=True)),
+                ("capture_id", models.CharField(blank=True, max_length=100, null=True)),
+                (
+                    "booking",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="payment",
+                        to="booking.booking",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='SeatLock',
+            name="SeatLock",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user', models.CharField(max_length=100)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expires_at', models.DateTimeField()),
-                ('seat', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='seats.seats')),
-                ('show', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='theatres.showtime')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("user", models.CharField(max_length=100)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expires_at", models.DateTimeField()),
+                (
+                    "seat",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="seats.seats"
+                    ),
+                ),
+                (
+                    "show",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="theatres.showtime",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='BookingSeat',
+            name="BookingSeat",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('booked', 'Booked'), ('cancelled', 'Cancelled')], default='booked', max_length=20)),
-                ('price', models.DecimalField(decimal_places=2, max_digits=8)),
-                ('booking', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookingseats', to='booking.booking')),
-                ('seat', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='seats.seats')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("booked", "Booked"), ("cancelled", "Cancelled")],
+                        default="booked",
+                        max_length=20,
+                    ),
+                ),
+                ("price", models.DecimalField(decimal_places=2, max_digits=8)),
+                (
+                    "booking",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="bookingseats",
+                        to="booking.booking",
+                    ),
+                ),
+                (
+                    "seat",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="seats.seats"
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('booking', 'seat')},
+                "unique_together": {("booking", "seat")},
             },
         ),
     ]

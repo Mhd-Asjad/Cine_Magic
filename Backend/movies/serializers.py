@@ -3,6 +3,6 @@ from .models import *
 
 
 class CitySerializer(serializers.ModelSerializer):
-    class Meta :
+    class Meta:
         model = City
-        fields  = '__all__'
+        fields = "__all__"

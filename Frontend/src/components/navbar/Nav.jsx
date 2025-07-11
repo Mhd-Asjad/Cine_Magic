@@ -14,11 +14,13 @@ import { useNavigate } from 'react-router-dom';
 import { selectCityId } from '../../redux/features/Location.slice';
 import { logout } from '@/pages/userauth/AuthService';
 import apiMovies from '@/axios/Moviesapi';
-import { MessageCircle , LayoutDashboard  , Bell ,  LogOut, User } from 'lucide-react';
-import { clearNotifications } from '@/redux/features/notificationSlice';
+import { MessageCircle , LayoutDashboard  , Bell ,  LogOut, User , LockKeyhole , LockIcon} from 'lucide-react';
+import { clearNotifications , setNotifications } from '@/redux/features/notificationSlice';
+import { toast } from 'sonner';
+import { checkUserBlocked } from '@/pages/userauth/AuthService';
+import apiBooking from '@/axios/Bookingapi';
 function Nav() {
   const [isModalOpen , setIsModalOpen] = useState(false);
-  const [message , setMessage] = useState('');
   const [isOtpSent , setIsOtpSent] = useState(false);
   const [userEmail , setUserEmail ] = useState('');
   const dispatch = useDispatch();
@@ -30,13 +32,45 @@ function Nav() {
   const  navigate = useNavigate();
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen)
   const { unread_count } = useSelector((state) => state.notifications.counts);
-
+  const {notifications } = useSelector((state) => state.notifications);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => {
     setIsModalOpen(false);
     setIsOtpSent(false);
     setMessage('');
   }
+
+  console.log(notifications)
+
+  const fetchNotifications = async () => {
+      try {
+          
+          const res = await apiBooking.get('notifications/');
+          console.log(res.data.notifications);
+          dispatch(setNotifications(res.data.notifications));
+
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+ 
+  };
+  useEffect(() => {
+    const checkStatus = async () => {
+    if (!user?.id) return;
+
+    const res = await checkUserBlocked(user.id);
+    console.log(res.status)
+    if (res?.data?.is_blocked || res.status === 401) {
+      handleLogout()
+      toast('your account has been blocked',{
+        icon: <LockKeyhole />
+      })
+    }else{
+      fetchNotifications()
+    }
+  };
+  checkStatus();
+  },[user , dispatch])
 
   const handleCitySelect = async ( cityId , currentCity  ) => {
     // here fetching the city id to show city based movie
@@ -128,7 +162,6 @@ function Nav() {
 
           <button
               className="flex p-2 border border-gray-400 rounded-md text-gray-700 hover:bg-gray-100 focus:ring-gray-300 transition"
-
               onClick={() => setIsCityModalOpen(true)}
             >
 
@@ -220,9 +253,9 @@ function Nav() {
 
             <button
             onClick={openModal}
-            className="bg-orange-500 text-white font-medium px-4 py-2 rounded-lg transition duration-300"
+            className="border border-gray-800 font-medium px-4 py-2 rounded-lg transition duration-300"
           >
-            Login/Signup
+            Login/Signup <LockIcon className='inline'/>
           </button>
 
           )}

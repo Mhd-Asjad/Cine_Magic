@@ -268,27 +268,6 @@ function Checkout() {
           </div>
           )}
           
-          <div className="border-t border-gray-300 my-4"></div>
-          
-          <div className="my-4">
-            <h4 className="mb-2">Offers for you</h4>
-            <div className="flex">
-              <input
-                type="text"
-                placeholder="Enter promocode"
-                className="border border-gray-300 rounded px-3 py-2 text-sm flex-1"
-              />
-              <button className="ml-2 bg-white text-blue-500 border border-blue-500 px-4 py-2 rounded text-sm">
-                Apply
-              </button>
-            </div>
-            <button className="text-blue-500 text-sm mt-2">
-              View all offers or enter promocode
-            </button>
-          </div>
-          
-          <div className="border-t border-gray-300 my-4"></div>
-          
           <div className="flex justify-between font-bold mb-4">
             <span>Grant Total</span>
             <span>₹{total_amount + total_amount / 10 }</span>

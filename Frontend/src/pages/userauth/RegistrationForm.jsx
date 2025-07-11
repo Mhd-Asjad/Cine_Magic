@@ -5,12 +5,12 @@ import * as Yup from 'yup';
 import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 import userApi from '@/axios/userApi';
-import { Eye, EyeOff, User, Mail, Lock, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff , CheckCircle } from 'lucide-react';
 import bg from '../../assets/cinelogo.png'
 import { useSelector } from 'react-redux';
+import { setPrevilage} from '../../redux/features/UserSlice'
 
 function RegistrationForm({ setMessage ,  setIsOtpSent, setUserEmail }) {
-    const [touched, setTouched] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const user = useSelector(state => state.user)
@@ -62,19 +62,17 @@ function RegistrationForm({ setMessage ,  setIsOtpSent, setUserEmail }) {
                 toastr.success('Registration successful! Please check your email for OTP.');
                 setUserEmail(values.email);
                 setIsOtpSent(true);
-                setUserPrevillage({
+                setPrevilage({
                     is_approved : false ,
                     is_admin : false ,
                     is_theatre : false 
                 })
                 
             } catch (error) {
+                console.error(error , 'error while registrations')
                 if (error.response && error.response.data) {
                     setErrors(error.response.data);
-                } else {
-                    toastr.error("Something went wrong. Please try again.");
                 }
-                
             } finally {
                 setSubmitting(false);
             }

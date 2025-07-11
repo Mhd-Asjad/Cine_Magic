@@ -9,39 +9,79 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('theatres', '0003_alter_showtime_end_time_and_more'),
+        ("theatres", "0003_alter_showtime_end_time_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SeatCategory',
+            name="SeatCategory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('price_factor', models.DecimalField(decimal_places=1, default=1.0, max_digits=3)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "price_factor",
+                    models.DecimalField(decimal_places=1, default=1.0, max_digits=3),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='SeatScreenLayout',
+            name="SeatScreenLayout",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('rows', models.PositiveIntegerField()),
-                ('cols', models.PositiveIntegerField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("rows", models.PositiveIntegerField()),
+                ("cols", models.PositiveIntegerField()),
             ],
         ),
         migrations.CreateModel(
-            name='seats',
+            name="seats",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('row', models.CharField(max_length=3)),
-                ('number', models.PositiveIntegerField()),
-                ('is_active', models.BooleanField(default=True)),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='seats.seatcategory')),
-                ('screen', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='seats', to='theatres.screen')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("row", models.CharField(max_length=3)),
+                ("number", models.PositiveIntegerField()),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "category",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="seats.seatcategory",
+                    ),
+                ),
+                (
+                    "screen",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="seats",
+                        to="theatres.screen",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('screen', 'row', 'number')},
+                "unique_together": {("screen", "row", "number")},
             },
         ),
     ]

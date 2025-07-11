@@ -7,22 +7,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('seats', '0003_alter_seatcategory_price_factor'),
+        ("seats", "0003_alter_seatcategory_price_factor"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='seatcategory',
-            name='price_factor',
+            model_name="seatcategory",
+            name="price_factor",
         ),
         migrations.AddField(
-            model_name='seatcategory',
-            name='price',
+            model_name="seatcategory",
+            name="price",
             field=models.DecimalField(decimal_places=2, default=90.0, max_digits=6),
         ),
         migrations.AlterField(
-            model_name='seats',
-            name='category',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='seats.seatcategory'),
+            model_name="seats",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="seats.seatcategory",
+            ),
         ),
     ]

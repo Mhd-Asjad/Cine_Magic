@@ -393,6 +393,7 @@ const Profile = () => {
                 type="file" 
                 className="mt-1 block w-[80%] p-2 border rounded bg-white"
                 accept="image/"
+                required
                 placeholder="your image"
                 onChange={(event) => setOwnerImage(event.currentTarget.files[0] || null)}
               />

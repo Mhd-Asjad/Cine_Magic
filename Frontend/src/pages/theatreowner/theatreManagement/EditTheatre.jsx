@@ -23,7 +23,7 @@ function EditTheatre( ) {
 
         try {
 
-            const res = await TheatreApi.get(`/theatre/${id}/edit`);
+            const res = await TheatreApi.get(`/theatre/${id}/edit/`);
             setCityId(res.data[0].cityid)
             setInitialValues({
                 name : res.data[0].name,

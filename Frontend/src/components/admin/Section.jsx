@@ -22,18 +22,18 @@ function Section() {
         <Routes>
             <Route path="dashboard" element={<AdminRoute> <Dashboard /></AdminRoute>}/>
             <Route path='download/reports' element={<AdminRoute><ExcelDownloadComponent/></AdminRoute>} />
-            <Route path="customers" element={<PrivateRoute><CustomerManagement /></PrivateRoute>} />
-            <Route path="enquery" element={<PrivateRoute> <Enquery /> </PrivateRoute>} />
-            <Route path="movies" element={<PrivateRoute><ListMovies /></PrivateRoute>} />
-            <Route path="movies/:movie_id/edit" element={<PrivateRoute><EditMovie/></PrivateRoute>} />
-            <Route path='add-movies' element={<PrivateRoute><AddMovies /></PrivateRoute>} />
-            <Route path="theatres/:theatreId/edit" element={<PrivateRoute><EditTheatre /></PrivateRoute>} />
-            <Route path='pending-theatres' element={<PrivateRoute><ShowRequest/></PrivateRoute>} />
-            <Route path='showtheatres' element={<PrivateRoute><ShowTheatres/></PrivateRoute>} />
-            <Route path='bookings' element={<PendingRefund/>} ></Route>
+            <Route path="customers" element={<AdminRoute><CustomerManagement /></AdminRoute>} />
+            <Route path="enquery" element={<AdminRoute> <Enquery /> </AdminRoute>} />
+            <Route path="movies" element={<AdminRoute><ListMovies /></AdminRoute>} />
+            <Route path="movies/:movie_id/edit" element={<AdminRoute><EditMovie/></AdminRoute>} />
+            <Route path='add-movies' element={<AdminRoute><AddMovies /></AdminRoute>} />
+            <Route path="theatres/:theatreId/edit" element={<AdminRoute><EditTheatre /></AdminRoute>} />
+            <Route path='pending-theatres' element={<AdminRoute><ShowRequest/></AdminRoute>} />
+            <Route path='showtheatres' element={<AdminRoute><ShowTheatres/></AdminRoute>} />
+            <Route path='bookings' element={<AdminRoute><PendingRefund/></AdminRoute>} ></Route>
             <Route path='complaints' element={<ShowComplaints/>} />
-            <Route path='complaint/action/:id' element={<RespondComplaint onBack={'/admin/complaints'} />} />
-            <Route path='settings' element={<AdminSettings/>} />
+            <Route path='complaint/action/:id' element={<AdminRoute><RespondComplaint onBack={'/admin/complaints'} /></AdminRoute>} />
+            <Route path='settings' element={<AdminRoute><AdminSettings/></AdminRoute>} />
         </Routes>
     </div>
   )

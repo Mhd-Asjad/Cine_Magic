@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('useracc', '0008_remove_user_otp_user_user_type'),
+        ("useracc", "0008_remove_user_otp_user_user_type"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='is_approved',
+            model_name="user",
+            name="is_approved",
             field=models.BooleanField(default=False),
         ),
     ]

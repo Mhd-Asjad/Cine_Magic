@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('theatres', '0005_timeslot_remove_showtime_unique_show_per_screen_time_and_more'),
+        (
+            "theatres",
+            "0005_timeslot_remove_showtime_unique_show_per_screen_time_and_more",
+        ),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='showtime',
-            name='end_date',
+            model_name="showtime",
+            name="end_date",
             field=models.DateField(blank=True, null=True),
         ),
     ]

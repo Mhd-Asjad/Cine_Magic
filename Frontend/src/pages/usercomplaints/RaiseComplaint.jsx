@@ -29,7 +29,6 @@ export default function RaiseComplaint({ userId , chatId , closeForm }) {
         },
       });
       if (response.status === 201 ) {
-          setMessage("complaint updated successfully take action soon✅")
           closeForm()
           reset();
           console.log(response.data)
@@ -44,11 +43,6 @@ export default function RaiseComplaint({ userId , chatId , closeForm }) {
 
   return (
     <div>
-      {message &&
-
-        <CustomAlert title={'registered'} setMessage={setMessage} message={message} isError={false} />
-      }
-
       <form onSubmit={handleSubmit(onSubmit)} >
         <div>
           <label className="block mb-1 font-medium">Category</label>

@@ -5,13 +5,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('useracc', '0004_user_is_staff_alter_user_is_superuser'),
+        ("useracc", "0004_user_is_staff_alter_user_is_superuser"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='email',
+            model_name="user",
+            name="email",
             field=models.EmailField(blank=True, max_length=254, null=True, unique=True),
         ),
     ]

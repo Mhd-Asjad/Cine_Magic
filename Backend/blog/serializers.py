@@ -1,29 +1,46 @@
-from rest_framework import serializers , status
+from rest_framework import serializers, status
 from .models import *
 import json
 import traceback
 from rest_framework.response import Response
+
+
 class PostImageSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
-    
-    class Meta :
+
+    class Meta:
         model = PostImage
-        fields = ['image']
-        
-    def get_image(self , obj):
-        request = self.context.get('request')
-        if obj.image :
+        fields = ["image"]
+
+    def get_image(self, obj):
+        request = self.context.get("request")
+        if obj.image:
             return request.build_absolute_uri(obj.image.url)
         return None
-    
+
+
 class PostSerializer(serializers.ModelSerializer):
-    images = PostImageSerializer(many=True , read_only=True)
+    images = PostImageSerializer(many=True, read_only=True)
     tags = serializers.StringRelatedField(many=True)
-    author_name = serializers.CharField(source='author.username' , read_only=True)
+    author_name = serializers.CharField(source="author.username", read_only=True)
+
     # user_reaction = serializers.BooleanField(source='')
     class Meta:
         model = Post
-        fields = ['id', 'author' , 'author_name' , 'title', 'reactions' , 'content', 'images', 'tags', 'like_count' , 'unlike_count' ,'created_at']
+        fields = [
+            "id",
+            "author",
+            "author_name",
+            "title",
+            "reactions",
+            "content",
+            "images",
+            "tags",
+            "like_count",
+            "unlike_count",
+            "created_at",
+        ]
+
 
 class EditPostSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
@@ -33,26 +50,26 @@ class EditPostSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(), many=True, required=False
     )
 
-    class Meta :
+    class Meta:
         model = Post
-        fields = ['id' , 'title' , 'content' , 'images' ,'tags' ]
-        
+        fields = ["id", "title", "content", "images", "tags"]
+
     def update(self, instance, validated_data):
 
-        title = validated_data.get('title' , instance.title)
-        content = validated_data.get('content' , instance.content)
-        tags = validated_data.get('tags' , None)
+        title = validated_data.get("title", instance.title)
+        content = validated_data.get("content", instance.content)
+        tags = validated_data.get("tags", None)
         if tags is not None and isinstance(tags, str):
             tags = json.loads(tags[0])
-            print(tags , 'tags in serializer')
+            print(tags, "tags in serializer")
         instance.title = title
         instance.content = content
-        if tags is not None :
+        if tags is not None:
             instance.tags.set(tags)
 
         instance.save()
-        
-        images = validated_data.get('images', None)
+
+        images = validated_data.get("images", None)
         if images is not None and len(images) > 0:
             post_image = PostImage.objects.filter(post=instance).first()
             if post_image:
@@ -61,9 +78,11 @@ class EditPostSerializer(serializers.ModelSerializer):
             else:
                 PostImage.objects.create(post=instance, image=images[0])
         return instance
-    
+
+
 class CommentSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username' , read_only=True)
-    class Meta :
+    username = serializers.CharField(source="user.username", read_only=True)
+
+    class Meta:
         model = Comment
-        fields = [ 'id' , 'user' , 'username' , 'post' , 'name' , 'created_at']
+        fields = ["id", "user", "username", "post", "name", "created_at"]

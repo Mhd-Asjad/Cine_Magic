@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Booking {{ booking.status|title }}</title>
+</head>
+<body>
+  <h2>Your Booking is {{ booking.status|title }}</h2>
+  <p>Dear {{ booking.customer_name }},</p>
+
+  <p>Thank you for your booking with CineMagic. Here are your details:</p>
+
+  <ul>
+    <li><strong>Booking ID:</strong> {{ context.booking_id }}</li>
+    <li><strong>Movie:</strong> {{ context.movie }}</li>
+    <li><strong>Theatre:</strong> {{ context.theatre }}</li>
+    <li><strong>Show Date:</strong> {{ context.show_date }}</li>
+    <li><strong>Show Time:</strong> {{ context.show_time }}</li>
+  </ul>
+
+  {% if qr_code %}
+  <p>
+    <strong>Your QR Code:</strong><br>
+    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width: 150px; height: 150px;" />
+  </p>
+  {% endif %}
+  <p>Regards,<br><strong>CineMagic Team</strong></p>
+</body>
+</html>

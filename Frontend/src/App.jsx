@@ -34,7 +34,7 @@ function App() {
             <Router>
                 <Routes>
                     <Route path="/" element={<Landingpage/>}/>
-                    <Route path="/movie/:id/details" element={<PrivateRoute allowedTypes={'user'} ><MovieSpecification/></PrivateRoute>} />
+                    <Route path="/movie/:id/details" element={<MovieSpecification/>} />
                     <Route path="/movie/:movieId" element={<UpcomingMovieDetails/>} />
                     <Route path="/profile" element={<Profile/>} />
                     <Route path={`/available-show-details/:id`} element={<AvailableShowDetails/>} />
@@ -56,7 +56,7 @@ function App() {
                     <Route path='movies/my-orders' element={<MyBookings/>} />
                     <Route path='booking/:id/ticket' element={<TicketView/>} />
                     <Route path='verify-ticket/:id' element={<VerifiedTicket/>} />
-                    <Route path='/blogs' element={<PrivateRoute allowedTypes={'user'} ><BlogPosts/></PrivateRoute>} />
+                    <Route path='/blogs' element={<BlogPosts/>} />
                     <Route path='/blogs/add' element={<AddBlog/>} />
                     <Route path="/posts/details/:id" element={<BlogInfo/>}/>
                     <Route path="/reset-password" element={<ResetPassword/>} />

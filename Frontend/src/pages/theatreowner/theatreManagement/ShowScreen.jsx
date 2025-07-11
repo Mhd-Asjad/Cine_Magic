@@ -84,6 +84,7 @@ function ShowScreen() {
             console.log(e.response)
         }
     }
+
     const organizeByRow = (seats) => {
         const rowMap = {}
         seats.forEach((seat) => {
@@ -96,7 +97,7 @@ function ShowScreen() {
           rowSeats.sort((a, b) => a.number - b.number)
         })
         return rowMap
-      }
+    }
 
       console.log(seats)
     const getSeatClass = () => {
@@ -242,7 +243,7 @@ function ShowScreen() {
             }
         });
     }
-
+    console.log(screens)
 
     return (
         <div className='p-10 m-10'>
@@ -279,7 +280,7 @@ function ShowScreen() {
                             <tbody>
                                 {screens.length > 0 ? (
                                     screens.map((screen, indx) => (
-                                        screen.is_approved ? (
+                                        screen.is_approved && screen.is_active ? (
 
                                         
                                         <tr key={indx} className="border-b hover:bg-gray-50">
@@ -326,54 +327,54 @@ function ShowScreen() {
                                                             seat Layout
                                                         </DialogTitle>
 
-                                                        <div className='mt-5'>
+                                                <div className='mt-5'>
                                                     <div className='flex flex-wrap gap-2'>
-                                                    {Object.entries(seats).map(([row, rowSeats]) => {
-                                
+                                                        {Object.entries(seats).map(([row, rowSeats]) => {
+                                    
 
-                                                        return (
-                                                        <div
-                                                            key={row}
-                                                            className='flex justify-center w-full mb-4'
-                                                        >
-                                                            <button
-                                                            className={`w-6 h-6 font-bold mr-2 rounded cursor-not-allowed`}
+                                                            return (
+                                                            <div
+                                                                key={row}
+                                                                className='flex justify-center w-full mb-4'
                                                             >
-                                                            {row}
-                                                            </button>
-
-                                                            <div className='flex space-x-1'>
-                                                            {rowSeats.map((seat) => (
-                                                                seat?.label ? (
-
-
                                                                 <button
-                                                                    type='button'
-                                                                    key={seat.id}
-                                                                    disabled={true }
-                                                                    title={`${seat.category_name || 'No Category'} - ₹${seat.price}`}
-                                                           
-                                                                
-                                                                    className={`w-6 h-6 rounded-sm  flex items-center justify-center text-xs ${getSeatClass(
-                                                                    seat
-                                                                    )}`}
+                                                                className={`w-6 h-6 font-bold mr-2 rounded cursor-not-allowed`}
                                                                 >
-                                                                    {seat.number}
+                                                                {row}
                                                                 </button>
 
-                                                                ):(
+                                                                <div className='flex space-x-1'>
+                                                                {rowSeats.map((seat) => (
+                                                                    seat?.label ? (
 
-                                                                <div key={seat.id} className="w-6 h-6"/>
-                                                                )
-                                                            ))}
+
+                                                                    <button
+                                                                        type='button'
+                                                                        key={seat.id}
+                                                                        disabled={true }
+                                                                        title={`${seat.category_name || 'No Category'} - ₹${seat.price}`}
+                                                            
+                                                                    
+                                                                        className={`w-6 h-6 rounded-sm  flex items-center justify-center text-xs ${getSeatClass(
+                                                                        seat
+                                                                        )}`}
+                                                                    >
+                                                                        {seat.number}
+                                                                    </button>
+
+                                                                    ):(
+
+                                                                    <div key={seat.id} className="w-6 h-6"/>
+                                                                    )
+                                                                ))}
+                                                                </div>
                                                             </div>
+                                                            )
+                                                        })}
+                                                        <div className="relative mb-8 pb-28 z-0">
+                                                        <div className="flex justify-center ">
+                                                            <img src={screenimg} className='w-[80%] mt-3' alt="screen image" ></img>
                                                         </div>
-                                                        )
-                                                    })}
-                                                    <div className="relative mb-8 pb-28 z-0">
-                                                    <div className="flex justify-center ">
-                                                        <img src={screenimg} className='w-[80%] mt-3' alt="screen image" ></img>
-                                                    </div>
                                                     </div>
                                                     </div>
 
@@ -570,9 +571,6 @@ function ShowScreen() {
 
                                                                 showtime of Movie (Screen {screen.screen_number})
                                                                 </DialogTitle>
-
-                                                  
-                                                                        
                                                                         <ul className="list-disc pl-5">
                                                                         {sortedShowDetails.map((show) => {
                                                         
@@ -650,7 +648,7 @@ function ShowScreen() {
                                                 <div className='flex space-x-2' >
                                                     
                                                 <button className='border-orange-300 border-2 py-2 px-1 cursor-not-allowed rounded-md' >
-                                                    requested 
+                                                    { screen.is_active ? 'requested' : 'deactivated' }
                                                 </button>
                                                     
                                                 </div> 

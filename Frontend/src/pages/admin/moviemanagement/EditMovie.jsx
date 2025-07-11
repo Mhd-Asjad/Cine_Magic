@@ -3,19 +3,29 @@ import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { useNavigate, useParams } from 'react-router-dom';
 import apiAdmin from '../../../axios/api';
-
+import { Alert, AlertDescription, AlertTitle  } from "@/components/ui/alert"
+import { Terminal } from 'lucide-react';
 function EditMovie() {
     const { movie_id } = useParams(); 
     const [loading, setLoading] = useState(false);
     const [initialValues, setInitialValues] = useState({});
-    const [ imageSrc , setImageSrc ] = useState(null)  
+    const [ message , setMessage ] = useState('');
     const navigate = useNavigate()
     useEffect(() => {
         const fetchMovie = async () => {
             try {
                 const res = await apiAdmin.get(`movies/${movie_id}/update/`);
-                console.log(res.data)
-                setInitialValues(res.data);
+                const data = res.data
+            
+                console.log(data)
+                setInitialValues({
+                    title: data.title,
+                    language: data.language,
+                    duration: data.duration,
+                    release_date: data.release_date,
+                    description: data.description,
+                    genre: data.genre,        
+                });
             } catch (error) {
                 console.error('Error fetching movie:', error);
             }
@@ -36,26 +46,28 @@ function EditMovie() {
             .required('* Description is required')
             .max(300, 'Description must be 300 characters or less'),
         genre: Yup.string().required('* Genre is required'),
-        poster: Yup.mixed().nullable()
-        .required('photo field is required')
+        poster: Yup.mixed()
+            .nullable()
+            .notRequired() 
     });
-
     const handleSubmit = async (values) => {
         setLoading(true);
         const formData = new FormData();
         Object.keys(values).forEach((key) => {
-            if (key === 'poster' && values.poster) {
-                formData.append('poster', values.poster);
+            if (key === 'poster' ) {
+                if (values.poster) {
+                    formData.append('poster' , values.poster)
+                }
             } else {
                 formData.append(key, values[key]);
             }
         });
 
         try {
-            const response = await apiAdmin.put(`movies/${movie_id}/update/`, formData, {
+            const response = await apiAdmin.patch(`movies/${movie_id}/update/`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            alert('Movie updated successfully');
+            setMessage('Movie updated successfully');
             navigate('/admin/movies')
         } catch (error) {
             console.error('Error updating movie:', error);
@@ -63,11 +75,21 @@ function EditMovie() {
             setLoading(false);
         }
     };
-    console.log(initialValues['poster'])
+
     if (!initialValues) return <p>Loading movie data...</p>;
 
     return (
         <div className="flex min-h-screen bg-gray-100">
+            {message && 
+                <Alert variant="default | destructive">
+                    <Terminal />
+                    <AlertTitle>check!</AlertTitle>
+                    <AlertDescription>
+                        {message}
+                    </AlertDescription>
+                </Alert>
+            }
+
             <div className="p-8 py-4">
                 <h2 className="text-center mb-7 pt-12 px-3 font-semibold text-3xl text-gray-500">
                     Edit Movie
@@ -126,7 +148,7 @@ function EditMovie() {
                                     onChange={(e) => setFieldValue('poster' , e.currentTarget.files[0])}
                                     className="w-full border-gray-300 border rounded-lg px-4 py-2"
                                 />
-                                <ErrorMessage name="poster" component="div" className="text-red-500 text-sm mt-1" />
+
                             </div>
 
                             <button type="submit" className="flex mx-auto mt-3 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">

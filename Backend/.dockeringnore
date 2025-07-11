@@ -10,8 +10,12 @@ venv/
 .vscode/
 .idea/
 .DS_Store
-*.db
+tests/
+*.db\
+python
+README.md
 media/
 staticfiles/
 Frontend/
 .sql
+Dockerfile.base

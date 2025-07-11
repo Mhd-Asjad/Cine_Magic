@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('theatres', '0010_theatre_latitude_theatre_longitude'),
+        ("theatres", "0010_theatre_latitude_theatre_longitude"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='timeslot',
-            name='end_time',
+            model_name="timeslot",
+            name="end_time",
             field=models.TimeField(blank=True, null=True),
         ),
     ]

@@ -7,14 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('booking', '0003_booking_show'),
-        ('theatres', '0009_alter_showtime_unique_together_remove_showtime_slot'),
+        ("booking", "0003_booking_show"),
+        ("theatres", "0009_alter_showtime_unique_together_remove_showtime_slot"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='booking',
-            name='slot',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='theatres.timeslot'),
+            model_name="booking",
+            name="slot",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="theatres.timeslot",
+            ),
         ),
     ]

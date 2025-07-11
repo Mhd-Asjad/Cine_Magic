@@ -8,12 +8,11 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { AlertDialog, AlertDialogTrigger, AlertDialogCancel , AlertDialogAction , AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useToast } from '@/hooks/use-toast';
 import ShowRefundStatus from './ShowRefundStatus';
 import apiBooking from '@/axios/Bookingapi';
 import useBookingWebSocket from '@/contexts/useNotificationSocket';
 import { useSelector } from 'react-redux';
-
+import {toast} from 'sonner'
 function TicketView() {
   const { id } = useParams();
   const [ticketData, setTicketData] = useState([]);
@@ -23,43 +22,41 @@ function TicketView() {
   const [error, setError] = useState(null);
   const [ refundInfo , setRefundInfo ] = useState(null);
   const [ open , setOpen ] = useState(false)
-  const {toast} = useToast();
   const userId = useSelector((state) => state.user.id)
   useBookingWebSocket(userId)
   useEffect(() => {
-      const fetchRefundInfo = async() => {
-
-        try {
-          const res = await apiBooking.get(`refund-info/${id}/`)
-          setRefundInfo(res.data.refund_data)
-
-        }catch(e){
-          console.log(e , 'error while fetching cancel refund')
-        }
-      }
-    const fetchQrCode = async() => {
-      setLoading(true);
-
-      try {
-        const res = await apiBooking.get(`ticket/${id}/`);
-        const { ticket_data, movie_details, seats } = res.data;
-        setTicketData(ticket_data);
-        setShowDetails(movie_details);
-        setSeats(seats);
-        setLoading(false);
-
-      } catch(e) {
-        console.log(e);
-        setError(e?.response?.data?.error || 'An error occurred');
-        setLoading(false);
-      }
-    };
-
     fetchRefundInfo()
     fetchQrCode();
-    
-    }, [id]);
-    console.log(refundInfo , 'refund info')
+  }, [id]);
+
+    const fetchRefundInfo = async() => {
+
+      try {
+        const res = await apiBooking.get(`refund-info/${id}/`)
+        setRefundInfo(res.data.refund_data)
+
+      }catch(e){
+        console.log(e , 'error while fetching cancel refund')
+      }
+    }
+  const fetchQrCode = async() => {
+    setLoading(true);
+
+    try {
+      const res = await apiBooking.get(`ticket/${id}/`);
+      const { ticket_data, movie_details, seats } = res.data;
+      setTicketData(ticket_data);
+      setShowDetails(movie_details);
+      setSeats(seats);
+      setLoading(false);
+
+    } catch(e) {
+      console.log(e);
+      setError(e?.response?.data?.error || 'An error occurred');
+      setLoading(false);
+    }
+  };  
+  console.log(refundInfo , 'refund info')
 
   const convertMinutes = (minutes) => {
     const hours = Math.floor(minutes / 60)
@@ -122,19 +119,15 @@ function TicketView() {
           'refund_amount' : refundInfo.refund_amount
         }
       );
-      toast({title : res.data.message})
+      fetchRefundInfo()
       setOpen(false)
     }catch(e){
-      toast({title : e?.response?.data?.error,
-        variant : 'destructive'
-
-
-      })
+      toast( e?.response?.data?.error)
     }
 
     
   }
-  console.log(ticketData.refund_status , 'ticket status')
+  console.log(ticketData)
   if (loading) {
     return (
       <div>

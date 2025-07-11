@@ -9,45 +9,94 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('movies', '0001_initial'),
+        ("movies", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Screen',
+            name="Screen",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('screen_number', models.PositiveIntegerField()),
-                ('capacity', models.PositiveIntegerField(default=100)),
-                ('screen_type', models.CharField(blank=True, max_length=50, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("screen_number", models.PositiveIntegerField()),
+                ("capacity", models.PositiveIntegerField(default=100)),
+                ("screen_type", models.CharField(blank=True, max_length=50, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='ShowTime',
+            name="ShowTime",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_time', models.DateTimeField()),
-                ('end_time', models.DateTimeField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('modified_at', models.DateTimeField(auto_now=True)),
-                ('movie', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='showtimes', to='movies.movie')),
-                ('screen', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='showtimes', to='theatres.screen')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("start_time", models.DateTimeField()),
+                ("end_time", models.DateTimeField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("modified_at", models.DateTimeField(auto_now=True)),
+                (
+                    "movie",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="showtimes",
+                        to="movies.movie",
+                    ),
+                ),
+                (
+                    "screen",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="showtimes",
+                        to="theatres.screen",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Theatre',
+            name="Theatre",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('address', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('modified_at', models.DateTimeField(auto_now=True)),
-                ('city', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='theatres', to='movies.city')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("address", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("modified_at", models.DateTimeField(auto_now=True)),
+                (
+                    "city",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="theatres",
+                        to="movies.city",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='screen',
-            name='theatre',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='screens', to='theatres.theatre'),
+            model_name="screen",
+            name="theatre",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="screens",
+                to="theatres.theatre",
+            ),
         ),
     ]

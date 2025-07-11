@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('theatres', '0011_timeslot_end_time'),
+        ("theatres", "0011_timeslot_end_time"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='timeslot',
-            name='end_time',
+            model_name="timeslot",
+            name="end_time",
         ),
         migrations.AddField(
-            model_name='showslot',
-            name='calculated_end_time',
+            model_name="showslot",
+            name="calculated_end_time",
             field=models.TimeField(blank=True, null=True),
         ),
     ]

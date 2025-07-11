@@ -14,27 +14,29 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
-from django.urls import path , include
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-urlpatterns = [
-
-    path('admin/', admin.site.urls),
-    path('accounts/',include('allauth.urls')),
-    path('auth/',include('dj_rest_auth.urls')),
-    path('auth/registration/', include('dj_rest_auth.registration.urls')),
-    path('auth/social/', include('allauth.socialaccount.urls')),
-    path('user_api/', include('useracc.urls')),
-    path('movies/',include('movies.urls')),
-    path('theatres/',include('theatres.urls')),
-    path('adminside/',include('adminside.urls')),
-    path('theatre_owner/',include('theatre_owner.urls')),
-    path('seats/' , include('seats.urls')),
-    path('booking/', include('booking.urls')),
-    path('blog/' , include('blog.urls')),
-    path('review/',include('review.urls'))
-    
-] + static(settings.MEDIA_URL , document_root = settings.MEDIA_ROOT) \
+urlpatterns = (
+    [
+        path("admin/", admin.site.urls),
+        path("accounts/", include("allauth.urls")),
+        path("auth/", include("dj_rest_auth.urls")),
+        path("auth/registration/", include("dj_rest_auth.registration.urls")),
+        path("auth/social/", include("allauth.socialaccount.urls")),
+        path("user_api/", include("useracc.urls")),
+        path("movies/", include("movies.urls")),
+        path("theatres/", include("theatres.urls")),
+        path("adminside/", include("adminside.urls")),
+        path("theatre_owner/", include("theatre_owner.urls")),
+        path("seats/", include("seats.urls")),
+        path("booking/", include("booking.urls")),
+        path("blog/", include("blog.urls")),
+        path("review/", include("review.urls")),
+    ]
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+)

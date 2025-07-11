@@ -7,18 +7,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('movies', '0007_remove_movie_cities'),
-        ('theatre_owner', '0003_alter_theaterownerprofile_user'),
+        ("movies", "0007_remove_movie_cities"),
+        ("theatre_owner", "0003_alter_theaterownerprofile_user"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='theaterownerprofile',
-            name='location',
+            model_name="theaterownerprofile",
+            name="location",
         ),
         migrations.AddField(
-            model_name='theaterownerprofile',
-            name='city',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='movies.city'),
+            model_name="theaterownerprofile",
+            name="city",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="movies.city",
+            ),
         ),
     ]
