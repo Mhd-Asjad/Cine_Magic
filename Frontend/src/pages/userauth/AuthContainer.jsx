@@ -80,7 +80,6 @@ function AuthContainer({ setIsOtpSent , setUserEmail , isModalClose , Logined })
                 ) :(
                     
                     <RegistrationForm
-                        setMessage={() => {}}
                         setIsOtpSent={setIsOtpSent}
                         setUserEmail={setUserEmail}
                     />

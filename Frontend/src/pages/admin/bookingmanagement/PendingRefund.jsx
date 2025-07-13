@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Api from "@/axios/api";
 import { Coins, Filter } from "lucide-react";
-import axios from "axios";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import apiBooking from "@/axios/Bookingapi";
+import { ShieldAlert } from "lucide-react";
+import { icon } from "leaflet";
 
 const PendingRefund = () => {
   const [refunds, setRefunds] = useState([]);
   const [filteredRefunds, setFilteredRefunds] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
-  const { toast } = useToast();
   const [loadingRefundId, setLoadingRefundId] = useState(null);
 
   const formattTime = (timeString) => {
@@ -115,17 +115,23 @@ const PendingRefund = () => {
             refund.id === refund_id ? { ...refund, refunt_status: "completed" } : refund
           )
         );
-        toast({
-          title: res.data.message,
-          description: "Refund Processed Successfully✅",
-        });
+        toast(
+          res.data.message,
+          {
+            icon: <Coins className="w-6 h-6 text-green-500" />,
+            style: {
+              backgroundColor: '#f0f9ff',
+              color: '#0369a1',
+            },
+          }
+        );
       }
     } catch (error) {
       console.log(error);
       setLoadingRefundId(null);
-      toast({
-        title: error?.response?.data?.error,
-        variant: "destructive",
+      toast(
+       error?.response?.data?.error,{
+       icon : <ShieldAlert className="w-6 h-6 text-red-500" />,
       });
     } finally {
       setLoadingRefundId(null);

@@ -111,7 +111,7 @@ function PrivateRoute({ children , allowedTypes }) {
     }
 
     const handleDialogConfirm = () => {
-        performLogout(dispatch,navigate)
+        performLogout(dispatch,navigate , allowedTypes);
     }
 
     if(!isAuthenticated) {

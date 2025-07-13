@@ -302,6 +302,7 @@ function TicketView() {
             </div>
             
             <div className="p-8 flex flex-col items-center">
+              <h1>{ticketData.qrcode_img}</h1>
               <div className="p-3 bg-white rounded-lg shadow-md">
                 <img 
                   src={ticketData.qrcode_img}

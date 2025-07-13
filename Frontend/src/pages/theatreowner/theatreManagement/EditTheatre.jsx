@@ -49,7 +49,7 @@ function EditTheatre( ) {
         formData.append('address' , values.details)
 
         try {
-            const res = await TheatreApi.put(`/theatre/${id}/edit`, 
+            const res = await TheatreApi.put(`/theatre/${id}/edit/`, 
                 formData )
             navigate(`/theatre-owner/list-theatre`)
         }catch(e){

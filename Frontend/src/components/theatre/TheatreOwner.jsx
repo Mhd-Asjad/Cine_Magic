@@ -13,7 +13,7 @@ const TheatreOwner = () => {
           <TheatreNav />
         </div>
 
-        <div className="flex p-5 bg-gray-100 h-full justify-center">
+        <div className="flex bg-gray-100 h-full justify-center">
           <Sections />
         </div>
       </div>

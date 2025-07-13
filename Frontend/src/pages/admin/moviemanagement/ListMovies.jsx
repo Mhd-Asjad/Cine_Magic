@@ -4,15 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import apiAdmin from '../../../axios/api';
 import { Button } from '@/components/ui/button';
 import Swal from 'sweetalert2';
-import { CandlestickChart } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { CircleCheckBig } from 'lucide-react';
 import SearchBar from '@/components/search/SearchBar';
+import { toast } from 'sonner';
 
 function ListMovies() {
     const navigate = useNavigate();
     const [ movies , setMovies ] = useState([])
     const [searchTerm , setSearchTerm ] = useState('');
-    const {toast} = useToast();
     
     useEffect(() => {
         fetchMovies()
@@ -42,10 +41,12 @@ function ListMovies() {
       try {
         const res = await apiAdmin.delete(`movies/${movie_id}/delete/`)
         fetchMovies()
-        toast({
-          title : res.data.message,
-          variant : 'success'
-        })
+        toast('Movie deleted successfully', {
+          icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+          style: {
+            backgroundColor: '#f0f9ff',
+            color: '#0369a1',
+          }});
       }catch(e){
         console.log(e)
       }

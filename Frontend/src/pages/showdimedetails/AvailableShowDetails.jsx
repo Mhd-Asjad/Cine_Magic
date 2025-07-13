@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Info, Sliders } from 'lucide-react';
+import { Calendar, Clock, MapPin, Info, Sliders, ChevronLeft, ChevronRight, X, Navigation, Map, ExternalLink } from 'lucide-react';
 import Nav from '@/components/navbar/Nav';
 import Footer from '@/components/footer/Footer';
 import { useSelector } from 'react-redux';
@@ -12,23 +12,43 @@ import Select from '@mui/material/Select';
 import not_found from '../../assets/not-found.png'
 import apiMovies from '@/axios/Moviesapi';
 import qs from 'qs';
+import TheatreApi from '@/axios/theatreapi';
 
 const AvailableShowDetails = () => {
-
   const [dateButtons, setDateButtons] = useState([]);
-  const [ selectedDate, setSelectedDate ] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [movie, setMovie] = useState(null);
-  const [showDetails, setShowDetails] = useState([]);
+  const [showDetails, setShowDetails] = useState([]); 
   const [newMovies, setNewMovies] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
-  // const [prices , setPrices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentDateIndex, setCurrentDateIndex] = useState(0);
+  const [showDirectionsModal, setShowDirectionsModal] = useState(false);
+  const [selectedTheatre, setSelectedTheatre] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
   
   const { id } = useParams();
   const city_name = useSelector((state) => state.location.selectedCity);
   const cityid = useSelector(selectCityId);
   const navigate = useNavigate();
+
+  // Get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Error getting location:', error);
+        }
+      );
+    }
+  }, []);
 
   const formatTime = (timeString) => {
     const [hours, minutes] = timeString.split(':');
@@ -71,9 +91,18 @@ const AvailableShowDetails = () => {
   };
 
   const extractUniqueShowTimes = (theatres) => {
-    return [...new Set(theatres.flatMap(theatre =>
-      theatre.shows.map(show => show.label)
-    ))].sort();
+    const timeSet = new Set();
+    theatres.forEach(theatre => {
+      theatre.shows.forEach(show => {
+        show.slots.forEach(slot => {
+          const slotLabel = slot.lablel || slot.label;
+          if (slotLabel) {
+            timeSet.add(slotLabel);
+          }
+        });
+      });
+    });
+    return Array.from(timeSet).sort();
   };
 
   const availableLanguages = useMemo(() => 
@@ -94,24 +123,30 @@ const AvailableShowDetails = () => {
     return showDetails.map(theatre => {
       const filteredShows = theatre.shows.filter(show => {
         const matchesDate = show.show_date === formattedSelectedDate;
-
-        // setting time and language
-        
         const matchesLanguage = !selectedLanguage || 
           capitalizeString(show.movies_data.language.trim()) === selectedLanguage;
         
-        const matchesTime = !selectedTime || show.label === selectedTime;
+        return matchesDate && matchesLanguage;
+      }).map(show => {
+        const filteredSlots = show.slots.filter(slot => {
+          if (!selectedTime) return true;
+          const slotLabel = slot.lablel || slot.label;
+          return slotLabel === selectedTime;
+        });
 
-        return matchesDate && matchesLanguage && matchesTime;
-      });
+        return {
+          ...show,
+          slots: filteredSlots.sort((a, b) => {
+            const aTime = a.start_time || '00:00';
+            const bTime = b.start_time || '00:00';
+            return aTime.localeCompare(bTime);
+          })
+        };
+      }).filter(show => show.slots.length > 0);
 
       return {
         ...theatre,
-        shows: filteredShows.sort((a, b) => {
-          const aFirstSlot = a.slots[0]?.start_time || '00:00';
-          const bFirstSlot = b.slots[0]?.start_time || '00:00';
-          return aFirstSlot.localeCompare(bFirstSlot);
-        })
+        shows: filteredShows
       };
     }).filter(theatre => theatre.shows.length > 0);
   }, [showDetails, formattedSelectedDate, selectedLanguage, selectedTime]);
@@ -124,6 +159,23 @@ const AvailableShowDetails = () => {
     );
   }, [filteredTheatres]);
 
+  // Date navigation functions
+  const canNavigateLeft = currentDateIndex > 0;
+  const canNavigateRight = currentDateIndex < Math.max(0, dateButtons.length - 6);
+
+  const navigateDates = (direction) => {
+    if (direction === 'left' && canNavigateLeft) {
+      setCurrentDateIndex(currentDateIndex - 1);
+    } else if (direction === 'right' && canNavigateRight) {
+      setCurrentDateIndex(currentDateIndex + 1);
+    }
+  };
+
+  const visibleDates = useMemo(() => {
+    if (dateButtons.length <= 6) return dateButtons;
+    return dateButtons.slice(currentDateIndex, currentDateIndex + 6);
+  }, [dateButtons, currentDateIndex]);
+
   const fetchShowDetails = async () => {
     try {
       setLoading(true);
@@ -131,12 +183,11 @@ const AvailableShowDetails = () => {
         params: { 'city_id': cityid },
         paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' })
       });
-
+      console.log('Show details response:', response.data);
       const theatres = response.data.theatres;
       setNewMovies(response.data.movies || []);
       setShowDetails(theatres || []);
 
-      console.log(response.data.theatres)
       const availableDates = processAvailableDates(response.data.theatres || []);
       setDateButtons(availableDates);
 
@@ -161,6 +212,18 @@ const AvailableShowDetails = () => {
     }
   };
 
+  const fetchTheatreLocation = async (theatreId) => {
+    try {
+      console.log('Fetching theatre location for ID:', theatreId);
+      const response = await TheatreApi.get(`/theatre-location/${theatreId}/`);
+      console.log('response', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching theatre location:', error);
+      return null;
+    }
+  };
+
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
     if (name === 'language') {
@@ -180,6 +243,46 @@ const AvailableShowDetails = () => {
     navigate(`/available-show-details/${screen_id}/${show_id}/seats?slot_id=${slot_id}`);
   };
 
+  const handleGetDirections = async (theatre) => {
+    const locationData = await fetchTheatreLocation(theatre.id);
+    if (locationData) {
+      setSelectedTheatre({
+        ...theatre,
+        latitude: locationData.latitude,
+        longitude: locationData.longitude
+      });
+    } else {
+      setSelectedTheatre(theatre);
+    }
+    setShowDirectionsModal(true);
+  };
+
+  const openInGoogleMaps = (lat, lng, name) => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${encodeURIComponent(name)}`;
+    window.open(url, '_blank');
+  };
+
+  const openInAppleMaps = (lat, lng, name) => {
+    const url = `https://maps.apple.com/?daddr=${lat},${lng}&q=${encodeURIComponent(name)}`;
+    window.open(url, '_blank');
+  };
+
+  const getDistanceFromUser = (theatreLat, theatreLng) => {
+    if (!userLocation) return null;
+    
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = (theatreLat - userLocation.lat) * Math.PI / 180;
+    const dLon = (theatreLng - userLocation.lng) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(userLocation.lat * Math.PI / 180) * Math.cos(theatreLat * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    
+    return distance.toFixed(1);
+  };
+
   const clearFilters = () => {
     setSelectedLanguage('');
     setSelectedTime('');
@@ -192,10 +295,6 @@ const AvailableShowDetails = () => {
     }
   }, [id, cityid]);
 
-
-  console.log(filteredTheatres)
-
-  
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gray-100">
@@ -225,12 +324,28 @@ const AvailableShowDetails = () => {
 
         {/* Date Selection and Filters */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          {/* Date Selection */}
-          <div className="flex items-center space-x-2 overflow-x-auto pb-4 mb-4 border-b border-gray-200">
-            <div className="flex space-x-2 min-w-max">
-              {dateButtons.map((date, index) => (
+          {/* Date Selection with Navigation */}
+          <div className="flex items-center space-x-2 pb-4 mb-4 border-b border-gray-200">
+            {/* Left Arrow */}
+            {dateButtons.length > 6 && (
+              <button
+                onClick={() => navigateDates('left')}
+                disabled={!canNavigateLeft}
+                className={`p-2 rounded-full transition-colors ${
+                  canNavigateLeft 
+                    ? 'text-gray-600 hover:bg-gray-100' 
+                    : 'text-gray-300 cursor-not-allowed'
+                }`}
+              >
+                <ChevronLeft size={20} />
+              </button>
+            )}
+
+            {/* Date Buttons */}
+            <div className="flex space-x-2 min-w-max overflow-hidden">
+              {visibleDates.map((date, index) => (
                 <button
-                  key={index}
+                  key={date.toISOString()}
                   className={`flex flex-col items-center justify-center px-4 py-3 rounded-lg transition-all duration-200 min-w-[70px] ${
                     selectedDate.toDateString() === date.toDateString()
                       ? 'bg-blue-500 text-white shadow-md transform scale-105'
@@ -248,6 +363,21 @@ const AvailableShowDetails = () => {
                 </button>
               ))}
             </div>
+
+            {/* Right Arrow */}
+            {dateButtons.length > 6 && (
+              <button
+                onClick={() => navigateDates('right')}
+                disabled={!canNavigateRight}
+                className={`p-2 rounded-full transition-colors ${
+                  canNavigateRight 
+                    ? 'text-gray-600 hover:bg-gray-100' 
+                    : 'text-gray-300 cursor-not-allowed'
+                }`}
+              >
+                <ChevronRight size={20} />
+              </button>
+            )}
           </div>
 
           {/* Filters */}
@@ -317,13 +447,12 @@ const AvailableShowDetails = () => {
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">{theatre.name}</h3>
                     <p className="text-gray-600 text-sm mb-3">{theatre.address}</p>
                     <div className="flex items-center gap-4">
-                      <button className="flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                      <button 
+                        onClick={() => handleGetDirections(theatre)}
+                        className="flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                      >
                         <MapPin size={16} className="mr-1" />
                         <span>Get Directions</span>
-                      </button>
-                      <button className="flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                        <Info size={16} className="mr-1" />
-                        <span>More Info</span>
                       </button>
                     </div>
                   </div>
@@ -338,33 +467,31 @@ const AvailableShowDetails = () => {
                           {capitalizeString(show.movies_data.language)} • {show.label}
                         </span>
 
-                        {show.price.map(p => (
-
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {show.price.map((p, index) => (
+                          <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
                             ₹{p}
                           </span>
-
                         ))}
                       </div>
                       
                       <div className="flex gap-3 flex-wrap">
-                        {show.slots
-                          .sort((a, b) => a.start_time.localeCompare(b.start_time))
-                          .map((slot) => (
-                            <button
+                        {show.slots.map((slot) => (
+                          <button
                             key={slot.slot_id}
                             className="border-2 border-green-500 rounded-lg px-4 py-3 text-green-600 hover:bg-green-50 hover:border-green-600 transition-all duration-200 flex flex-col items-center min-w-[100px] group"
                             onClick={() => handleShowClick(show.screen.screen_id, show.show_id, slot.slot_id)}
-                            >
-                              <div className="text-lg font-bold group-hover:text-green-700">
-                                {formatTime(slot.start_time)}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                {show.screen.screen_type}
-                              </div>
-                            </button>
-                          ))
-                        }
+                          >
+                            <div className="text-lg font-bold group-hover:text-green-700">
+                              {formatTime(slot.start_time)}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {show.screen.screen_type}
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1">
+                              {slot.lablel || slot.label}
+                            </div>
+                          </button>
+                        ))}
                       </div>
                     </div>
                   ))}
@@ -411,6 +538,66 @@ const AvailableShowDetails = () => {
           </div>
         )}
       </div>
+
+      {/* Directions Modal */}
+      {showDirectionsModal && selectedTheatre && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold text-gray-800">Get Directions</h3>
+                <button
+                  onClick={() => setShowDirectionsModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-800 mb-2">{selectedTheatre.name}</h4>
+                <p className="text-gray-600 text-sm mb-3">{selectedTheatre.address}</p>
+                
+                {selectedTheatre.latitude && selectedTheatre.longitude && userLocation && (
+                  <p className="text-sm text-blue-600 mb-4">
+                    <Navigation size={16} className="inline mr-1" />
+                    Approximately {getDistanceFromUser(selectedTheatre.latitude, selectedTheatre.longitude)} km away
+                  </p>
+                )}
+              </div>
+
+              {selectedTheatre.latitude && selectedTheatre.longitude ? (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => openInGoogleMaps(selectedTheatre.latitude, selectedTheatre.longitude, selectedTheatre.name)}
+                    className="w-full flex items-center justify-center gap-2 border-1 px-4 py-3 rounded-lg border transition-colors"
+                  >
+                    <Map size={20} />
+                    <span>Open in Google Maps</span>
+                    <ExternalLink size={16} />
+                  </button>
+                  
+                  <button
+                    onClick={() => openInAppleMaps(selectedTheatre.latitude, selectedTheatre.longitude, selectedTheatre.name)}
+                    className="w-full flex items-center justify-center gap-2 bg-gray-800 text-white px-4 py-3 rounded-lg hover:bg-gray-900 transition-colors"
+                  >
+                    <MapPin size={20} />
+                    <span>Open in Apple Maps</span>
+                    <ExternalLink size={16} />
+                  </button>
+
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <MapPin size={48} className="mx-auto text-gray-400 mb-3" />
+                  <p className="text-gray-600">Location coordinates not available for this theatre.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );

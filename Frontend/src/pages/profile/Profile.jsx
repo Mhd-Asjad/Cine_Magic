@@ -11,11 +11,11 @@ import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import { useDispatch } from "react-redux";
 import { setUsername , setEmail } from "@/redux/features/UserSlice";
-import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, CheckCircle, DeleteIcon,  User , CalendarRange , Trash, X , ShieldAlert } from 'lucide-react';
+import { Plus, Edit, CheckCircle, DeleteIcon,  User , CalendarRange , Trash, X , LockIcon ,  ShieldAlert } from 'lucide-react';
 import LocationPicker from "@/components/map/LocationPicker";
 import 'leaflet/dist/leaflet.css';
-import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import apiBlogs from "@/axios/Blogapi";
 import {
   AlertDialog , 
@@ -73,14 +73,19 @@ const Profile = () => {
   const [animationType, setAnimationType] = useState('');
   const [ confirmDelete , setConfirmDelete] = useState(false);
   const [ fieldError , setFieldError] = useState('');
-  const {toast} = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   console.log(user)
   const handleToggleForm = async() => {
     const isRegisteration = await checkAdminSettings()
     if(!isRegisteration.allow_registration) {
-      alert('theater registration temperorly closed now')
+      toast('theater registration temperorly closed now', {
+        icon: <LockIcon className="text-red-500" size={20} />,
+        style: {
+          backgroundColor: '#f8d7da',
+          color: '#721c24',
+        },
+      })
       return;
     }
     setShowContactForm(!showContactForm);
@@ -241,9 +246,15 @@ const Profile = () => {
       const {username , email } = res.data
       dispatch(setUsername(username))
       dispatch(setEmail(email))
-      toast({
-        title : 'user updated successfully'
-      })
+      toast( 'user updated successfully',{
+        duration: 3000,
+        icon: <CheckCircle className="text-green-500" size={20} />,
+        style : {
+          backgroundColor: '#f0f4f8',
+          color: '#333',
+        }
+      }
+      )
       handleToggleForm1()
   
       }catch(e){

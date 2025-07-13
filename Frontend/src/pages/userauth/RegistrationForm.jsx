@@ -10,7 +10,7 @@ import bg from '../../assets/cinelogo.png'
 import { useSelector } from 'react-redux';
 import { setPrevilage} from '../../redux/features/UserSlice'
 
-function RegistrationForm({ setMessage ,  setIsOtpSent, setUserEmail }) {
+function RegistrationForm({ setIsOtpSent, setUserEmail }) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const user = useSelector(state => state.user)

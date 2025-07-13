@@ -22,6 +22,7 @@ import apiBooking from '@/axios/Bookingapi';
 function Nav() {
   const [isModalOpen , setIsModalOpen] = useState(false);
   const [isOtpSent , setIsOtpSent] = useState(false);
+  const [ message , setMessage ] = useState('');
   const [userEmail , setUserEmail ] = useState('');
   const dispatch = useDispatch();
   const selectedcity = useSelector((state) => state.location.selectedCity);
@@ -57,15 +58,16 @@ function Nav() {
   useEffect(() => {
     const checkStatus = async () => {
     if (!user?.id) return;
-
+    // Check if the user is blocked
     const res = await checkUserBlocked(user.id);
     console.log(res.status)
-    if (res?.data?.is_blocked || res.status === 401) {
+    if (res?.data?.is_blocked) {
       handleLogout()
       toast('your account has been blocked',{
         icon: <LockKeyhole />
       })
     }else{
+
       fetchNotifications()
     }
   };
@@ -133,7 +135,6 @@ function Nav() {
     toggleDropdown()
     navigate('/')
   }
-
   return (
 
     <nav className="bg-white-800 shadow-md">
@@ -146,9 +147,6 @@ function Nav() {
           <div className="hidden md:flex flex-1 justify-start px-40 space-x-10 font-bold">
             <a href="/" className="text-black-300 hover:bg-blue-200 py-1 px-1 rounded-md">
               Home
-            </a>
-            <a href="#" className="text-black-300  hover:bg-blue-200 py-1 px-1 rounded-md">
-              Theatres
             </a>
             <a href="/blogs" className="text-black-300 hover:bg-blue-200 py-1 px-1 rounded-md ">
               Blogs

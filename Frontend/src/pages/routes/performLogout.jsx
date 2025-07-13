@@ -4,8 +4,7 @@ import { clearNotifications } from "@/redux/features/notificationSlice";
 
 
 
-export const performLogout = (dispatch, navigate) => {
-  const userType = localStorage.getItem('current_user_type');
+export const performLogout = (dispatch, navigate , userType) => {
   logout();
   dispatch(resetUser());
   dispatch(clearNotifications());

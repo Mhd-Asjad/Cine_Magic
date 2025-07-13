@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Settings, Palette, Shield, Globe, Save, Eye, EyeOff, Camera, Upload } from 'lucide-react';
 import apiAdmin from '@/axios/api';
-import { useSelector } from 'react-redux';
-
+import { toast } from 'sonner';
+import { CircleCheckBig , ShieldAlert } from 'lucide-react';
 const AdminSettings = () => {
   const [activeSection, setActiveSection] = useState('appearance');
   const [appSettings, setAppSettings] = useState({
@@ -61,7 +61,13 @@ const AdminSettings = () => {
         'allow_registration' : appSettings.allowRegistration
       })
       if (res.status == 200 ){
-        alert('settings updated successfully');
+        toast('settings updated successfully',{
+          icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+          style: {
+            backgroundColor: '#f0f9ff',
+            color: '#0369a1',
+          },
+        });
       }
     }catch(error){
       console.log('error settings adding',error)
@@ -71,7 +77,13 @@ const AdminSettings = () => {
   const handlePasswordChange = async(e) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) {
-      alert('New passwords do not match!');
+      toast('New passwords do not match!',{
+        icon: <ShieldAlert className="w-6 h-6 text-red-500" />,
+        style: {
+          backgroundColor: '#fef2f2',
+          color: '#b91c1c',
+        },
+      });
       return;
     }
     console.log('Password change requested');
@@ -81,7 +93,13 @@ const AdminSettings = () => {
         'old_password' : passwords.current,
         'new_password' : passwords.new
       })
-      alert(res.data.message)
+      toast(res.data.message,{
+        icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+        style: {
+          backgroundColor: '#f0f9ff',
+          color: '#0369a1',
+        },
+      })
     }catch(error){
       console.log('error while changing password')
     }
