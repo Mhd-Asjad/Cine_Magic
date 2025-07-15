@@ -11,7 +11,9 @@ import login from "./AuthService";
 import userApi from "@/axios/userApi";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
-
+import { toast } from 'sonner'
+import { icon } from "leaflet";
+import { CircleCheckBig } from "lucide-react";
 export default function LoginForm({ isModalClose }) {
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
@@ -48,6 +50,13 @@ export default function LoginForm({ isModalClose }) {
 
     try {
       await login(dispatch, username, password, userType);
+      toast(`${username} login successfully`,{
+        icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+        style: {
+            backgroundColor: '#f0f9ff',
+            color: '#0369a1',
+        },
+      })
       isModalClose();
     } catch (e) {
       console.log("login error", e);

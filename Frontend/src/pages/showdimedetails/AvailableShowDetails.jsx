@@ -498,7 +498,7 @@ const AvailableShowDetails = () => {
           <div className="bg-white rounded-lg shadow-sm p-8">
             <div className="text-center">
               <div className="inline-block p-4 rounded-full bg-gray-50 mb-4">
-                <img src={not_found} alt="No shows found" className="w-16 h-16 opacity-70" />
+                <img src={not_found} alt="No shows found" className="w-full max-h-72 opacity-70" />
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-2">No Shows Found</h3>
               <p className="text-gray-600 mb-4">
@@ -507,7 +507,7 @@ const AvailableShowDetails = () => {
               {(selectedLanguage || selectedTime) && (
                 <button
                   onClick={clearFilters}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="px-4 py-2 rounded-lg border border-gray-1 border-dashed  hover:bg-gray-100 transition-colors"
                 >
                   Clear Filters
                 </button>

@@ -18,13 +18,9 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login
 from django.views import View
-from rest_framework.decorators import api_view, permission_classes , authentication_classes
+from rest_framework.decorators import api_view, permission_classes
 from allauth.socialaccount.models import SocialAccount
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.token_blacklist.models import (
-    BlacklistedToken,
-    OutstandingToken,
-)
 from theatre_owner.serializers import TheatreOwnerSerialzers
 from theatre_owner.models import TheaterOwnerProfile
 from django.core.exceptions import ValidationError
@@ -305,7 +301,6 @@ class checkUserType(APIView):
 
 
 @api_view(["GET"])
-@authentication_classes([])
 @permission_classes([permissions.AllowAny])
 def check_user_status(request, pk):
     """Check if a user is blocked or active."""

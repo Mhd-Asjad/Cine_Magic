@@ -304,9 +304,9 @@ class ConfirmTheatreOwner(APIView):
 
                 Reason: {rejection_reason}
 
-                If you believe this decision was made in error or if you have additional documentation to support your application, please feel free to contact our support team.
+                If you believe this decision was made in error or if you have additional documentation to support your application.
+                please feel free to contact our support team.
 
-                You may also reapply with proper documentation.
 
                 Best regards,
                 Theatre Management Team

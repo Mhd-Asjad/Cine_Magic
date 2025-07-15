@@ -13,7 +13,7 @@ function AddMovies() {
         language: '',
         duration: '',
         release_date: '',
-        description: '',
+        description: '',    
         genre: '',
         poster: null,
     };

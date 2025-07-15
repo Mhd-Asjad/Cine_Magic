@@ -29,16 +29,29 @@ function TicketView() {
     fetchQrCode();
   }, [id]);
 
-    const fetchRefundInfo = async() => {
+  const fetchRefundInfo = async() => {
 
-      try {
-        const res = await apiBooking.get(`refund-info/${id}/`)
-        setRefundInfo(res.data.refund_data)
+    try {
+      const res = await apiBooking.get(`refund-info/${id}/`)
+      setRefundInfo(res.data.refund_data)
 
-      }catch(e){
-        console.log(e , 'error while fetching cancel refund')
-      }
+    }catch(e){
+      console.log(e , 'error while fetching cancel refund')
     }
+  }
+
+const handleFetchRefundStatus = async (refundId) => {
+    try {
+      const res = await apiBooking.get(`booking-status/${refundId}/`);
+      console.log(res.data.status);
+      return res.data.status;
+    } catch (e) {
+      console.error('Error in parent fetching refund status:', e);
+      toast('Could not fetch refund status in parent.');
+      return null;
+    }
+  };
+
   const fetchQrCode = async() => {
     setLoading(true);
 
@@ -302,7 +315,6 @@ function TicketView() {
             </div>
             
             <div className="p-8 flex flex-col items-center">
-              <h1>{ticketData.qrcode_img}</h1>
               <div className="p-3 bg-white rounded-lg shadow-md">
                 <img
                   src={ticketData.qrcode_img}

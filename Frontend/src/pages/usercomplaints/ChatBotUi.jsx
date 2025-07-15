@@ -15,7 +15,7 @@ export function ChatBotUi({ setLastMessageId}) {
 
     const [historyLoaded , setHistoryLoaded ] = useState(false)
     const { messages, input, handleInputChange, append , setMessages ,  handleSubmit, isLoading, stop } = useChat({
-        api : 'http://localhost:8000/review/chatbot/',
+        api : 'https://api.cine-magic.fun/review/chatbot/',
         streamProtocol : 'text',
         headers :  {
             "Authorization" : `Bearer ${token}`

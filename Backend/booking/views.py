@@ -528,12 +528,13 @@ class ticket_view(APIView):
 
 
 class list_notification(APIView):
-    # this view lists all the notifications for the user.
-    authentication_classes = []
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
+
+        user = request.user
+        logger.info(f'user details {user}')
         try:
-            notifications = Notifications.objects.filter(user=request.user).order_by(
+            notifications = Notifications.objects.filter(user=user.id).order_by(
                 "-created"
             )
             unread_count = notifications.filter(is_read=False).count()
@@ -566,7 +567,7 @@ class list_notification(APIView):
 
 class notification_actions(APIView):
     # this view allows the user to mark notifications as read or delete them.
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     def post(self, request, notification_id):
         try:
             data = request.data

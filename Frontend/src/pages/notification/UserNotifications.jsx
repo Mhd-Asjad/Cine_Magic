@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, CheckCircle, AlertCircle, Check, CheckCheck, Settings, RefreshCw } from 'lucide-react';
+import { Bell, CheckCircle, AlertCircle, Check, CheckCheck, Trash2 , RefreshCw } from 'lucide-react';
 import Nav from '@/components/navbar/Nav';
 import apiBooking from '@/axios/Bookingapi';
 import { setNotifications , setLoading } from '@/redux/features/notificationSlice';
@@ -135,16 +135,18 @@ const UserNotificationsPage = () => {
             
             <div className="flex items-center gap-3">
                 {counts.unread_count > 0 && (
-                <div className="flex items-center gap-2">
-                
-                    <button
-                    onClick={handleMarkAllAsRead}
-                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium"
-                    >
-                    <CheckCheck className="w-4 h-4" />
-                    Mark all read
-                    </button>
-                </div>
+                    <div className="flex items-center gap-2">
+                    
+                        <button
+                        onClick={handleMarkAllAsRead}
+                        className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium"
+                        >
+                        <CheckCheck className="w-4 h-4" />
+                        Mark all read
+                        </button>
+                     
+                    </div>
+
                 )}
                 
                 <button
@@ -268,11 +270,22 @@ const UserNotificationsPage = () => {
                                <Check className="w-4 h-4 text-blue-500" /> 
                             </button>
                             ):(
+                                <div className='flex' >
+                                <button
+                                    onClick={() => handleNotificationAction(notification.id , 'delete')}
+                                    className="opacity-0 group-hover:opacity-100 ml-4 p-2 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                                    title="remove"
+                                >
+                                <Trash2 className="w-4 h-4 text-red-500" /> 
+                                </button>
+
                                 <div className='ml-4 p-2'>
 
                                     <CheckCheck className='w-4 h-4'/>
                                 </div>
+                                </div>
                             )}
+
                         </div>
                         </div>
 

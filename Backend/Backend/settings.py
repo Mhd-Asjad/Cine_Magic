@@ -175,10 +175,7 @@ CHANNEL_LAYERS = {
 
 AUTH_USER_MODEL = "useracc.User"
 
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-
+# SECURE_SSL_REDIRECT = True
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 print(os.getenv("DB_HOST"), "postgres docker")
@@ -236,7 +233,6 @@ TMDB_API_KEY = os.getenv('TMDB_API_KEY')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
 STATIC_URL = "/static/"
 STATIC_ROOT = "app/staticfiles"
 MEDIA_URL = "/media/"
@@ -247,7 +243,7 @@ MEDIA_ROOT = "/app/media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_CREDENTIALS = True
-
+# for development onlyy
 CORS_ALLOW_ALL_ORIGINS = False
 
 CSRF_TRUSTED_ORIGINS = [
@@ -264,6 +260,10 @@ CORS_ALLOWED_ORIGINS = os.getenv(
     "https://cine-magic.fun,https://www.cine-magic.fun,https://api.cine-magic.fun,http://localhost:5173",
 ).split(",")
 print(CORS_ALLOWED_ORIGINS, "cors origin varss")
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'authorization',
+]
 
 ACCOUNT_SIGNUP_FIELDS = {
 

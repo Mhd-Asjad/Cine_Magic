@@ -8,10 +8,11 @@ function Cityselction({ oncityselect }) {
   
     const [ cities , setCities ] = useState([]);
     const [ loading , setLoading] = useState(true)
-    const [ error , setError] = useState('')
+    const [error , setError ] = useState('');
     const dispatch = useDispatch();
 
     const fetchNearestMovies = async(city_ids , lat , lon) => {
+      setLoading(true)
       try{
         const res = await apiMovies.get(`/get-multiplecity-movies/?city_ids=${city_ids.join(',')}`)
         const city_id = res.data.map((movie)=> movie.city_id)
@@ -38,6 +39,8 @@ function Cityselction({ oncityselect }) {
 
       }catch(error){  
         console.log(error , 'err while fetching multiple movies')
+      }finally{
+        setLoading(false)
       }
     }
 
@@ -60,6 +63,7 @@ function Cityselction({ oncityselect }) {
           await fetchNearestMovies(city_ids, latitude, longitude);
 
         } catch (error) {
+          // setError(error)
           console.error('Failed to fetch nearest cities:', error);
         }
       });

@@ -362,7 +362,7 @@ class verify_screen(APIView):
             Unfortunately, we are unable to approve it at this time due to the following reason:
             
             {rejection_reason}
-            You may make the necessary changes on Screen Edit option.
+            You may make the necessary changes on Screen delete screen and try recreate it.
 
             Thank you for your understanding.
 

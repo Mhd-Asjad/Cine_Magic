@@ -19,6 +19,7 @@ import { clearNotifications , setNotifications } from '@/redux/features/notifica
 import { toast } from 'sonner';
 import { checkUserBlocked } from '@/pages/userauth/AuthService';
 import apiBooking from '@/axios/Bookingapi';
+import navlogo  from '../../../src/assets/navlogo.png'
 function Nav() {
   const [isModalOpen , setIsModalOpen] = useState(false);
   const [isOtpSent , setIsOtpSent] = useState(false);
@@ -42,15 +43,16 @@ function Nav() {
     setIsOtpSent(false);
     setMessage('');
   }
+  console.log(import.meta.env.VITE_BOOKING_API , 'booking apiii comes from the api file')
 
   console.log(notifications)
 
   const fetchNotifications = async () => {
       try {
           
-          const res = await apiBooking.get('notifications/');
-          console.log(res.data.notifications);
-          dispatch(setNotifications(res.data.notifications));
+        const res = await apiBooking.get('notifications/');
+        console.log(res.data.notifications);
+        dispatch(setNotifications(res.data.notifications));
 
       } catch (error) {
         console.error('Error fetching notifications:', error);
@@ -159,11 +161,12 @@ function Nav() {
           
           {/* Logo Section - Hidden on mobile to save space */}
           <div className="hidden lg:flex items-center justify-start">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">M</span>
+            <div className="w-36 h-20 rounded-lg flex items-center justify-center overflow-hidden">
+              <img src={navlogo} alt="Logo" className="w-full h-full object-contain" />
             </div>
-            <span className="ml-3 text-xl font-bold text-gray-900">MovieApp</span>
+            <span className="ml-3 text-2xl font-bold text-gray-900">cineMagic</span>
           </div>
+
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex flex-1 justify-start lg:px-40 px-8 space-x-6 lg:space-x-10 font-bold">
@@ -254,12 +257,11 @@ function Nav() {
 
           <div className="md:hidden flex items-center justify-between w-full">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">M</span>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+                <img src={navlogo} alt="Logo" className="w-full h-full object-contain" />
               </div>
-              <span className="ml-2 text-lg font-bold text-gray-900">MovieApp</span>
+              <span className="ml-2 text-lg font-bold text-gray-900">cineMagic</span>
             </div>
-
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
