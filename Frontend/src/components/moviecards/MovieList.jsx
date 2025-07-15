@@ -40,23 +40,6 @@ function MovieList({ movie }) {
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         
-        {/* New Release Badge */}
-        {/* {isNewRelease() && (
-          <div className="absolute top-3 left-3 z-10">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1 animate-pulse">
-              <Sparkles className="w-3 h-3" />
-              <span>NEW</span>
-            </div>
-          </div>
-        )} */}
-        
-        {/* Rating Badge */}
-        {/* <div className="absolute top-3 right-3 z-10">
-          <div className={`${getRatingColor(movie.rating)} backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold flex items-center space-x-1`}>
-            <Star className="w-3 h-3 fill-current" />
-            <span>{movie.rating}</span>
-          </div>
-        </div> */}
         
         {/* Hover Overlay with Actions */}
         <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
@@ -69,16 +52,6 @@ function MovieList({ movie }) {
               }}
             >
               <Play className="w-5 h-5 fill-current" />
-            </button>
-            <button 
-              className={`backdrop-blur-sm p-3 rounded-full transition-all duration-200 hover:scale-110 ${
-                isLiked 
-                  ? 'bg-red-500/30 text-red-400' 
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-              onClick={handleLike}
-            >
-              <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
             </button>
           </div>
         </div>

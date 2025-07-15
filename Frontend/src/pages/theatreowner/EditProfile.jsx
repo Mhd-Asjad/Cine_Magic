@@ -18,10 +18,10 @@ import { useSelector } from 'react-redux';
 import TheatreApi from '@/axios/theatreapi';
 import { useDispatch } from 'react-redux';
 import { setTheatreOwner } from '@/redux/features/Theatreownerslice';
-import { useToast } from '@/hooks/use-toast';
+import { CircleCheckBig } from 'lucide-react';
+import { toast } from 'sonner';
 function EditProfile() {
     const dispatch = useDispatch();
-    const {toast} = useToast();
     const theatreOwner = useSelector((state) => state.theatreOwner);
 
     const [ open , setOpen ] = React.useState(false);
@@ -58,9 +58,15 @@ function EditProfile() {
 
             }
             ))
-            toast({
-                title : 'profile updated successfully'
-            })
+            toast(
+                'profile updated successfully',{
+                icon: <CircleCheckBig size={20} className='text-green-500'/>,
+                style: {
+                    backgroundColor: '#f0fff4',
+                    color: '#16a34a',
+                }
+                }
+            )
             setOpen(false)
         }catch(e){
             console.log(e)

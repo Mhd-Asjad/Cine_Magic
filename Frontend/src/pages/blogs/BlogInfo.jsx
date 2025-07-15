@@ -8,7 +8,7 @@ import LikeDislikeButton from './LikeDislikeButton';
 import Modal from '@/components/modals/Modal';
 import AuthContainer from '../userauth/AuthContainer';
 import { getDate, getDay } from 'date-fns';
-import { MessageCircle, Clock1, Send, Share2 , MoreHorizontal, Edit, Trash2 } from "lucide-react"
+import { MessageCircle, Clock1, Send, Share2 , MoreHorizontal, Edit, Trash2 ,Check } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +31,7 @@ function BlogInfo() {
     const [isLogin , setIsLogin] = useState(false);
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editingText, setEditingText] = useState("");
+    const [copied , setCopied] = useState(false);
     const {id} = useParams();
     const userId = useSelector((state) => state.user.id)
     
@@ -172,6 +173,23 @@ function BlogInfo() {
         setEditingText("");
 
     }
+    const copyPageUrl = async() => {
+        try {
+            await navigator.clipboard.writeText(window.location.href)
+            setCopied(true)
+            setTimeout(() => setCopied(false) , 2000)
+            
+        }catch(err){
+            const textArea = document.createElement('textarea');
+            textArea.value = window.location.href;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    }
     console.log(allComments)
     return(
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -194,8 +212,16 @@ function BlogInfo() {
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                                         <div className="absolute top-4 right-4 flex space-x-2">
                                       
-                                            <button className="bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors">
-                                                <Share2 className="w-5 h-5 text-blue-600" />
+                                            <button className="bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors"
+                                                onClick={copyPageUrl}
+                                                title='copy post url'
+                                            >
+                                                {copied ? (
+                                                    <Check className='w-5 h-5 text-green-300'/>
+                                                ):(
+                                                
+                                                    <Share2 className="w-5 h-5 text-blue-600" />
+                                                )}
                                             </button>
                                         </div>
                                     </div>
@@ -380,8 +406,8 @@ function BlogInfo() {
                                         </div>
                                     ) : (
                                         <div className="p-8 text-center">
-                                            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <MessageCircle className="w-8 h-8 text-blue-500" />
+                                            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <MessageCircle className="w-8 h-8 text-gray-500" />
                                             </div>
                                             <h3 className="font-semibold text-gray-900 mb-2">Start the conversation</h3>
                                             <p className="text-sm text-gray-500 mb-4">

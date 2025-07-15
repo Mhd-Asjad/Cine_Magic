@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Download, Calendar, Building, Filter, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CloudDownload } from 'lucide-react';
 import apiAdmin from '@/axios/api';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 const ExcelDownloadComponent = () => {
     const [isDownloading, setIsDownloading] = useState(false);
     const [theatres, setTheatres] = useState([]);
@@ -12,7 +13,6 @@ const ExcelDownloadComponent = () => {
         theatreId: '',
         reportType: 'all'
     });
-    const {toast} = useToast();
 
     console.log(downloadParams)
 
@@ -87,7 +87,13 @@ const ExcelDownloadComponent = () => {
     } catch (error) {
       console.error('Download error:', error);
     } finally {
-      toast({title :'Report downloaded successfully!'})
+      toast('Report downloaded successfully!', {
+        icon: <CloudDownload className="w-6 h-6 text-blue-500" />,
+        style: {
+          backgroundColor: '#f0f9ff',
+          color: '#0369a1',
+        },
+      })
       setIsDownloading(false);  
     }
   };
@@ -138,6 +144,7 @@ const ExcelDownloadComponent = () => {
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
+                  required
                   type="date"
                   value={downloadParams.startDate}
                   onChange={(e) => handleInputChange('startDate', e.target.value)}
@@ -153,6 +160,7 @@ const ExcelDownloadComponent = () => {
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
+                  required
                   type="date"
                   value={downloadParams.endDate}
                   onChange={(e) => handleInputChange('endDate', e.target.value)}
@@ -196,6 +204,7 @@ const ExcelDownloadComponent = () => {
               ].map((option) => (
                 <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
                   <input
+                    required  
                     type="radio"
                     name="reportType"
                     value={option.value}

@@ -4,7 +4,6 @@ from .models import *
 from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework import status, permissions
-import requests
 from django.conf import settings
 from theatres.models import *
 from django.db.models import Count
@@ -15,15 +14,13 @@ from django.db.models import Prefetch
 from .serializers import CitySerializer
 from collections import defaultdict
 from math import radians, sin, cos, sqrt, atan2
+from review.models import Rating
 
 # Create your views here.
 
-
+# this view is used to fetch the available cities for the user
 class fetchavailablecity(APIView):
-    permission_classes = [permissions.AllowAny]
-
     def get(self, request):
-        print(request.user, "user")
         now = datetime.now()
         theatres = Theatre.objects.annotate(
             movie_count=Count("screens__showtimes__movie")
@@ -42,13 +39,12 @@ class fetchavailablecity(APIView):
         ]
         return JsonResponse({"cities": city_data}, safe=False)
 
-
+# this view is used to fetch the movies available in a specific city
 class CityBasedMovies(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, city_id):
         try:
-            print(city_id)
             today = datetime.now()
             city = City.objects.get(id=city_id)
             showtimes = (
@@ -59,8 +55,6 @@ class CityBasedMovies(APIView):
                 .distinct()
             )
             movies = {showtime.movie for showtime in showtimes}
-
-            print(movies, "movies in the city")
 
         except City.DoesNotExist:
             return Response(
@@ -90,106 +84,53 @@ class CityBasedMovies(APIView):
             status=status.HTTP_200_OK,
         )
 
-
+# this view is used to fetch the detailed information of a specific movie
 class DetailedMovieView(APIView):
-
-    permission_classes = [permissions.AllowAny]
-
+    
     def get(self, request, id):
         try:
-            print("inside views")
-            print(id, "got the id hrere")
-            try:
+            movie = Movie.objects.get(id=id)
+        except Movie.DoesNotExist:
+            return Response(
+                {"message": "movie does not exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        movie_data = {
+            "title": movie.title,
+            "language": movie.language,
+            "duration": movie.duration,
+            "release_date": movie.release_date,
+            "description": movie.description,
+            "genre": movie.genre,
+            "poster": (
+                request.build_absolute_uri(movie.poster.url)
+                if movie.poster
+                else None
+            ),
+        }
+        return JsonResponse(movie_data, safe=False, status=status.HTTP_200_OK)
 
-                movie = Movie.objects.get(id=id)
-            except Movie.DoesNotExist:
-                return Response(
-                    {"message": "movie does not exist"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-
-            tmdb_url = "https://api.themoviedb.org/3/search/movie"
-            tmdb_params = {
-                "api_key": settings.TMDB_API_KEY,
-                "query": movie.title,
-                "include_adult": False,
-                "language": "ml",
-                "region": "IN",
-                "page": 1,
-            }
-
-            movie_id = 0
-            backdrop_url = ""
-            try:
-                tmdb_response = requests.get(
-                    tmdb_url, params=tmdb_params, timeout=5, verify=False
-                )
-                tmdb_response.raise_for_status()
-                tmdb_data = tmdb_response.json()
-                results = tmdb_data.get("results", [])
-
-                if results:
-                    movie_id = results[0]["id"]
-                    backdrop_url = (
-                        results[0]["backdrop_path"] or results[0]["poster_path"]
-                    )
-
-                print("respose status", tmdb_response.status_code)
-
-            except requests.exceptions.RequestException as e:
-                print(f"error fetching tmdb data {e}")
-            movie_data = {
-                "movie_id": movie_id,
-                "bg_image": backdrop_url,
-                "title": movie.title,
-                "language": movie.language,
-                "duration": movie.duration,
-                "release_date": movie.release_date,
-                "description": movie.description,
-                "genre": movie.genre,
-                "poster": (
-                    request.build_absolute_uri(movie.poster.url)
-                    if movie.poster
-                    else None
-                ),
-            }
-            return JsonResponse(movie_data, safe=False, status=status.HTTP_200_OK)
-        except Exception as e:
-            print(f"exception {str(e)}")
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        # movie_data = {
-        #     "title": movie.title,
-        #     "language": movie.language,
-        #     "duration": movie.duration,
-        #     "release_date": movie.release_date,
-        #     "description": movie.description,
-        #     "genre": movie.genre,
-        #     "poster": request.build_absolute_uri(movie.poster.url) if movie.poster else None,
-        # }
-        # return JsonResponse(movie_data , safe=False , status=status.HTTP_200_OK)
-
-
+# this function is used to get the showtime label based on the start time
 def get_showtime_label(start_time):
     if not start_time:
         return ""
     if time(6, 0) <= start_time < time(12, 0):
         return "Morning"
-    elif time(12, 0) <= start_time < time(16, 0):
+    elif time(12, 0) <= start_time < time(18, 0):
         return "Afternoon"
-    elif time(16, 0) <= start_time < time(18, 0):
+    elif time(18, 0) <= start_time < time(22, 0):
         return "Evening"
-    else:
+    elif time(22, 0) <= start_time < time(24, 0):
         return "Night"
+    else:
+        return "Late Night"
 
-
+# this view is used to fetch the showtimes for a specific movie in a city
 class movie_showtime(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, id):
         cityids = request.GET.getlist("city_id")
-        print(cityids, "idss")
-        if not cityids:
-            print("no city idies provide")
 
         try:
             city_ids = list(set(map(int, cityids)))
@@ -215,8 +156,7 @@ class movie_showtime(APIView):
                 )
                 .prefetch_related("slots")
             )
-            print(showtimes, "showtimes")
-
+            
         except ShowTime:
             return Response(
                 {"error": "show not available"}, status=status.HTTP_404_NOT_FOUND
@@ -228,6 +168,7 @@ class movie_showtime(APIView):
             if theatre_name not in theatre_data:
 
                 theatre_data[theatre_name] = {
+                    "id" : show.screen.theatre.id,
                     "name": show.screen.theatre.name,
                     "city": show.screen.theatre.city.name,
                     "address": show.screen.theatre.address,
@@ -279,7 +220,6 @@ class movie_showtime(APIView):
                 }
             )
 
-        print(theatre_data, "theatre data")
         shows = ShowTime.objects.filter(screen__theatre__city__id__in=city_ids)
         movies = set(show.movie for show in shows)
         movie_data = []
@@ -300,7 +240,7 @@ class movie_showtime(APIView):
             safe=True,
         )
 
-
+# this view is used to fetch the show details for a specific show
 class Show_Details(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -320,6 +260,7 @@ class Show_Details(APIView):
 
 
 class FetchCities(APIView):
+    permission_classes = [permissions.AllowAny]
     def get(self, reqeust):
         try:
             cities = City.objects.all()
@@ -340,15 +281,13 @@ def haversine(lat1, lon1, lat2, lon2):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 
-
+# get the nearest cities based on user location
 class get_nearest_cities(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         user_lat = float(request.GET.get("latitude"))
         user_lon = float(request.GET.get("longitude"))
-
-        print("userlat", user_lat, "user long:", user_lon)
 
         theatres = Theatre.objects.filter(is_confirmed=True).exclude(city_id=None)
 
@@ -376,14 +315,13 @@ class get_nearest_cities(APIView):
 
         return Response(city_distance[:5], status=status.HTTP_200_OK)
 
-
+# this view is created for detect my location functionality on the frontend 
 class multiple_city_based_movies(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
 
         city_ids = request.query_params.get("city_ids")
-        print(city_ids)
         if not city_ids:
             return Response(
                 {"detail": "city_ids parameter is required"},
@@ -446,3 +384,28 @@ class multiple_city_based_movies(APIView):
             )
 
         return Response(result, status=status.HTTP_200_OK)
+
+# this view is used to fetch the ratings and reviews for a specific movie
+class MovieReviewsView(APIView):
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+    def get(self, request, movie_id):
+        try:
+            movie = Movie.objects.get(id=movie_id)
+        except Movie.DoesNotExist:
+            return Response(
+                {"error": "Movie not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        ratings = Rating.objects.filter(movie=movie).select_related("user")
+        reviews = [
+            {
+                "user": rating.user.username,
+                "rating": rating.rating,
+                "review": rating.review,
+                "created_at": rating.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            for rating in ratings
+        ]
+
+        return Response({"movie": movie.title, "reviews": reviews}, status=status.HTTP_200_OK)

@@ -26,6 +26,7 @@ const getRefreshToken = () => localStorage.getItem('refresh_token')
 TheatreApi.interceptors.response.use(
     response => response,
     async (error) => {
+        console.log(error)
         if (error.response.status === 401) {
             try {
                 const refreshResponse = await axios.post(`${API_BASE_URL}/token/refresh/`, {

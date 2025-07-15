@@ -14,12 +14,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class CustomPagination(PageNumberPagination):
     page_size = 5
     page_query_param = "page"
 
-
+# create user post
 class CreatePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -93,10 +92,10 @@ class CreatePostView(APIView):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
+# get user posts
 class GetUserPostsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    # This view retrieves all posts made by a specific user.
     def get(self, request, user_id):
         try:
             user = get_object_or_404(User, id=user_id)
@@ -108,7 +107,6 @@ class GetUserPostsView(APIView):
                 return Response({"message": "no posts found"})
 
             serializer = PostSerializer(posts, many=True, context={"request": request})
-            print(serializer.data, "serializer data")
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -116,10 +114,10 @@ class GetUserPostsView(APIView):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
+# This view allows a user to edit an existing post.
 class EditPost(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    # This view allows a user to edit an existing post.
     def put(self, request, post_id):
 
         try:
@@ -161,9 +159,9 @@ class EditPost(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# This view allows a user to delete an existing post.
 class DeletePost(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, post_id):
         try:
@@ -182,13 +180,13 @@ class DeletePost(APIView):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
+# get all posts
 class GetAllPosts(generics.ListAPIView):
     queryset = Post.objects.all()
     permission_classes = [permissions.AllowAny]
     pagination_class = CustomPagination
     serializer_class = PostSerializer
-
+    # This view retrieves all posts with pagination.
     def list(self, request):
         queryset = self.get_queryset()
         paginated_queryset = self.paginate_queryset(queryset)
@@ -212,9 +210,9 @@ class GetPostDetail(APIView):
         serializer = PostSerializer(post, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# This view allows a user to post a comment on a specific post.
 class PostComment(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, post_id):
         serializer = CommentSerializer(data=request.data)
@@ -223,7 +221,6 @@ class PostComment(APIView):
             return Response(
                 {"message": "comment posted"}, status=status.HTTP_201_CREATED
             )
-        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, post_id):
@@ -239,7 +236,7 @@ class PostComment(APIView):
         serializer = CommentSerializer(data, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# This view allows a user to toggle the like on blog posts.
 class toggle_like(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -270,7 +267,7 @@ class toggle_like(APIView):
 
         return Response({"message": "post liked"}, status=status.HTTP_200_OK)
 
-
+# This view allows a user to toggle the dislike on blog posts.
 class toggle_dislike(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -301,7 +298,7 @@ class toggle_dislike(APIView):
 
         return Response({"message": "post disliked"}, status=status.HTTP_200_OK)
 
-
+#  this view allows a user to get their reaction on a post.
 class get_post_reaction(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -310,16 +307,16 @@ class get_post_reaction(APIView):
 
         try:
             post_reaction = PostReaction.objects.get(user=user, post=post_id)
-            print(post_reaction.user.username)
-            print(post_reaction.is_like)
             return Response(
                 {"is_like": post_reaction.is_like}, status=status.HTTP_200_OK
             )
         except PostReaction.DoesNotExist:
             return Response({"error": None}, status=status.HTTP_404_NOT_FOUND)
 
-
+# This view allows a user to edit or delete their comment on a post.
 class edit_comment(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    # This view allows a user to edit or delete their comment on a post.
     def put(self, request, comment_id):
         data = request.data
         try:
@@ -334,7 +331,7 @@ class edit_comment(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    # This view allows a user to delete their comment on a post.
     def delete(self, request, comment_id):
         try:
             comment = Comment.objects.get(id=comment_id)

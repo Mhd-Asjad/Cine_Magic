@@ -314,7 +314,6 @@ const AvailableShowDetails = () => {
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Nav />
       <div className="container mx-auto px-4 py-6 flex-grow">
-        {/* Movie Header */}
         {movie && (
           <div className="mb-6 bg-white rounded-lg shadow-sm p-6">
             <h1 className="text-3xl font-bold mb-2 text-gray-800">{movie.title}</h1>
@@ -322,11 +321,8 @@ const AvailableShowDetails = () => {
           </div>
         )}
 
-        {/* Date Selection and Filters */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          {/* Date Selection with Navigation */}
           <div className="flex items-center space-x-2 pb-4 mb-4 border-b border-gray-200">
-            {/* Left Arrow */}
             {dateButtons.length > 6 && (
               <button
                 onClick={() => navigateDates('left')}
@@ -341,8 +337,9 @@ const AvailableShowDetails = () => {
               </button>
             )}
 
-            {/* Date Buttons */}
-            <div className="flex space-x-2 min-w-max overflow-hidden">
+            <div className="overflow-x-auto flex">
+
+             <div className="flex space-x-2 min-w-max px-2 pb-2 scroll-smooth">
               {visibleDates.map((date, index) => (
                 <button
                   key={date.toISOString()}
@@ -364,7 +361,8 @@ const AvailableShowDetails = () => {
               ))}
             </div>
 
-            {/* Right Arrow */}
+            
+          </div>
             {dateButtons.length > 6 && (
               <button
                 onClick={() => navigateDates('right')}
@@ -436,12 +434,10 @@ const AvailableShowDetails = () => {
           </div>
         </div>
 
-        {/* Show Results */}
         {totalShowCount > 0 ? (
           <div className="space-y-4">
             {filteredTheatres.map((theatre) => (
               <div key={theatre.name} className="bg-white rounded-lg shadow-sm p-6">
-                {/* Theatre Header */}
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">{theatre.name}</h3>
@@ -458,7 +454,6 @@ const AvailableShowDetails = () => {
                   </div>
                 </div>
 
-                {/* Show Times */}
                 <div className="space-y-4">
                   {theatre.shows.map((show) => (
                     <div key={show.show_id} className="border-l-4 border-blue-500 pl-4">
@@ -521,7 +516,6 @@ const AvailableShowDetails = () => {
           </div>
         )}
 
-        {/* Latest Movies Section */}
         {newMovies.length > 0 && (
           <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
             <h3 className="text-xl font-semibold mb-4 text-gray-800">
@@ -539,7 +533,6 @@ const AvailableShowDetails = () => {
         )}
       </div>
 
-      {/* Directions Modal */}
       {showDirectionsModal && selectedTheatre && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">

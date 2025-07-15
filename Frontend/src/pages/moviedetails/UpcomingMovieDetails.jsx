@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Star, Calendar, Globe, Clock, Share2, User , Bookmark } from 'lucide-react';
+import { ChevronLeft, Star, Calendar, Globe, Clock, User , Bookmark } from 'lucide-react';
 import Nav from '@/components/navbar/Nav';
 const UpcomingMovieDetails = () => {
   const { movieId } = useParams(); 
@@ -160,7 +160,7 @@ const UpcomingMovieDetails = () => {
               {backdropUrl && (
               <>
                   <div 
-                  className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                  className="absolute inset-0 bg-cover bg-center bg-no-repeat "
                   style={{ backgroundImage: `url(${backdropUrl})` }}
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-60" />
@@ -175,16 +175,10 @@ const UpcomingMovieDetails = () => {
                   <ChevronLeft className="w-5 h-5" />
                   <span>Back</span>
               </button>
-              <div className="flex space-x-3">
-                 
-                  <button className="p-2 bg-black bg-opacity-50 rounded-full hover:bg-opacity-70 transition-all">
-                  <Share2 className="w-5 h-5" />
-                  </button>
-              </div>
               </div>
             
               <div className="absolute w-full p-4 md:p-6 text-white">
-              <div className="flex flex-col md:flex-row md:items-end space-y-4 md:space-y-0 md:space-x-6">
+              <div className="flex flex-col md:flex-row md:items-end space-y-4 md:space-y-0 md:mb-4 md:space-x-6 ">
                   {posterUrl && (
                   <img
                       src={posterUrl}
@@ -205,7 +199,6 @@ const UpcomingMovieDetails = () => {
                       </p>
                   )}
                   
-                  {/* Rating */}
                   {movie.vote_average > 0 && (
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-4">
                       <div className="flex items-center space-x-1">
@@ -216,7 +209,6 @@ const UpcomingMovieDetails = () => {
                       </div>
                   )}
   
-                  {/* Movie Info */}
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm mb-4">
                       <div className="flex items-center space-x-1">
                       <Calendar className="w-4 h-4" />
@@ -237,7 +229,6 @@ const UpcomingMovieDetails = () => {
                       )}
                   </div>
                     
-                  {/* Genres */}
                   {movie.genres && movie.genres.length > 0 && (
                       <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
                       {movie.genres.map(genre => (
@@ -248,13 +239,7 @@ const UpcomingMovieDetails = () => {
                       </div>
                   )}
   
-                  <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                
-                      <button className="flex items-center space-x-2 bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-lg font-medium transition-colors">
-                      <Bookmark className="w-5 h-5" />
-                      <span>Watchlist</span>
-                      </button>
-                  </div>
+                  
                   </div>
               </div>
               </div>

@@ -15,7 +15,8 @@ from .serializers import (
     UpdateTheatreOwnerSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.core.mail import send_mail
+from rest_framework.decorators import api_view, permission_classes
+from django.shortcuts import get_object_or_404
 from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from movies.models import *
@@ -37,8 +38,8 @@ from .tasks import send_response_mail
 
 logger = logging.getLogger(__name__)
 
-
 # Create your views here.
+
 class CreateOwnershipProfile(APIView):
     permission_classes = [AllowAny]
 
@@ -46,7 +47,6 @@ class CreateOwnershipProfile(APIView):
         try:
             data = request.data
             user_id = data["user"]
-            print(data)
             user = User.objects.get(id=user_id)
             if user.is_staff:
                 return Response(
@@ -73,10 +73,10 @@ class CreateOwnershipProfile(APIView):
                     {"message": "request has been made soon update via mail"},
                     status=status.HTTP_200_OK,
                 )
-            print(serializer.errors)
+            logger.error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(str(e))
+            logger.error(str(e))
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -84,7 +84,7 @@ class CreateOwnershipProfile(APIView):
 
 class Update_theatreowner(APIView):
     def put(self, request, pk):
-        print("inputdata", request.data)
+        logger.info(f"inputdata : {request.data}")
         theatre_name = request.data.get("theatre_name")
         try:
             owner = TheaterOwnerProfile.objects.get(pk=pk)
@@ -98,26 +98,20 @@ class Update_theatreowner(APIView):
         )
         if serializer.is_valid():
             serializer.save()
-            print(serializer.data)
+            logger.error(serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        print(serializer.errors)
+        logger.info(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ConfirmTheatreOwner(APIView):
-    """
-    Enhanced Theatre Owner Management API
-    Handles pending, rejected, and archived theatre enquiries
-    """
 
+    permission_classes = [IsAuthenticated]
     def get(self, request):
-        """
-        Get theatre enquiries based on tab parameter
-        """
+      
         try:
             tab = request.query_params.get("tab", "pending")
-            print("inside the get method")
             if tab == "pending":
                 theatre_profiles = TheaterOwnerProfile.objects.filter(
                     ownership_status="pending",
@@ -127,7 +121,6 @@ class ConfirmTheatreOwner(APIView):
                 )
 
             elif tab == "rejected":
-                print(f"inside rejection filter with tab", {tab})
                 theatre_profiles = TheaterOwnerProfile.all_objects.filter(
                     ownership_status="rejected",
                     user__is_theatre_owner=True,
@@ -147,7 +140,6 @@ class ConfirmTheatreOwner(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            print("filtered object", theatre_profiles)
             data = []
             for theatre in theatre_profiles:
                 enquiry_data = {
@@ -170,7 +162,6 @@ class ConfirmTheatreOwner(APIView):
                     "deleted_at": theatre.deleted_at,
                 }
                 data.append(enquiry_data)
-            print(data)
             return Response(
                 {
                     "enquiries": data,
@@ -188,9 +179,7 @@ class ConfirmTheatreOwner(APIView):
             )
 
     def post(self, request):
-        """
-        Handle theatre owner status changes: confirm, reject, or archive
-        """
+
         profile_id = request.data.get("id")
         ownership_status = request.data.get("ownership_status")
         user_id = request.data.get("userId")
@@ -235,7 +224,7 @@ class ConfirmTheatreOwner(APIView):
             )
 
     def _handle_confirmation(self, theatre_owner, user, request):
-        """Handle theatre owner confirmation"""
+        # Handle theatre owner confirmation
         try:
             # Use the model's confirm method
             theatre_owner.confirm()
@@ -301,7 +290,7 @@ class ConfirmTheatreOwner(APIView):
             )
 
     def _handle_rejection(self, theatre_owner, user, rejection_reason):
-        """Handle theatre owner rejection"""
+        # Handle theatre owner rejection
         try:
             # Use the model's reject method
             theatre_owner.reject(rejection_reason)
@@ -338,7 +327,6 @@ class ConfirmTheatreOwner(APIView):
             )
 
     def _handle_archive(self, theatre_owner, user, archive_reason):
-        """Handle theatre owner archival"""
         try:
             # Use the model's archive method
             theatre_owner.archive(archive_reason)
@@ -374,14 +362,9 @@ class ConfirmTheatreOwner(APIView):
 
 
 class RestoreTheatreOwner(APIView):
-    """
-    API endpoint to restore rejected or archived theatre owners
-    """
-
+    permission_classes = [IsAuthenticated]
     def post(self, request):
-        """
-        Restore a soft-deleted theatre owner profile
-        """
+        # Restore a soft deleted theatre owner profile
         profile_id = request.data.get("id")
         user_id = request.data.get("userId")
 
@@ -442,13 +425,12 @@ class RestoreTheatreOwner(APIView):
 
 # checking theatre owner for the pending theatres
 class validateowner(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         owner_id = request.GET.get("owner_id")
-        print(owner_id)
         theatre_without_screen = Theatre.objects.annotate(
             screen_count=Count("screens")
         ).filter(owner=owner_id, screen_count=0)
-        print(theatre_without_screen)
         if theatre_without_screen.exists():
             return Response(
                 {"error": "you have to verify other pending theatre"},
@@ -461,6 +443,7 @@ class validateowner(APIView):
 
 # fetching all movies data
 class FetchAllMovies(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
             Movies = Movie.objects.filter().order_by("-created_at")
@@ -469,14 +452,14 @@ class FetchAllMovies(APIView):
             )
             return Response(serializer.data)
         except Exception as e:
-            print(serializer.errors)
+            logger.error(serializer.errors)
             return Response({"error": str(e)}, status=500)
 
 
 # fetching all the showtimes for the theatre
 class fetch_showtime(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, theatre_id):
-        print(theatre_id, "reached in the vieews")
         try:
             screens = Screen.objects.filter(theatre=theatre_id)
             if not screens.exists():
@@ -493,7 +476,6 @@ class fetch_showtime(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print("error while fetching showtime", str(e))
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -501,6 +483,7 @@ class fetch_showtime(APIView):
 
 # show pending theatres for the theatre owner
 class pending_theatres(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, owner_id):
         theatre_owner = TheaterOwnerProfile.objects.get(id=owner_id)
         pendings = Theatre.objects.filter(owner=theatre_owner)
@@ -508,7 +491,6 @@ class pending_theatres(APIView):
             return Response(
                 {"warning": "no theatres to verify"}, status=status.HTTP_200_OK
             )
-        print(pendings)
         pending_li = []
         for pending in pendings:
             pending_dict = {
@@ -526,14 +508,13 @@ class pending_theatres(APIView):
 
 # creating a screen for the theatre
 class CreateScreen(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         data = request.data
         theatre_id = data["theatre"]
         screen_no = data["screen_number"]
         Screen_type = list(data["screen_type"])
         time_slots = data["time_slots"]
-        theatre = Theatre.objects.get(id=theatre_id)
-        owner_email = theatre.owner.user.email
         Screen_Occurs = Screen.objects.filter(
             theatre=theatre_id, screen_number=screen_no
         )
@@ -573,15 +554,15 @@ class CreateScreen(APIView):
                 status=status.HTTP_201_CREATED,
             )
 
-        print(serializers.errors)
+        logger.info(serializers.errors)
         return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # show verified theatres for the theatre owner
 class ShowVerifiedTheatre(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         owner = request.query_params.get("owner_id")
-        print(owner)
 
         try:
             available_theatres = Theatre.objects.filter(owner=owner)
@@ -598,7 +579,7 @@ class ShowVerifiedTheatre(APIView):
                 }
                 for theatre in available_theatres
             ]
-            print(theatre_data)
+            logger.info(f'theatre data with verified : {theatre_data}')
             return Response(
                 {"available_theatre": theatre_data}, status=status.HTTP_200_OK
             )
@@ -612,13 +593,12 @@ class ShowVerifiedTheatre(APIView):
 
 # get theatre screens for the theatre owner
 class get_theatre_screens(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
-        print(request.data)
         theatre = request.query_params.get("theatre_id")
         screens = Screen.objects.filter(theatre=theatre).order_by("screen_number")
         screen_count = screens.count()
         serializer = CreateScreenSerializer(screens, many=True)
-        print(serializer.data)
         return Response(
             {"data": serializer.data, "screen_count": screen_count},
             status=status.HTTP_200_OK,
@@ -627,6 +607,7 @@ class get_theatre_screens(APIView):
 
 # get all the time slots for the screen
 class get_timeslots(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         screen_id = request.query_params.get("screen_id")
         screen = Screen.objects.get(id=screen_id)
@@ -648,6 +629,7 @@ class get_timeslots(APIView):
 
 # adding time slots for the screen
 class create_timeslot(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
 
         data = request.data
@@ -657,7 +639,6 @@ class create_timeslot(APIView):
             screen_id = data.pop("screen_id")
             show_time_obj = datetime.strptime(show_time, "%H:%M:%S").time()
             new_start_dt = datetime.combine(datetime.today(), show_time_obj)
-            print(new_start_dt)
             new_end_dt = new_start_dt + timedelta(hours=3)
             formatted_time = show_time_obj.strftime("%I:%M %p")
 
@@ -666,7 +647,6 @@ class create_timeslot(APIView):
             for time in screen_times:
                 existing_start_dt = datetime.combine(datetime.today(), time.start_time)
                 existing_end_dt = existing_start_dt + timedelta(hours=3)
-                print(time.start_time, existing_end_dt)
                 if new_start_dt < existing_end_dt and existing_start_dt < new_end_dt:
                     return Response(
                         {"Error": "during this time already show time added"},
@@ -734,7 +714,6 @@ class Add_Show_Time(APIView):
                 )
             to_date = datetime.strptime(end_date, "%Y-%m-%d").date()
 
-            print(to_date)
 
             today = date.today()
             if not to_date:
@@ -743,7 +722,6 @@ class Add_Show_Time(APIView):
                 )
 
             if to_date <= from_date:
-                print("not validd")
                 return Response(
                     {"Error": "to date must be greater that start date"},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -788,7 +766,6 @@ class Add_Show_Time(APIView):
                     {"message": "show time data successfully create"},
                     status=status.HTTP_201_CREATED,
                 )
-            print(serializers.errors)
             return Response(
                 {"Error": serializers.errors}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -802,8 +779,8 @@ class Add_Show_Time(APIView):
 
 # add theatres
 class AddTheatre(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request, city_id):
-        print(city_id)
         try:
             city = City.objects.get(id=city_id)
 
@@ -853,10 +830,11 @@ class AddTheatre(APIView):
 
 # edit theatre data
 class EditTheatreData(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, id):
+        
         try:
             theatre = Theatre.objects.get(id=id)
-            print(theatre.city.id)
         except Theatre.DoesNotExist:
             return Response(
                 {"message": "theatre is not found"}, status=status.HTTP_404_NOT_FOUND
@@ -881,7 +859,6 @@ class EditTheatreData(APIView):
 
         name = request.data.get("name")
         address = request.data.get("address")
-        print(address, "adress")
 
         if not name or not address:
             return Response(
@@ -898,17 +875,15 @@ class EditTheatreData(APIView):
 
 # delete theatre data
 class DeleteTheatre(APIView):
-
+    permission_classes = [IsAuthenticated]
     def delete(self, request, id):
-        print(f"Received request to delete theatre with ID: {id}")
-
         try:
             theatre = Theatre.objects.get(id=id)
         except Theatre.DoesNotExist:
             return Response(
                 {"error": "Theatre not found"}, status=status.HTTP_404_NOT_FOUND
             )
-
+        
         theatre.delete()
         return Response(
             {"message": "Theatre deleted successfully"}, status=status.HTTP_200_OK
@@ -924,9 +899,8 @@ def get_date_range(start_date, end_date):
 
 
 # editing show date view
-
-
 class Edit_show_det(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, slot_id):
         """Get show time details for editing"""
         try:
@@ -975,7 +949,7 @@ class Edit_show_det(APIView):
                 {"error": "Error fetching show details"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
+    # Update show details
     def put(self, request, slot_id):
         data = request.data.copy()
 
@@ -1091,7 +1065,7 @@ class Edit_show_det(APIView):
                     f"Updated slot {slot_id} start time from {old_start_time} to {start_time_obj}"
                 )
 
-            # Get existing show dates for this slot, screen, and movie combination
+            # Get existing show dates for this slot screen and movie combination
             existing_dates = set(
                 ShowTime.objects.filter(
                     screen=screen,
@@ -1156,9 +1130,21 @@ class Edit_show_det(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+class delete_screen(APIView):
+    def delete(self , request , pk):
+        try:
+            screen = Screen.objects.get(pk=pk)
+            
+        except Screen.DoesNotExist:
+            logger.info('screen not found')
+            return Response({'message':'screen not found'},status=status.HTTP_404_NOT_FOUND)
+        screen.delete()
+        return Response({'message': f"screen {screen.screen_number} deleted successfully"},status=status.HTTP_200_OK)
+        
 
-# get all the bookings for the theatre owner
+# get all the bookings for the theatre owner with details
 class Get_Theatre_Bookings(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         owner = request.query_params.get("owner_id")
         try:
@@ -1196,12 +1182,12 @@ class Get_Theatre_Bookings(APIView):
             return Response({"booking_data": booking_data}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print(str(e))
+            logger.error(str(e))
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
+# theatre owner dashboard status view
 class DashboardStatus(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -1217,7 +1203,6 @@ class DashboardStatus(APIView):
                 {"error": "theatre not found"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        print(theatre_owner)
         booking_queryset = Booking.objects.filter(
             show__screen__theatre__in=theatres,
             show__screen__id__in=screens,
@@ -1309,7 +1294,7 @@ class Revenue_Chart(APIView):
 
         return Response(data, status=status.HTTP_200_OK)
 
-
+# theatre owner profile edit view
 class EditTheatreProfile(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
@@ -1345,7 +1330,7 @@ class EditTheatreProfile(APIView):
                 {"error": "Internal server error"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
+    # Update theatre owner profile
     def post(self, request):
         try:
             logger.info(f"data from settings theater: {request.data}")
@@ -1380,3 +1365,43 @@ class EditTheatreProfile(APIView):
                 f"Serializer errors for user {request.user.id}: {serializer.errors}"
             )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# API endpoint to get theatre location coordinates
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_theatre_location(request, theatre_id):
+    """
+    API endpoint to get theatre location coordinates
+    """
+    try:
+        theatre = get_object_or_404(Theatre, id=theatre_id)
+        
+        # Check if theatre has location coordinates
+        if theatre.latitude is None or theatre.longitude is None:
+            return Response({
+                'error': 'Location coordinates not available for this theatre',
+                'theatre_name': theatre.name,
+                'address': theatre.address
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Return theatre location data
+        location_data = {
+            'theatre_id': theatre.id,
+            'name': theatre.name,
+            'address': theatre.address,
+            'latitude': theatre.latitude,
+            'longitude': theatre.longitude,
+            'city': theatre.city.name if theatre.city else None,
+        }
+        
+        return Response(location_data, status=status.HTTP_200_OK)
+        
+    except Theatre.DoesNotExist:
+        return Response({
+            'error': 'Theatre not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': 'An error occurred while fetching theatre location',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

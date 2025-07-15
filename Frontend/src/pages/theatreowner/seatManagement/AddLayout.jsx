@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import seatsApi from '@/axios/seatsaApi';
-import { useToast } from '@/hooks/use-toast';
+import {toast} from 'sonner';
+import { CircleCheckBig, CircleAlert } from 'lucide-react';
 function AddLayout({ closeModal , fetchLayouts }) {
     const [name , setName] = useState('');
     const [ cols , setCols] = useState('');
     const [ rows , setRows ] = useState('');
-    const {toast} = useToast();
     const handleSubmit = async(e) => {
         e.preventDefault()
         try {
@@ -17,15 +17,25 @@ function AddLayout({ closeModal , fetchLayouts }) {
             console.log(res.data)
             fetchLayouts()
             closeModal()
-            toast({
-                title : 'layout added successfylly',
-                varinat : 'success'
-            })
+            toast('layout added successfylly',
+                {
+                    icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+                    style: {
+                        backgroundColor: '#f0f9ff',
+                        color: '#0369a1',
+                    },
+               }
+            )
 
         }catch(e) {
-            toast({title : e.response?.data?.error,
-                variant : 'destructive'
-            })
+            toast( e.response?.data?.error,{
+                icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+                style: {
+                    backgroundColor: '#fff3cd',
+                    color: '#856404',
+                },
+            }
+            )
         }
     }
   return (

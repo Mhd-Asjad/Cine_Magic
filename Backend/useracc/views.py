@@ -18,7 +18,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login
 from django.views import View
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes , authentication_classes
 from allauth.socialaccount.models import SocialAccount
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import (
@@ -56,7 +56,7 @@ class UserRegisterView(APIView):
 # view for otp verification
 class VerifyOtpView(APIView):
     permission_classes = [permissions.AllowAny]
-
+    # this view verifies the otp and returns the user data with tokens
     def post(self, request):
         serializer = OtpVerificationSerializer(data=request.data)
         if serializer.is_valid():
@@ -73,12 +73,11 @@ class VerifyOtpView(APIView):
                 "refresh_token": str(refresh),
             }
 
-            print(user_data)
             return Response(
                 {"user": user_data, "message": "OTP Verified Successfully "},
                 status=status.HTTP_200_OK,
             )
-        print(serializer.errors)
+        logger.error(serializer.errors)
         return Response(
             {"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
         )
@@ -95,6 +94,7 @@ class UserLoginView(APIView):
             password = data.get("password")
             user_type = data.get("user_type", "normal")
             user = authenticate(request, username=username, password=password)
+
             if user is None:
                 return Response(
                     {"error": "invalid credentials"},
@@ -157,7 +157,7 @@ class UserLoginView(APIView):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
+# this view resets the user password
 class resetuser_password(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -196,14 +196,13 @@ class resetuser_password(APIView):
             {"message": "password changed successfully"}, status=status.HTTP_200_OK
         )
 
-
+# user logout view
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         try:
             refresh_token = request.data["refresh"]
-            print(refresh_token)
             token = RefreshToken(refresh_token)
             token.blacklist()
             return Response(
@@ -212,7 +211,7 @@ class LogoutView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# this view handles google authentication
 @method_decorator(csrf_exempt, name="dispatch")
 class GoogleAuthView(View):
     permission_classes = [permissions.AllowAny]
@@ -221,7 +220,6 @@ class GoogleAuthView(View):
         try:
             data = json.loads(request.body)
             email = data.get("email")
-            print(data.get("username"))
 
             username = data.get("username") or email.split("@")[0]
             user, created = User.objects.get_or_create(
@@ -231,7 +229,6 @@ class GoogleAuthView(View):
                 },
             )
             if created:
-                print("already exist")
                 user.set_password()
                 SocialAccount.objects.create(
                     user=user, provider="google", uid=email, extra_data=data
@@ -257,12 +254,12 @@ class GoogleAuthView(View):
                 }
             )
         except Exception as e:
-            print(str(e))
+            logger.error(str(e))
             return JsonResponse(
                 {"success": False, "error": str(e)}, status=status.HTTP_400_BAD_REQUEST
             )
 
-
+# This view edits the user profile
 class editUser(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -283,7 +280,7 @@ class editUser(APIView):
             return Response(serializers.data, status=status.HTTP_200_OK)
         return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# This view checks the user type based on authentication
 class checkUserType(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -303,21 +300,34 @@ class checkUserType(APIView):
             user_type = "theatre"
         else:
             user_type = "user"
-        print(user_type)
 
         return Response({"user_type": user_type}, status=status.HTTP_200_OK)
 
 
 @api_view(["GET"])
+@authentication_classes([])
 @permission_classes([permissions.AllowAny])
 def check_user_status(request, pk):
+    """Check if a user is blocked or active."""
     try:
         user = User.objects.get(pk=pk)
+        is_blocked = getattr(user, 'is_blocked', not user.is_active)
+        if is_blocked:
+            return Response(
+                {
+                    "success" : False,
+                    "is_blocked": True,
+                    "message": "User is blocked"
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         return Response(
             {
                 "success": True,
-                "is_blocked": getattr(user, "is_blocked", not user.is_active),
-            }
+                "is_blocked": False,
+                "message": "User is active"
+            },
+            status=status.HTTP_200_OK
         )
     except User.DoesNotExist:
         return Response({"success": False, "error": "User not found"}, status=404)

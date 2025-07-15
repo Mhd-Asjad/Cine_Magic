@@ -23,11 +23,12 @@ function MovieReviews({ movie_id }) {
     <div className='p-4 border border-gray-100' >
         <div  className='flex justify-between' >
         <h2 className='text-xl font-bold mb-4'> movie Reviews</h2>
-        <a href="#" className="text-sm hover:underline"> {reviews.length > 3 ?'View All' : ''}</a>
+        <a href={`/movie/reviews/${movie_id}`} className="text-sm hover:underline"> {'View All'}</a>
 
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+        <div className={`grid grid-cols-1 gap-4 ${reviews.length > 0 ? 'sm:grid-cols-3' : 'sm:grid-cols-1'}`}>
 
         {reviews.length > 0 ? (
         reviews.map((r, i) => (
@@ -55,8 +56,10 @@ function MovieReviews({ movie_id }) {
 
         ):(
 
-            <div className="mx-auto text-gray-500 p-4">
-            No reviews yet.
+            <div className="flex justify-center text-gray-500 p-4">
+
+                <p>  No reviews yet.</p>
+          
             </div>
 
 

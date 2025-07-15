@@ -4,7 +4,7 @@ import apiAdmin from '@/axios/api';
 import { toast } from 'sonner';
 import { CircleCheckBig , ShieldAlert } from 'lucide-react';
 const AdminSettings = () => {
-  const [activeSection, setActiveSection] = useState('appearance');
+  const [activeSection, setActiveSection] = useState('security');
   const [appSettings, setAppSettings] = useState({
     theme: 'light',
     primaryColor: '#3b82f6',
@@ -18,12 +18,7 @@ const AdminSettings = () => {
     confirm: ''
   });
   const sections = [
-    { 
-      id: 'appearance', 
-      label: 'Appearance', 
-      icon: Palette,
-      description: 'Customize the look and feel of your application'
-    },
+    
     { 
       id: 'security', 
       label: 'Security', 
@@ -93,70 +88,12 @@ const AdminSettings = () => {
         'old_password' : passwords.current,
         'new_password' : passwords.new
       })
-      toast(res.data.message,{
-        icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
-        style: {
-          backgroundColor: '#f0f9ff',
-          color: '#0369a1',
-        },
-      })
+      toast(res.data.message)
     }catch(error){
       console.log('error while changing password')
     }
     setPasswords({ current: '', new: '', confirm: '' });
   };
-
-  const renderAppearance = () => (
-    <div className="space-y-8">    
-
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-blue-100">
-        <h3 className="text-xl font-semibold mb-6 text-gray-800 flex items-center">
-          <Palette className="w-5 h-5 mr-2 text-blue-500" />
-          Theme & Colors
-        </h3>
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-4">Theme Mode</label>
-            <div className="grid grid-cols-2 gap-4">
-              {['light', 'dark'].map((theme) => (
-                <div
-                  key={theme}
-                  onClick={() => setAppSettings({...appSettings, theme})}
-                  className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
-                    appSettings.theme === theme
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300'
-                  }`}
-                >
-                  <div className={`w-full h-16 rounded-lg mb-3 ${
-                    theme === 'light' ? 'bg-white border border-gray-200' : 'bg-gray-800'
-                  }`}></div>
-                  <p className="text-center font-medium capitalize text-gray-700">{theme}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-4">Primary Color</label>
-            <div className="flex space-x-3">
-              {['#3b82f6', '#06b6d4', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'].map((color) => (
-                <div
-                  key={color}
-                  onClick={() => setAppSettings({...appSettings, primaryColor: color})}
-                  className={`w-12 h-12 rounded-xl cursor-pointer border-3 transition-all duration-200 ${
-                    appSettings.primaryColor === color ? 'border-gray-800 scale-110' : 'border-white hover:scale-105 shadow-md'
-                  }`}
-                  style={{ backgroundColor: color }}
-                ></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
 
   // password changing section
   const renderSecurity = () => (
@@ -259,10 +196,9 @@ const AdminSettings = () => {
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'appearance': return renderAppearance();
       case 'security': return renderSecurity();
       case 'general': return renderGeneral();
-      default: return renderAppearance();
+      default: return renderSecurity();
     }
   };
 

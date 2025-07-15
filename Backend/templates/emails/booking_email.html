@@ -2,14 +2,26 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Booking {{ booking.status|title }}</title>
+  <title>Booking {{ context.status|title }}</title>
 </head>
 <body>
-  <h2>Your Booking is {{ booking.status|title }}</h2>
-  <p>Dear {{ booking.customer_name }},</p>
+  <h2>Your Booking is {{ context.status|title }}</h2>
+  <p>Dear {{ context.customer_name }},</p>
+  {% if context.status == "confirmed" %}
+    <p>Thank you for your booking with CineMagic. Here are your details:</p>
 
-  <p>Thank you for your booking with CineMagic. Here are your details:</p>
+    <ul>
+      <li><strong>Booking ID:</strong> {{ context.booking_id }}</li>
+      <li><strong>Movie:</strong> {{ context.movie }}</li>
+      <li><strong>Theatre:</strong> {{ context.theatre }}</li>
+      <li><strong>Show Date:</strong> {{ context.show_date }}</li>
+      <li><strong>Show Time:</strong> {{ context.show_time }}</li>
+    </ul>
+    
+  {% endif %}
 
+  {% if context.status == "cancelled" %}
+  <p>We’re sorry to inform you that your booking has been <strong>cancelled</strong>.</p>
   <ul>
     <li><strong>Booking ID:</strong> {{ context.booking_id }}</li>
     <li><strong>Movie:</strong> {{ context.movie }}</li>
@@ -17,12 +29,28 @@
     <li><strong>Show Date:</strong> {{ context.show_date }}</li>
     <li><strong>Show Time:</strong> {{ context.show_time }}</li>
   </ul>
-
-  {% if qr_code %}
   <p>
-    <strong>Your QR Code:</strong><br>
-    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width: 150px; height: 150px;" />
+    If you have already paid for this booking, the refund will be processed within 2–5 business days.
   </p>
+{% endif %}
+
+  {% if qr_code and context.status == "confirmed" %}
+  <h3>Booking Confirmation</h3>
+  <div style="border: 1px solid #eee; padding: 16px; margin: 24px 0; background: #fafafa;">
+    <h3 style="margin-top: 0;">Your QR Code for Entry {{ qr_code }}</h3>
+    <p>
+      Please present this QR code at the theatre entrance for a smooth check-in experience.<br>
+      <img src="https://api.cine-magic.fun{{ qr_code }}" alt="QR Code" style="width: 150px; height: 150px; border: 2px solid #333; margin-top: 8px;" />
+    </p>
+    <ul style="font-size: 14px; color: #555;">
+      <li>This QR code is unique to your booking.</li>
+      <li>Do not share this code with others.</li>
+      <li>Keep this email handy for quick access.</li>
+    </ul>
+    <p style="font-size: 13px; color: #888;">
+      If you face any issues at the venue, please contact our support team.
+    </p>
+  </div>
   {% endif %}
   <p>Regards,<br><strong>CineMagic Team</strong></p>
 </body>

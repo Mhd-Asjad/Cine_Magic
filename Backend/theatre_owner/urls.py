@@ -23,6 +23,7 @@ urlpatterns = [
         name="pending-theatre",
     ),
     path("add-screen/", CreateScreen.as_view(), name="add-screen"),
+    path('remove-screen/<int:pk>/',delete_screen.as_view(),name='remove-screen'),
     path("show-available/", ShowVerifiedTheatre.as_view(), name="show-available"),
     path("show-screens/", get_theatre_screens.as_view(), name="show-screens"),
     path("showtime/<int:theatre_id>/", fetch_showtime.as_view(), name="showtime"),
@@ -45,4 +46,6 @@ urlpatterns = [
     ),
     path("theatre-revenue/", Revenue_Chart.as_view(), name="theatre-revenue"),
     path("theatre-profile/", EditTheatreProfile.as_view(), name="edit-theatre-profile"),
+    path('theatre-location/<int:theatre_id>/',
+         get_theatre_location, name='theatre_location'),
 ]

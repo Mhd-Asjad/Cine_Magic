@@ -1,13 +1,13 @@
 import seatsApi from '@/axios/seatsaApi';
-import { useToast } from '@/hooks/use-toast';
 import React ,{useEffect, useState} from 'react'
+import {toast} from 'sonner';
+import { CircleCheckBig, CircleAlert } from 'lucide-react';
 
 function EditLayout( { closeModal , selectedLayout } ) {
     console.log(selectedLayout)
     const [name , setName] = useState('');
     const [ cols , setCols] = useState('');
     const [ rows , setRows ] = useState('');
-    const {toast} = useToast();
 
     useEffect(() => {
 
@@ -30,7 +30,13 @@ function EditLayout( { closeModal , selectedLayout } ) {
                 'cols' : cols
             })
             if (res.status === 200){
-                toast({title : 'data update successfully'})
+                toast( 'data update successfully',{
+                    icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+                    style: {
+                        backgroundColor: '#f0f9ff',
+                        color: '#0369a1',
+                    },  
+                })
                 closeModal(true)
             }
         }catch(e){

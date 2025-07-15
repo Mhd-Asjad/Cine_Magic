@@ -15,14 +15,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
+# This view creates a new seat layout for a theatre.
 class create_layout(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         data = request.data
         name = data["name"]
         row = data["rows"]
         col = data["cols"]
-        print(data)
         if not name or not row or not col:
             return Response(
                 {"error": "fill up the fields"}, status=status.HTTP_400_BAD_REQUEST
@@ -48,15 +48,17 @@ class create_layout(APIView):
             return Response(serializers.data, status=status.HTTP_201_CREATED)
         return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# This view retrieves all seat layouts.
 class GetScreenLayout(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         layouts = SeatScreenLayout.objects.all()
         serializer = LayoutSerializers(layouts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# This view updates an existing seat layout.
 class Update_Layout(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def patch(self, request, layout_id):
 
         try:
@@ -70,8 +72,9 @@ class Update_Layout(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# this view retrieves specific seat layout for screens
 class get_theatre_screenlayout(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request, owner_id):
 
         try:
@@ -95,8 +98,9 @@ class get_theatre_screenlayout(APIView):
             )
         return Response(data, status=200)
 
-
+# This view retrieves all seats for a specific screen
 class get_screen_seats(APIView):
+    parser_classes = [permissions.IsAuthenticated]
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, screen_id):
@@ -108,7 +112,6 @@ class get_screen_seats(APIView):
 
             inactive_seats = seatss.filter(is_seat=False).count()
             total_active = seatss.count()
-            print(inactive_seats, total_active)
             seat_data = []
             for seat in seatss:
 
@@ -126,17 +129,16 @@ class get_screen_seats(APIView):
                         "label": seat.row + str(seat.number) if seat.is_seat else "",
                     }
                 )
-            # print(seat_data)
             return Response(seat_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# This view retrieves all screens for a specific theatre owner
 class get_theatre_screens(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request, id):
         try:
             theatres = Theatre.objects.filter(owner=id, is_confirmed=True)
-            print(theatres, "new theatres")
             data = []
             for theatre in theatres:
                 for screen in theatre.screens.all():
@@ -156,7 +158,7 @@ class get_theatre_screens(APIView):
                 {"message": "theatre not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-
+# This view retrieves all seat categories
 class get_seats_category(APIView):
     permission_classes = [IsAuthenticatedUser]
 
@@ -165,7 +167,7 @@ class get_seats_category(APIView):
         serializer = All_SeatCategory(cat, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# This view updates the category of selected seats
 class update_seats_category(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -181,11 +183,11 @@ class update_seats_category(APIView):
         seats.objects.filter(id__in=seats_ids).update(category_id=category_id)
         return Response({"message": "seats category updated successfully"})
 
-
+# This view locks seats for a specific show booking
 @permission_classes([permissions.AllowAny])
 class Lock_seats(APIView):
+    
     def post(self, request):
-        print("entering to seatlockk")
         data = request.data
         seats_ids = data.get("seats_ids")
         show_id = data.get("show_id")
@@ -193,7 +195,6 @@ class Lock_seats(APIView):
         if not session_id:
             session_id = request.session.session_key
 
-        print(session_id, "this session id")
         expires_at = timezone.now() + timezone.timedelta(seconds=600)
         locked_seats = SeatLock.objects.filter(
             seat_id__in=seats_ids,
@@ -223,8 +224,9 @@ class Lock_seats(APIView):
             status=status.HTTP_200_OK,
         )
 
-
+# This view unlocks seats based on user action or if they are expired
 class Unlock_Seats(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
         try:
             data = request.data
@@ -254,21 +256,15 @@ class Unlock_Seats(APIView):
                     status=status.HTTP_200_OK,
                 )
 
-            selected_show = SeatLock.objects.filter(
-                seat_id__in=seat_ids, show_id=show_id
-            ).first()
-            if selected_show is None:
-                return Response(
-                    {"message": "seat lock expired", "movie_id": show.movie.id},
-                    status=status.HTTP_200_OK,
-                )
-
-            movie_id = selected_show.show.movie.id
+            # Delete expired seat locks and return movie_id from ShowTime table
+            
             SeatLock.objects.filter(
                 seat_id__in=seat_ids, show_id=show_id, expires_at__lt=now
             ).delete()
+            show = ShowTime.objects.get(id=show_id)
+            movie_id = show.movie.id
             return Response(
-                {"message": "seats unloacked", "movie_id": movie_id},
+                {"message": "seats unlocked", "movie_id": movie_id},
                 status=status.HTTP_200_OK,
             )
 

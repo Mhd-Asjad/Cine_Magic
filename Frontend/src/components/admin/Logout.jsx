@@ -21,9 +21,13 @@ function Logout() {
     }
 
   return (
-    <button  onClick={handleLogout}>
-        logOut<span><CiLogout /></span>
-    </button>
+    <div className='flex items-center justify-center gap-2'>
+
+      <button  onClick={handleLogout}>
+          Logout<span><CiLogout className='inline' /></span>
+      </button>
+
+    </div>
   )
 }
 export default Logout

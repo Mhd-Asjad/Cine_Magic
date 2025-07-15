@@ -14,4 +14,5 @@ urlpatterns = [
         multiple_city_based_movies.as_view(),
         name="get-multiplecity",
     ),
+    path('get-movie-reviews/<int:movie_id>/', MovieReviewsView.as_view(), name='get-movie-reviews'),
 ]

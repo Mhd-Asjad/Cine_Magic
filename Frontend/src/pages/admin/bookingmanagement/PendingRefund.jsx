@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import apiBooking from "@/axios/Bookingapi";
 import { ShieldAlert } from "lucide-react";
 import { icon } from "leaflet";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 const PendingRefund = () => {
   const [refunds, setRefunds] = useState([]);
@@ -144,7 +145,7 @@ const PendingRefund = () => {
   };
 
   return (
-    <div className="w-full max-w-screen-xl mx-auto mt-[10%]">
+    <div className="w-full max-w-screen-xl mx-auto mt-2">
       {/* Filter Section */}
       <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
         <div className="flex items-center gap-2 mb-4">
@@ -208,19 +209,25 @@ const PendingRefund = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           {shouldShowAction(refund.refunt_status) ? (
-                            <button
-                              key={refund.id}
-                              onClick={() => onRefund(refund.id)}
-                              disabled={loadingRefundId === refund.id}
-                              className={`inline-flex items-center px-3 py-2 border-dashed border-2 text-sm leading-4 font-medium rounded-md transition-colors ${
-                                loadingRefundId === refund.id
-                                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                  : 'hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                              }`}
+                            <ConfirmDialog
+                              title="are you sure to rufund ?"
+                              description="click the confirm button to rund and cancel if not sure"
+                              onConfirm={() => onRefund(refund.id)}
                             >
-                              <Coins className="w-4 h-4 mr-1" />
-                              {loadingRefundId === refund.id ? 'Processing...' : 'Process Refund'}
-                            </button>
+                            <button
+                            key={refund.id}
+                            disabled={loadingRefundId === refund.id}
+                            className={`inline-flex items-center px-3 py-2 border-dashed border-2 text-sm leading-4 font-medium rounded-md transition-colors ${
+                              loadingRefundId === refund.id
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                            }`}
+                          >
+                            <Coins className="w-4 h-4 mr-1" />
+                            {loadingRefundId === refund.id ? 'Processing...' : 'Process Refund'}
+                          </button>
+
+                            </ConfirmDialog>
                           ) : (
                             <span className="text-gray-400 text-sm italic">
                               No action needed

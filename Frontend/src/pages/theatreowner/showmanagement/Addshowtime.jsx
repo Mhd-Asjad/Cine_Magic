@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import TheatreApi from '@/axios/theatreapi'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useFormik } from 'formik'
 import TimePicker from 'react-time-picker'
 import 'react-time-picker/dist/TimePicker.css';
 import 'react-clock/dist/Clock.css';
-import * as Yup from 'yup';
 import { Clock } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
-import { CircleAlert } from 'lucide-react'
-
-
+import { CircleAlert , CircleCheckBig } from 'lucide-react'
+import { toast } from 'sonner'
 function Addshowtime() {
   const {theatreId , screenId} = useParams();
   const [showTimes , setShowTimes ] = useState([])
@@ -18,7 +14,6 @@ function Addshowtime() {
   const [time , setTime ] = useState('12:00:00');
   const [ screenApproved , setScreenApproved ] = useState(false)
   const navigate = useNavigate();
-  const {toast} = useToast();
   let is_approved = null;
 
   useEffect(() => {
@@ -44,19 +39,22 @@ function Addshowtime() {
         'screen_id' : screenId ,
         'start_time' : time.length === 5 ? time + ':00' : time ,
       })
-      toast({
-        title : res.data.message , 
-        variant : 'sucess'
-      })
+      toast(
+        res.data.message , {
+          icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+        }
+      )
       navigate(`/theatre-owner/${theatreId}/screens`)
 
 
     }catch(e){
       console.log(e.response.data.error || 'An Error Occur')
-      toast({
-        description : e?.response?.data?.Error ,
-        variant : 'destructive'
-
+      toast( e?.response?.data?.Error ,{
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+        },
       });
       
     }
@@ -67,9 +65,13 @@ function Addshowtime() {
       setShowAddForm(true)
     }else{
       setShowAddForm(false)
-      toast({
-        title : 'no access until screen approval',
-        variant : 'destructive'
+      toast( 'no access until screen approval',{
+
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+        },
       })
     }
     
@@ -87,8 +89,8 @@ function Addshowtime() {
 
   const handleSeatEdit = (timeslot_id , showend) => {
     if (!showend){
-      toast({title : 'no show created yet' ,
-        variant : 'destructive'
+      toast( 'no show created yet' , {
+        iconL: <CircleAlert className="w-6 h-6 text-yellow-500" />,
       })
       return
 

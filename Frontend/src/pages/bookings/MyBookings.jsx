@@ -4,8 +4,7 @@ import { useSelector } from 'react-redux'
 import notFound from '../../assets/no-booking.png'
 import { useNavigate } from 'react-router-dom'
 import apiBooking from '@/axios/Bookingapi'
-import axios from 'axios'
-import { Star } from 'lucide-react'
+import { CircleCheckBig, Star , ShieldAlert } from 'lucide-react'
 import CustomAlert from '@/components/CustomAlert'
 import { 
     Dialog,
@@ -17,7 +16,7 @@ import {
 import Rating from '@mui/material/Rating';
 import Box from '@mui/material/Box';
 import StarIcon from '@mui/icons-material/Star';
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import apiReview from '@/axios/Reviewapi'
 
 const labels = {
@@ -45,7 +44,6 @@ function MyBookings() {
     const [ showReviewForm , setShowReviewForm] = useState(false)
     const [ message , setMessage] = useState()
     const [ review , setReview] = useState('')
-    const { toast } = useToast();
     const [ selectedShow , setSelectedShow] = useState(null)
     const [ value, setValue ] = React.useState(2);
     const [ hover, setHover] = React.useState(-1);
@@ -114,12 +112,24 @@ function MyBookings() {
                     'Content-Type': 'application/json'
                 }
             })
-            toast({title : res.data.message})
+            toast(res.data.message,{
+                icon: <CircleCheckBig className='text-green-500' />,
+                style: {
+                    background: '#f0fff4',
+                    color: '#065f46',
+                },
+            })
             setShowReviewForm(false)
 
-        }catch(e){
+        }catch(e){s
             console.log(e)
-            toast({title :e?.response?.data?.error})
+            toast(e?.response?.data?.error,{
+                icon: <ShieldAlert className='text-red-500' />,
+                style: {
+                    background: '#fee2e2',
+                    color: '#b91c1c',
+                },
+            })
         }
     }
     

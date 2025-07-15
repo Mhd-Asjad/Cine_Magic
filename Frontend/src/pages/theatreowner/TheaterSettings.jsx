@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Avatar, { genConfig } from 'react-nice-avatar';
-import { Camera, Upload, Settings, User, Palette, Shuffle } from 'lucide-react';
+import { Camera, Upload, Settings, CircleAlert , CircleCheckBig ,  User, Palette, Shuffle } from 'lucide-react';
 import TheatreApi from '@/axios/theatreapi';
+import { toast } from 'sonner';
 
 const features = [
   { key: 'hairStyle', icon: '💇‍♂️', label: 'Hair', options: ['normal', 'thick', 'mohawk', 'womanLong', 'womanShort'] },
@@ -66,7 +67,13 @@ const TheatreSettings = () => {
     const file = event.target.files[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        alert('File size exceeds 10MB limit');
+        toast('File size exceeds 10MB limit',{
+          icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+          style: {
+            backgroundColor: '#fff3cd',
+            color: '#856404',
+          },
+        });
         return;
       }
       const reader = new FileReader();
@@ -95,12 +102,18 @@ const TheatreSettings = () => {
         formData.append('owner_photo', ''); 
       }catch(error){
         console.log('Invalid Json for avatar config',error)
-        alert('Invalid avatar configuration');
+        toast('Invalid avatar configuration');
         return;
 
       }
     } else {
-      alert('Please select an avatar or upload an image');
+      toast('Please select an avatar or upload an image',{
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+        },
+      });
       return;
     }
 
@@ -118,10 +131,22 @@ const TheatreSettings = () => {
       if (response.data.avatar_config) {
         setConfig(response.data.avatar_config);
       }
-      alert(response.data.message);
+      toast(response.data.message,{
+        icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+        style: {
+          backgroundColor: '#f0f9ff',
+          color: '#0369a1',
+        },
+      });
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert(error.response?.data?.error || 'Failed to update profile');
+      toast(error.response?.data?.error || 'Failed to update profile',{
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+        },
+      });
     }
   };
 

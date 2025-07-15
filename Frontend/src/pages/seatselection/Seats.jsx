@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { X } from 'lucide-react';
+import { X , ShieldAlert } from 'lucide-react';
 import screenimg from '../../assets/screen.png'
 import seatsApi from '@/axios/seatsaApi';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { lockseats } from '@/redux/features/selectedseats';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import apiMovies from '@/axios/Moviesapi';
 import Modal from '@/components/modals/Modal';
 import AuthContainer from '../userauth/AuthContainer';
@@ -22,7 +22,6 @@ function Seats() {
   const [isLogin , setIsLogin] = useState(false);
 
   const dispatch = useDispatch();
-  const {toast} = useToast();
   const username1 = useSelector((state) => state.user.username)
   const [priceCategories , setPriceCategories ] = useState([])
   const [searchparams]  = useSearchParams()
@@ -66,8 +65,9 @@ function Seats() {
 
   const toggleSeatSelection = (seat) => {
     if (selectedSeats.length >= 10 && !selectedSeats.some(s => s.id === seat.id)) {
-      toast({
-      title: 'You can select a maximum of 10 seats at a time!',
+      toast('You can select a maximum of 10 seats at a time!',{
+        icon: <ShieldAlert className='w-6 h-6 text-red-500' />,
+
       });
       return;
     }
@@ -88,6 +88,7 @@ function Seats() {
   }
   
   const organizeByRow = (seats) => {
+    if (!Array.isArray(seats)) return {}; // 🚨 guard clause
 
     const rowMap = {};
     const priceRange = {}
@@ -140,7 +141,7 @@ function Seats() {
       return;
 
     }
-    const selectedSeatsIds = selectedSeats.map(seat => seat.id , [])
+    const selectedSeatsIds = selectedSeats.map(seat => seat.id)
     console.log(selectedSeatsIds , 'selected seats ids')
     const payload = {
       'show_id': showId,
@@ -166,9 +167,10 @@ function Seats() {
         navigate(`/seat-layout?booking_slot=${slotId}`)
       }
     }catch(e) {
-      console.log(e?.response?.data)
-      toast({
-        title : e?.response?.data?.error || 'error occur'
+      console.log(e?.response?.data || e.message || e)
+      toast(
+         e?.response?.data?.error || 'error occur',{
+          icon: <ShieldAlert className='w-6 h-6 text-red-500' />,
         
       })
     }
@@ -202,7 +204,7 @@ function Seats() {
           < p className='font-medium ml-[12%] mt-3' >◉ {show.show_date} , {formatTime(show?.slot?.start_time)}  { show.slot.end_time ? `to ${formatTime(show.slot?.end_time)}`:''} {show.theatre_name} {show.theatre_details}</p>
 
         </div>
-      <div className="flex justify-end px-10  space-x-8 pt-5 ">
+      <div className="flex justify-end px-10  space-x-3 sm:space-x-2 mt-4">
         <div className="flex items-center">
           <div className="w-4 h-4 bg-white outline outline-1 outline-blue-600 rounded-sm mr-2"></div>
           <span>Available</span>

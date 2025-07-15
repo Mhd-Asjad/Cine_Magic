@@ -4,7 +4,7 @@ import seatsApi from '@/axios/seatsaApi'
 function LayoutCards() {
     const owner_id = useSelector((state) => state.theatreOwner.theatreId)
     const [screenData, setScreen] = useState([])
-
+    console.log(screenData)
     useEffect(() => {
         const fetchScreenData = async () => {
             try {

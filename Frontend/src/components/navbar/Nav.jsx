@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { selectCityId } from '../../redux/features/Location.slice';
 import { logout } from '@/pages/userauth/AuthService';
 import apiMovies from '@/axios/Moviesapi';
-import { MessageCircle , LayoutDashboard  , Bell ,  LogOut, User , LockKeyhole , LockIcon} from 'lucide-react';
+import { MessageCircle , LayoutDashboard  , Bell ,  LogOut, User , LockKeyhole , Lock , CircleAlert , Menu , X , MapPin , ChevronDown } from 'lucide-react';
 import { clearNotifications , setNotifications } from '@/redux/features/notificationSlice';
 import { toast } from 'sonner';
 import { checkUserBlocked } from '@/pages/userauth/AuthService';
@@ -35,6 +35,8 @@ function Nav() {
   const { unread_count } = useSelector((state) => state.notifications.counts);
   const {notifications } = useSelector((state) => state.notifications);
   const openModal = () => setIsModalOpen(true);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const closeModal = () => {
     setIsModalOpen(false);
     setIsOtpSent(false);
@@ -56,23 +58,38 @@ function Nav() {
  
   };
   useEffect(() => {
-    const checkStatus = async () => {
+  const checkStatus = async () => {
+    console.log(
+      'inside check status' , user.id
+    )
     if (!user?.id) return;
-    // Check if the user is blocked
-    const res = await checkUserBlocked(user.id);
-    console.log(res.status)
-    if (res?.data?.is_blocked) {
-      handleLogout()
-      toast('your account has been blocked',{
-        icon: <LockKeyhole />
-      })
-    }else{
 
-      fetchNotifications()
+    try {
+      const res = await checkUserBlocked(user.id);
+      console.log(res)
+      if (res.data?.is_blocked) {
+        handleLogout(); 
+        toast("Your account has been blocked.", {
+          icon: <LockKeyhole />,
+        });
+
+      }else if (res.status === 401) {
+        
+        handleLogout()
+        toast('your account is expired or blocked please login',{
+          icon: <CircleAlert size={20} />
+        });
+      } else {
+        fetchNotifications();
+      }
+    } catch (error) {
+      console.error("Status Check Error:", error);
     }
   };
+
   checkStatus();
-  },[user , dispatch])
+  }, [user] );
+
 
   const handleCitySelect = async ( cityId , currentCity  ) => {
     // here fetching the city id to show city based movie
@@ -136,152 +153,213 @@ function Nav() {
     navigate('/')
   }
   return (
-
-    <nav className="bg-white-800 shadow-md">
+    <nav className="bg-white shadow-md relative">
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between h-16">
-          <div classNam="flex items-center justify-start px-4">
-            {/* <img src={logo} className='h-[160px] rounded-lg ' ></img> */}
+          
+          {/* Logo Section - Hidden on mobile to save space */}
+          <div className="hidden lg:flex items-center justify-start">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">M</span>
+            </div>
+            <span className="ml-3 text-xl font-bold text-gray-900">MovieApp</span>
           </div>
 
-          <div className="hidden md:flex flex-1 justify-start px-40 space-x-10 font-bold">
-            <a href="/" className="text-black-300 hover:bg-blue-200 py-1 px-1 rounded-md">
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex flex-1 justify-start lg:px-40 px-8 space-x-6 lg:space-x-10 font-bold">
+            <a href="/" className="text-gray-700 hover:bg-blue-100 py-1 px-3 rounded-md transition-colors">
               Home
             </a>
-            <a href="/blogs" className="text-black-300 hover:bg-blue-200 py-1 px-1 rounded-md ">
+            <a href="/blogs" className="text-gray-700 hover:bg-blue-100 py-1 px-3 rounded-md transition-colors">
               Blogs
             </a>
-            <a href="/movies/my-orders" className="text-black-300 hover:bg-blue-200 py-1 px-1 rounded-md">
+            <a href="/movies/my-orders" className="text-gray-700 hover:bg-blue-100 py-1 px-3 rounded-md transition-colors">
               Order
             </a>
           </div>
 
-          <div className='flex gap-6' >
-
-          <button
-              className="flex p-2 border border-gray-400 rounded-md text-gray-700 hover:bg-gray-100 focus:ring-gray-300 transition"
+          {/* Desktop Right Actions */}
+          <div className="hidden md:flex items-center gap-4">
+            {/* Select City */}
+            <button
+              className="flex items-center gap-1 px-2 py-1 border border-gray-400 rounded-md text-gray-700 hover:bg-gray-100 transition text-sm"
               onClick={() => setIsCityModalOpen(true)}
             >
-
-              <MdOutlineAddLocation className="text-2xl" />
-              <span className="text-base font-medium">
-                  {selectedcity || 'Select Location'}
-              </span>
+              <MapPin className="w-4 h-4" />
+              <span className="hidden lg:inline">{selectedcity || 'Location'}</span>
+              <span className="lg:hidden">LOC</span>
             </button>
 
-              <div>
-  
-  
+            {/* Notifications */}
             <button className="relative p-2 rounded-full hover:bg-gray-100 transition"
               onClick={() => navigate('/notifications')}
+
             >
-              <Bell className="text-gray-700" size={30} />
+              <Bell className="text-gray-700 w-5 h-5" />
               {unread_count > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                   {unread_count > 99 ? '99+' : unread_count}
                 </span>
               )}
             </button>
-              </div>
-          { user.username ? (
 
-          <div className='reletive' >
+            {/* User Auth */}
+            {user.username ? (
+              <div className="relative">
+                <button
+                  onClick={toggleDropdown}
+                  className="flex items-center gap-1 rounded-full border border-gray-400 px-3 py-1.5 md:px-2 text-sm font-semibold text-black hover:bg-gray-100 transition"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="truncate max-w-[80px] lg:max-w-[120px]">{user.username}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
 
-            <button 
-            onClick={toggleDropdown}
-            className='flex items-center text-xl bg-blue-200  text-black font-semibold px-5 w-full py-2 rounded-lg transition duration-300' > 
-            
-              <HiUser className='text-2xl text-black' />
-               {user.username}
-
-               <IoMdArrowDropdown className='text-xl text-black gap-3 mx-auto' />
-
-              
-            </button>
-
-              {dropdownOpen && (
-   
-                <div className="absolute mx-auto mt-1 w-48 bg-white rounded-md shadow-lg z-10">
-                  <a
-                    href="/profile"
-                    className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                    <User className='inline'/> profile
-                  </a>
-
-                  {user.is_approved && (
-                    <a
-                    href="/theatre-owner/dashboard"
-                    className="block px-4 py-2 text-gray-800  hover:bg-gray-100">
-                    <LayoutDashboard className='inline' /> theatre Profile
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+                    <a href="/profile" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                      <User className="inline w-4 h-4 mr-2" /> Profile
                     </a>
-                  )}
-
-                  {user.is_admin &&(
-                     <a
-                     href="/admin/dashboard"
-                     className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                     <LayoutDashboard className='inline'/> admin dashboard
-                   </a>
-                  )}
-
-                  <a
-
-                    href="/complaint/assistant"
-                    className="block px-4 py-2  text-gray-800 hover:bg-gray-100"
-                  >
-                    <MessageCircle className='inline'/> Help or Chat
-                  </a>
-
-
-
-                  <a
-                    onClick={handleLogout}
-                    className="block px-4 py-2 cursor-pointer text-gray-800 hover:bg-gray-100">
-                   <LogOut className='inline'/> Logout
-
-                  </a>
-                </div>
-              )}
-
-            </div>
-
-
-
-          ):(
-
-            <button
-            onClick={openModal}
-            className="border border-gray-800 font-medium px-4 py-2 rounded-lg transition duration-300"
-          >
-            Login/Signup <LockIcon className='inline'/>
-          </button>
-
-          )}
-
+                    {user.is_approved && (
+                      <a href="/theatre-owner/dashboard" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                        <LayoutDashboard className="inline w-4 h-4 mr-2" /> Theatre Dashboard
+                      </a>
+                    )}
+                    {user.is_admin && (
+                      <a href="/admin/dashboard" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                        <LayoutDashboard className="inline w-4 h-4 mr-2" /> Admin Dashboard
+                      </a>
+                    )}
+                    <a href="/complaint/assistant" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">
+                      <MessageCircle className="inline w-4 h-4 mr-2" /> Help / Chat
+                    </a>
+                    <a
+                      onClick={handleLogout}
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <LogOut className="inline w-4 h-4 mr-2" /> Logout
+                    </a>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={openModal}
+                className="flex items-center gap-1 border border-gray-800 text-xs px-2 py-1 rounded-md transition duration-300 hover:bg-gray-100"
+              >
+                Login / Signup <Lock className="w-3 h-3" />
+              </button>
+            )}
           </div>
 
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">M</span>
+              </div>
+              <span className="ml-2 text-lg font-bold text-gray-900">MovieApp</span>
+            </div>
+
+            {/* Mobile Menu Button */}
             <button
-              className="text-gray-300 hover:text-white focus:outline-none"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="text-gray-700 hover:text-gray-900 focus:outline-none p-2 rounded-md hover:bg-gray-100"
               aria-label="Toggle menu"
             >
-              <svg
-                className="h-6 w-6"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16m-7 6h7"
-                />
-              </svg>
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute left-0 right-0 top-full bg-white border-t border-gray-200 shadow-lg z-30">
+            <div className="px-4 py-3 space-y-1">
+              
+              {/* Navigation Links */}
+              <div className="border-b border-gray-200 pb-3 mb-3">
+                <a href="/" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md font-medium">
+                  Home
+                </a>
+                <a href="/blogs" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md font-medium">
+                  Blogs
+                </a>
+                <a href="/movies/my-orders" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md font-medium">
+                  Order
+                </a>
+              </div>
+
+              <div className="space-y-2">
+                <button
+                  className="flex items-center w-full px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                  onClick={() => setIsCityModalOpen(true)}
+                >
+                  <MapPin className="w-4 h-4 mr-3" />
+                  <span>{selectedcity || 'Select Location'}</span>
+                </button>
+
+                <button 
+                  className="flex items-center w-full px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                  onClick={() => navigate('/notifications')}
+                >
+                  <Bell className="w-4 h-4 mr-3" />
+                  <span>Notifications</span>
+                  {unread_count > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      {unread_count > 99 ? '99+' : unread_count}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              <div className="border-t border-gray-200 pt-3 mt-3">
+                {user.username ? (
+                  <div>
+                    <div className="px-3 py-2 text-sm font-medium text-gray-900 bg-gray-50 rounded-md mb-2">
+                      <User className="inline w-4 h-4 mr-2" />
+                      {user.username}
+                    </div>
+                    <div className="space-y-1">
+                      <a href="/profile" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                        Profile
+                      </a>
+                      {user.is_approved && (
+                        <a href="/theatre-owner/dashboard" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                          Theatre Dashboard
+                        </a>
+                      )}
+                      {user.is_admin && (
+                        <a href="/admin/dashboard" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                          Admin Dashboard
+                        </a>
+                      )}
+                      <a href="/complaint/assistant" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                        Help / Chat
+                      </a>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 rounded-md"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={openModal}
+                    className="w-full bg-orange-500 text-white font-medium px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    Login / Signup
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <Modal isOpen={isCityModalOpen} closeModal={() => setIsCityModalOpen(false)} >
@@ -297,8 +375,8 @@ function Nav() {
           <OtpVerificationForm email={userEmail} setMessage={setMessage} closeModal={closeModal}  />
         )}
       </Modal>
-
     </nav>
-  )
-}
-export default Nav
+  );
+};
+
+export default Nav;

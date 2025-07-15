@@ -139,9 +139,7 @@ function AddScreen() {
             resetForm();
             setTimeSlot([{start_time : ""}])
             toast({'title' : "Screen added successfully✅"});
-            screenCount + 1 > 1
-                ? navigate(`/theatre-owner/${id}/screens`)
-                : navigate('/theatre-owner/theatre-confimation');
+            navigate(`/theatre-owner/${id}/screens`)
             dispatch(updateOwnershipStatus('success'));
         } catch (e) {
             toast({
@@ -152,8 +150,8 @@ function AddScreen() {
     };
     console.log(gapPositions)
     return (
-        <div className="flex border shadow-md mt-7 py-4 bg-gray-100">
-            <div className="p-10 py-8">
+        <div className="flex justify-center shadow-md mt-7 py-5 ">
+            <div className="p-10 py-4">
                 <h2 className="text-center mb-7 pt-12 px-3 font-semibold text-3xl text-gray-500">
                     Add Screen Details  
                 </h2>

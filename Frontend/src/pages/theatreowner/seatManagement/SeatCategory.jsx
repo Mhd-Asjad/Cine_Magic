@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import seatsApi from '@/axios/seatsaApi'
-import { useToast } from '@/hooks/use-toast'
-
+import { toast } from 'sonner'
+import { CircleCheckBig, CircleAlert } from 'lucide-react'
 function SeatCategory() {
   const ownerId = useSelector((state) => state.theatreOwner.theatreId)
   const [theatreScreen, setTheatreScreen] = useState([])
@@ -11,7 +11,6 @@ function SeatCategory() {
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedScreen, setSelectedScreen] = useState(null)
   const [selectedSeats, setSelectedSeats] = useState([])
-  const { toast } = useToast()
 
   useEffect(() => {
     const fetchScreens = async () => {
@@ -94,9 +93,13 @@ function SeatCategory() {
 
   const toggleRowSelection = (rowSeats) => {
     if (!selectedCategory) {
-      toast({
-        title: 'Please select a category before selecting a row',
-        variant: 'destructive',
+      toast('Please select a category before selecting a row',
+      {
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+        },
       })
       return
     }
@@ -127,9 +130,13 @@ function SeatCategory() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!selectedCategory || selectedSeats.length === 0) {
-      toast({
-        title: 'Try to select a category and at least one seat',
-        variant: 'destructive',
+      toast('Try to select a category and at least one seat',
+      {
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+        },
       })
       return
     }
@@ -144,7 +151,13 @@ function SeatCategory() {
     try {
       const res = await seatsApi.post('update-seats-category/', payload)
       console.log('response' , res)
-      toast({ title: res.data.message })
+      toast(res.data.message ,{
+        icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+        style: {
+          backgroundColor: '#f0f9ff',
+          color: '#0369a1',
+        },
+      })
       setSelectedSeats([])
       setSelectedCategory(null)
 
@@ -153,10 +166,14 @@ function SeatCategory() {
       setSelectedScreen(null)
     } catch (e) {
       console.log(JSON.stringify(e , null , 2))
-      toast({
-        title: e.response?.data?.error || 'Submission failed',
-        variant: 'destructive',
-      })
+      toast(e.response?.data?.error ,{
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+        },
+      }
+      )
     }
   }
   console.log(seats)

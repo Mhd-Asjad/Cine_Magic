@@ -4,7 +4,7 @@ import { Clock, User, ArrowRight, BookOpen, Calendar, Eye, ChevronLeft, ChevronR
 import apiBlogs from '@/axios/Blogapi'
 import Nav from '@/components/navbar/Nav'
 import { useNavigate, useLocation } from 'react-router-dom';
-import TextPressure from '../reactbits/TextPressure';
+import BlurText from '../reactbits/BlurText';
 
 import {
   Pagination,
@@ -119,37 +119,18 @@ function BlogPosts() {
   }
 
   return (
+    <div>
+
+
+    <Nav />         
+
     <div className='min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-white relative overflow-hidden'>
-      {/* Background Pattern */}
-      {/* <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 25% 25%, #3b82f6 2px, transparent 2px), 
-                           radial-gradient(circle at 75% 75%, #1e293b 1px, transparent 1px)`,
-          backgroundSize: '60px 60px',
-          backgroundPosition: '0 0, 30px 30px'
-        }}></div>
-      </div> */}
-      <Nav/>
 
       
       <div className="relative max-w-7xl mx-auto px-4 py-12">
-        
         {/* Hero Section */}
         <div className="text-center mb-16">
           <div className="relative inline-block">
-            <TextPressure 
-              text="blogs"
-              flex={true}
-              alpha={false}
-              stroke={false}
-              width={true}
-              weight={true}
-              italic={true}
-              textColor="#1e293b"
-              strokeColor="#3b82f6"
-              className='relative z-10'
-              minFontSize={88}
-            />
             <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-slate-500/20 blur-xl -z-10 rounded-full"></div>
           </div>
           <p className="text-slate-600 text-lg mt-4 max-w-2xl mx-auto">
@@ -215,27 +196,12 @@ function BlogPosts() {
                     <Calendar className="w-4 h-4 text-blue-500" />
                     <span>{formatTime(blog.created_at)}</span>
                   </div>
-                  
-                  <div className="flex items-center space-x-2 text-slate-600">
-                    <Clock className="w-4 h-4 text-blue-500" />
-                    <span>{blog.read_time || '5 min read'}</span>
-                  </div>
-
-                  {/* Reading Badge */}
-                  <div className="ml-auto">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full 
-                                   bg-blue-100 text-blue-700 text-xs font-medium
-                                   group-hover:bg-blue-200 transition-colors">
-                      <BookOpen className="w-3 h-3 mr-1" />
-                      Read More
-                    </span>
-                  </div>
+                
                 </div>
 
-                {/* Bottom Gradient Line */}
                 <div className="absolute bottom-0 left-0 right-0 h-1 
-                              bg-gradient-to-r from-blue-500/20 via-slate-500/20 to-blue-500/20 
-                              opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  bg-gradient-to-r from-blue-500/20 via-slate-500/20 to-blue-500/20 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
             </article>
           ))}
@@ -310,6 +276,7 @@ function BlogPosts() {
           </div>
         </div>
       </div>
+    </div>
   );
 }
 

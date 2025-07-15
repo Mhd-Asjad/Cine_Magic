@@ -16,7 +16,6 @@ from rest_framework.decorators import api_view
 from booking.models import *
 from booking.serializers import BookingSerializer
 from django.utils import timezone
-from collections import OrderedDict
 from rest_framework.decorators import permission_classes
 from django.db.models import Sum, Count, Q, F, Value as V
 from django.db.models.functions import Coalesce
@@ -30,11 +29,8 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from django.db.models import ExpressionWrapper, FloatField
 from theatre_owner.tasks import send_response_mail
 from .models import AdminSettings
-
 # Create your views here.
-
 logger = logging.getLogger(__name__)
-
 
 # customer listed views
 class UserListView(APIView):
@@ -67,6 +63,7 @@ class UserStatusUpdate(APIView):
 
 
 class CityTheatreView(APIView):
+    permission_classes = [permissions.IsAdminUser]
     def get(self, request, city_id):
         try:
             city = City.objects.get(id=city_id)
@@ -87,6 +84,8 @@ class CityTheatreView(APIView):
 
 # add theatre view
 class AddTheatre(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
     def post(self, request, owner_id):
 
         try:
@@ -120,8 +119,10 @@ class AddTheatre(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-
+# view for deleting theatres
 class DeleteTheatre(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
     def delete(self, request, id):
 
         try:
@@ -139,6 +140,7 @@ class DeleteTheatre(APIView):
 
 # Movies View ( CRUD )
 class ListMovies(APIView):
+    permission_classes = [permissions.IsAdminUser]
     def get(self, reqeust):
         queryset = Movie.objects.all()
 
@@ -166,6 +168,8 @@ class ListMovies(APIView):
 
 # create movie view
 class CreateMovieView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
     def post(self, request):
         data = request.data
         serializer = MovieSerializers(data=data)
@@ -175,12 +179,13 @@ class CreateMovieView(APIView):
                 {"message": "Movie created successfully", "data": serializer.data},
                 status=status.HTTP_201_CREATED,
             )
-        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # update movie view
 class update_movie(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
     def get(self, request, movie_id):
         try:
             movie = Movie.objects.get(id=movie_id)
@@ -205,14 +210,13 @@ class update_movie(APIView):
             return Response(
                 {"message": "Movie updated successfully", "movie": serializer.data}
             )
-        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # delete movie view
 class DeleteMovies(APIView):
+    permission_classes = [permissions.IsAdminUser]
     def delete(self, requst, id):
-        print("movie deletion reached here")
         try:
             movie = Movie.objects.get(id=id)
 
@@ -229,11 +233,11 @@ class DeleteMovies(APIView):
 
 # show pending theatres view including screens
 class ShowTheatreRequest(APIView):
+    permission_classes = [permissions.IsAdminUser]
     def get(self, request):
         try:
 
             theatres = Theatre.objects.filter(screens__is_approved=False).distinct()
-            print(theatres, "theatres")
         except Theatre.DoesNotExist:
             return Response(
                 {"message": "pending theatres not found"},
@@ -241,7 +245,6 @@ class ShowTheatreRequest(APIView):
             )
 
         serializer = TheatreSerializer(theatres, many=True)
-        print(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -297,6 +300,8 @@ def Verified_Theatres(request):
 
 # check theatre verfication view
 class verify_screen(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
     def post(self, request, screen_id):
         data = request.data
         owner = data.get("owner_id")
@@ -446,7 +451,6 @@ class PendingCancelledShows(APIView):
 
 # dashboard status information (admin view)
 
-
 class dashboard_stats(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -470,7 +474,6 @@ class dashboard_stats(APIView):
         )
 
         total_revenue = booking_queryset.aggregate(Sum("amount"))["amount__sum"] or 0
-        print(total_revenue)
         total_tickets = BookingSeat.objects.filter(
             booking__in=booking_queryset, status="booked"
         ).count()
@@ -512,7 +515,6 @@ class dashboard_stats(APIView):
             if previous_booking_queryset.count()
             else 0
         )
-        print(ticket_change, "changes from last month")
 
         return Response(
             {
@@ -528,7 +530,7 @@ class dashboard_stats(APIView):
 
 
 class revenue_chart_data(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAdminUser]
 
     def get(self, request):
         period = request.GET.get("period", "month")
@@ -540,7 +542,6 @@ class revenue_chart_data(APIView):
         )
 
         if not start_date and not end_date:
-            print("no start date and end date")
             if period == "week":
                 start_date = timezone.now() - timedelta(days=7)
                 end_date = timezone.now()
@@ -611,6 +612,8 @@ class revenue_chart_data(APIView):
 
 
 class ticket_trend_data(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
     def get(self, request):
         start_date = request.GET.get("start_date")
         end_date = request.GET.get("end_date")
@@ -660,10 +663,9 @@ class ticket_trend_data(APIView):
 
 
 class RecentSale(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAdminUser]
 
     def get(self, request):
-        print(request.data)
         limit = int(request.data.get("limit", 5))
         try:
             recent_bookings = (
@@ -712,7 +714,7 @@ class RecentSale(APIView):
             return Response(sales_data, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print(f"Error fetching recent sales: {str(e)}")
+            logger.info(f"Error fetching recent sales: {str(e)}")
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -720,6 +722,8 @@ class RecentSale(APIView):
 
 # Download xl sheet Reports view
 class ExportTheatreReport(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
     def get(self, request):
 
         start_date = request.GET.get("start_date")
@@ -1027,7 +1031,6 @@ def create_monthly_breakdown_sheet(wb, bookings_query, start_date, end_date):
 def create_seat_category_sheet(wb, bookings_query, start_date, end_date):
     """Create seat category analysis sheet"""
     ws = wb.create_sheet("Seat Category Analysis")
-    print(bookings_query)
     seat_data = []
     theatres = Theatre.objects.filter(
         screens__showtimes__booking__in=bookings_query, is_confirmed=True
@@ -1169,6 +1172,8 @@ def GetTheatres(request):
 
 
 class AdminSettingsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
         settings_ob, created = AdminSettings.objects.get_or_create(id=1)
         serializer = AdminSettingsSerializer(settings_ob)
@@ -1189,6 +1194,8 @@ class AdminSettingsView(APIView):
 
 
 class ChangePassword(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
     def post(self, request):
         try:
             user = request.user

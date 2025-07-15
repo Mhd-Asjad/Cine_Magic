@@ -3,13 +3,12 @@ import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { useNavigate, useParams } from 'react-router-dom';
 import apiAdmin from '../../../axios/api';
-import { Alert, AlertDescription, AlertTitle  } from "@/components/ui/alert"
-import { Terminal } from 'lucide-react';
+import { CircleCheckBig } from 'lucide-react';
+import { toast } from 'sonner';
 function EditMovie() {
     const { movie_id } = useParams(); 
     const [loading, setLoading] = useState(false);
     const [initialValues, setInitialValues] = useState({});
-    const [ message , setMessage ] = useState('');
     const navigate = useNavigate()
     useEffect(() => {
         const fetchMovie = async () => {
@@ -67,7 +66,13 @@ function EditMovie() {
             const response = await apiAdmin.patch(`movies/${movie_id}/update/`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            setMessage('Movie updated successfully');
+            toast('Movie updated successfully', {
+                icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+                style: {
+                    backgroundColor: '#f0f9ff',
+                    color: '#0369a1',
+                },
+            })
             navigate('/admin/movies')
         } catch (error) {
             console.error('Error updating movie:', error);
@@ -79,16 +84,8 @@ function EditMovie() {
     if (!initialValues) return <p>Loading movie data...</p>;
 
     return (
-        <div className="flex min-h-screen bg-gray-100">
-            {message && 
-                <Alert variant="default | destructive">
-                    <Terminal />
-                    <AlertTitle>check!</AlertTitle>
-                    <AlertDescription>
-                        {message}
-                    </AlertDescription>
-                </Alert>
-            }
+        <div className="flex min-h-screen justify-center bg-gray-100">
+         
 
             <div className="p-8 py-4">
                 <h2 className="text-center mb-7 pt-12 px-3 font-semibold text-3xl text-gray-500">

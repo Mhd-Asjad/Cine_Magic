@@ -11,6 +11,7 @@ import { CiEdit } from "react-icons/ci";
 import { FaSearch, FaEye, FaMapMarkerAlt } from "react-icons/fa";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import Swal from "sweetalert2";
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 function ListTheatre() {
   const [theatres, setTheatre] = useState([]);
@@ -66,22 +67,12 @@ function ListTheatre() {
   };
 
   const deleteCity = async (theatre_id) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    });
-
-    if (result.isConfirmed) {
       setProcessingId(theatre_id);
       try {
-        const res = await TheatreApi.delete(`/theatre/${theatre_id}/delete`);
-        setTheatre(res.data.remaining_cities);
-        
+        const res = await TheatreApi.delete(`/theatre/${theatre_id}/delete/`);
+        console.log(res.data)
+        VerifiedTheatre()
+        console.log(res)
         Swal.fire({
           title: "Deleted!",
           text: "Theatre has been deleted successfully.",
@@ -99,7 +90,6 @@ function ListTheatre() {
       } finally {
         setProcessingId(null);
       }
-    }
   };
 
   const handleEdit = (theatre_id) => {
@@ -141,14 +131,20 @@ function ListTheatre() {
   );
 
   const getStatusCounts = () => {
-    return {
-      all: theatres.length,
-      active: theatres.filter(t => t.is_confirmed).length,
-      inactive: theatres.filter(t => !t.is_confirmed).length
-    };
+    if (theatres){
+
+      return {
+        all: theatres?.length,
+        active: theatres?.filter(t => t.is_confirmed).length,
+        inactive: theatres?.filter(t => !t.is_confirmed).length
+      };
+
+    }
   };
 
   const statusCounts = getStatusCounts();
+
+  console.log(theatres)
 
   return (
     <div className='flex min-h-screen bg-gray-50'>
@@ -313,29 +309,36 @@ function ListTheatre() {
                                 <CiEdit className='w-3 h-3 mr-1' />
                                 Edit
                               </button>
-                              
-                              <button
-                                onClick={() => deleteCity(theatre.id)}
-                                disabled={processingId === theatre.id}
-                                className={`inline-flex items-center px-3 py-1 border border-red-300 text-red-700 text-xs font-medium rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 ${
-                                  processingId === theatre.id ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                              <ConfirmDialog
+                                title='are you sure?'
+                                description='you will be lost theater cant be undone this action'
+                                onConfirm={() => deleteCity(theatre.id)}
                               >
-                                {processingId === theatre.id ? (
-                                  <>
-                                    <svg className="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Deleting...
-                                  </>
-                                ) : (
-                                  <>
-                                    <MdDelete className='w-3 h-3 mr-1' />
-                                    Delete
-                                  </>
-                                )}
-                              </button>
+
+                                <button
+                              
+                                  disabled={processingId === theatre.id}
+                                  className={`inline-flex items-center px-3 py-1 border border-red-300 text-red-700 text-xs font-medium rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 ${
+                                    processingId === theatre.id ? 'opacity-50 cursor-not-allowed' : ''
+                                  }`}
+                                >
+                                  {processingId === theatre.id ? (
+                                    <>
+                                      <svg className="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                      </svg>
+                                      Deleting...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <MdDelete className='w-3 h-3 mr-1' />
+                                      Delete
+                                    </>
+                                  )}
+                                </button>
+
+                              </ConfirmDialog>
                             </div>
                           ) : (
                             <span className='text-gray-400 text-sm italic'>

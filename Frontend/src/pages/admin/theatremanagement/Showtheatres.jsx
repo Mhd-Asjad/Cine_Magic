@@ -1,8 +1,8 @@
 import apiAdmin from '@/axios/api'
 import React, { useEffect , useState } from 'react'
-import { ChevronDown, Film, MapPin, User, Info, Check, X } from 'lucide-react';
+import { ChevronDown, Film, MapPin, User, Info, Check, X , CircleCheckBig , ShieldAlert } from 'lucide-react';
 
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { 
     Dialog,     
     DialogContent, 
@@ -19,9 +19,6 @@ function ShowTheatres() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [rejectionScreen , setRejectionScreen] = useState(null);
-  const {toast} = useToast();
-
-
 
   useEffect(() => {
     fetchTheaters()
@@ -61,7 +58,9 @@ function ShowTheatres() {
       const res = await apiAdmin.post(`handle-screen/${screen_id}/`,{
         'owner_id' : ownerId,
       })
-      toast({title : res.data.message})
+      toast(res.data.message, {
+        icon: <CircleCheckBig className='w-6 h-6 text-green-500' />,
+      })
       setExpandedScreens({})
     }catch(e) {
       console.log(e)
@@ -73,11 +72,15 @@ function ShowTheatres() {
       const res = await apiAdmin.patch(`toggle-screen-status/${screenId}/`);
       if (res.status === 200) {
         fetchTheaters()
-        toast({ title: res.data.message });
+        toast(res.data.message ,{
+          icon: <CircleCheckBig className='w-6 h-6 text-green-500' />,
+        });
       }
     } catch (error) {
       console.error(error);
-      toast({ title: 'Failed to toggle status', variant: 'destructive' });
+      toast('Failed to toggle status', {
+        icon: <ShieldAlert className='w-6 h-6 text-red-500' />,
+      });
     }
   };
 
@@ -86,19 +89,25 @@ function ShowTheatres() {
       const res = await apiAdmin.patch(`toggle-theatre-status/${theatre_id}/`)
           if (res.status === 200) {
         fetchTheaters()
-        toast({ title: res.data.message });
+        toast(res.data.message ,{
+          icon: <CircleCheckBig className='w-6 h-6 text-green-500' />,
+        } );
         }
 
     }catch(error) {
       console.log(error)
-      toast({ title: 'Failed to toggle status', variant: 'destructive' });
+      toast('Failed to toggle status', {
+        icon: <ShieldAlert className='w-6 h-6 text-red-500' />,
+      });
 
     }
   }
 
   const handleDelete = async( owner )=> {
     if (!rejectionReason) {
-      toast({title : 'provide a reason to reject screeen' , variant:'destructive'});
+      toast('provide a reason to reject screeen', {
+        icon: <CircleCheckBig className='w-6 h-6 text-red-500' />,
+      });
       return
     }
   
@@ -114,7 +123,9 @@ function ShowTheatres() {
         console.log(res.data.message)
         if (res.status === 200){
 
-          toast({title : res.data.message})
+          toast(res.data.message, {
+            icon: <CircleCheckBig className='w-6 h-6 text-green-500' />,
+          })
           setExpandedScreens({})
           setShowRejectModal(false)
           setRejectionReason("")
@@ -135,7 +146,6 @@ function ShowTheatres() {
 
 
   <div className="w-full max-w-screen-xl mx-auto">
-    <h2 className="text-lg font-medium text-gray-700 mb-3">Active Theatres</h2>
     <div className="space-y-2">
 
       <div className="bg-gray-100 min-h-screen p-4">

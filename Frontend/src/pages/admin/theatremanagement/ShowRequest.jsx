@@ -18,13 +18,12 @@ import {
 } from "@/components/ui/dialog";
 import { IoMdArrowDropdown , IoMdArrowDropup } from "react-icons/io";
 import { Check, X , Eye } from "lucide-react";
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import Swal from 'sweetalert2';
 
   
 function ShowRequest() {
     const [ theatreData , setTheatreData ] = useState([])
-    const {toast} = useToast();
     const [seats , setSeats]  = useState({})   
     const [showSeatLayout , setShowSeatLayout] = useState(false);
     console.log(theatreData)
@@ -76,18 +75,22 @@ function ShowRequest() {
             });
             console.log(res.data.message)
 
-            toast({
-                description : "Theatre approved successfully..!"
-            })
+            toast(
+               "Theatre approved successfully..!",{
+                icon: <Check className='w-6 h-6 text-green-500' />,
+               }
+            )
 
             handleTheatresRequest()
 
         }catch(error){
             console.log(error.response)
-            toast({
-                description: error.response?.data?.error,
-                variant: "destructive",
-            });
+            toast(
+                error.response?.data?.error,
+                {
+                    icon: <X className='w-6 h-6 text-red-500' />,
+                }
+            );
         }
     }
 
@@ -120,15 +123,17 @@ function ShowRequest() {
 
             try {
                 const res = await apiAdmin.delete(`theatre/${theatre_id}/delete`)
-                toast({
-                    description: "Theatre request rejected and removed!",
-                    variant: "success"
-                });
+                toast(
+                    'Theatre request rejected and removed!',
+                    {
+                        icon : <Check className='w-6 h-6 text-green-500' />
+                    } 
+        
+                );
                 handleTheatresRequest()
             }catch(e){
-                toast({
-                    description: "Failed to reject theatre.",
-                    variant: "destructive",
+                toast("Failed to reject theatre request", {
+                    icon: <X className='w-6 h-6 text-red-500' />
                 });
                 console.log(e.response);
             }

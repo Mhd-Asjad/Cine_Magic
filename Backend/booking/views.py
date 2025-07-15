@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 # provides checkout details
 class Checkout(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    # This view provides checkout details for the selected seats and show.
     def get(self, request):
         user = request.user
 
@@ -109,19 +109,19 @@ class Checkout(APIView):
             )
 
         except Exception as e:
-            print("error in checkout", str(e))
+            logger.info("error in checkout", str(e))
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # payment callback handling
 @method_decorator(csrf_exempt, name="dispatch")
 class ProcessPayment(APIView):
+    # This view processes the payment after the user completes the transaction.
     permission_classes = [permissions.IsAuthenticated]
-
     def post(self, request):
         order_id = request.data.get("orderId")
-        print(order_id, "orderidddd")
-        validation_url = f"{settings.PAYPAL_API_URL}/v2/checkout/orders/{order_id}"
+        logger.info(f'paypal api url : {settings.PAYPAL_API_URL}')
+        validation_url = f"https://api-m.sandbox.paypal.com/v2/checkout/orders/{order_id}"
         auth = (settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET)
 
         response = requests.get(validation_url, auth=auth)
@@ -147,9 +147,8 @@ class ProcessPayment(APIView):
 # booking creating view
 class Create_Booking(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    # this accepts the booking details from the user and creates a booking.
     def post(self, request):
-        print("enters to the booking view")
         data = request.data
 
         user = User.objects.get(id=data["user_id"])
@@ -188,9 +187,6 @@ class Create_Booking(APIView):
                 payment_id=paymentdet["id"],
                 amount=grant_total,
             )
-
-            booking.generate_qrcode()
-            booking.save()
             for seat_id in seat_ids:
                 seat = seats.objects.get(id=seat_id)
                 BookingSeat.objects.create(booking=booking, seat=seat, price=price)
@@ -215,6 +211,7 @@ class Create_Booking(APIView):
 
 # verifying the booking done by the user
 class Verify_Booking(APIView):
+    # this view checks if the booking exists and is confirmed for the selected seats.
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -237,7 +234,7 @@ class Verify_Booking(APIView):
 
 
 class Booking_Info(APIView):
-
+    # this view provides the booking details for the user.
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, id):
@@ -254,7 +251,7 @@ class Booking_Info(APIView):
 # whole booking details view for the user
 @method_decorator(csrf_exempt, name="dispatch")
 class Show_Bookings(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, user_id):
         try:
@@ -296,7 +293,7 @@ class Show_Bookings(APIView):
             return Response({"bookings": data}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print("error my boookings", str(e))
+            logger.info("error my boookings", str(e))
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -322,18 +319,15 @@ def Ticket_View(request, booking_id):
 
         seat_det["seats"].append(f"{seat.seat.row}{seat.seat.number}")
 
-    # slot_det = booking.show.old_slot.all()
-    # print(slot_det , 'slot details')
-    # logger.info('slot details' , slot_det)
-
+    # ticket data to be returned
     data = {
         "id": booking.id,
         "booking_id": booking.booking_id,
         "email": booking.customer_email,
-        # 'show_time' : booking.show.slot.start_time.strftime(' %H:%M'),
+        'show_time' : booking.slot.start_time.strftime(' %H:%M'),
         "booking_time": booking.booking_time.strftime("%Y:%m:%d %H:%M"),
         "qrcode_img": (
-            request.build_absolute_uri(booking.qr_code.url) if booking.qr_code else None
+            request.build_absolute_uri(booking.qr_code.url).replace('http://','https://') if booking.qr_code else None
         ),
         "screen_number": booking.show.screen.screen_number,
         "theatre": booking.show.screen.theatre.name,
@@ -350,7 +344,8 @@ def Ticket_View(request, booking_id):
 
 # refund claculation view
 class Calculate_Refund_amount(APIView):
-    permission_classes = [permissions.AllowAny]
+    # this view calculates the refund amount based on the booking time and show time for cancellation.
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, booking_id):
         try:
@@ -398,7 +393,7 @@ class Calculate_Refund_amount(APIView):
 # ticket cancellation view
 class Cancel_Ticket(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    # this view allows the user to cancel their booking and process the refund.
     def post(self, request, booking_id):
         data = request.data
         re_amount = data.get("refund_amount")
@@ -438,7 +433,8 @@ class Cancel_Ticket(APIView):
 
 
 class process_refund(APIView):
-    permission_classes = [permissions.AllowAny]
+    # this view processes the refund for the cancelled booking.
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, booking_id):
         try:
@@ -479,7 +475,7 @@ class process_refund(APIView):
         except Exception as e:
             booking.refunt_status = "failed"
             booking.save()
-            print("error in refund", str(e))
+            logger.info("error in refund", str(e))
             return Response(
                 {"error": "refund failed"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -488,6 +484,7 @@ class process_refund(APIView):
 # booking status view
 class Get_Booking_Status(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    # this view provides the booking status and cancellation details.
 
     def get(self, request, booking_id):
         try:
@@ -509,7 +506,7 @@ class Get_Booking_Status(APIView):
         }
         return Response({"status": status_data}, status=status.HTTP_200_OK)
 
-
+# ticket view for the user
 class ticket_view(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -531,6 +528,9 @@ class ticket_view(APIView):
 
 
 class list_notification(APIView):
+    # this view lists all the notifications for the user.
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
     def get(self, request):
         try:
             notifications = Notifications.objects.filter(user=request.user).order_by(
@@ -565,6 +565,8 @@ class list_notification(APIView):
 
 
 class notification_actions(APIView):
+    # this view allows the user to mark notifications as read or delete them.
+    permission_classes = [permissions.AllowAny]
     def post(self, request, notification_id):
         try:
             data = request.data
@@ -594,6 +596,25 @@ class notification_actions(APIView):
                 return Response(
                     {"message": "marked as read"}, status=status.HTTP_200_OK
                 )
+            elif action == "delete":
+                notification.delete()
+                unread_count = Notifications.objects.filter(
+                    user=user, is_read=False
+                ).count()
+
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    f"user_{user.id}",
+                    {
+                        "type": "send_notification",
+                        "event_type": "unread_count_update",
+                        "unread_count": unread_count,
+                    },
+                )
+
+                return Response(
+                    {"message": "notification deleted"}, status=status.HTTP_200_OK
+                )
 
             else:
                 return Response(
@@ -602,13 +623,14 @@ class notification_actions(APIView):
                 )
 
         except Exception as e:
-            print("error on not actions", str(e))
+            logger.info("error on not actions", str(e))
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
+# mark all notifications as read
 class mark_all_asread(APIView):
+    permission_classes = [permissions.AllowAny]
     def post(self, request):
         try:
             user = request.user

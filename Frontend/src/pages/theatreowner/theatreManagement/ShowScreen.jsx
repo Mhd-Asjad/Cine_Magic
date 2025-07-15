@@ -13,16 +13,11 @@ import {
     DialogTitle, 
 
 } from '@/components/ui/dialog';
-import {
-    Alert,
-    AlertDescription,
-    AlertTitle,
-} from "@/components/ui/alert"
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import TheatreApi from '@/axios/theatreapi';
-
+import ShowDetailsDialog from './ShowDetailsDialog';
 import {
     Carousel,
     CarouselContent,
@@ -31,15 +26,13 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Input } from "@/components/ui/input";
-import { useToast } from '@/hooks/use-toast';
-import { ToastAction } from '@radix-ui/react-toast';
-import { Eye , X } from 'lucide-react';
+import { toast } from 'sonner';
 import { TbClockPlus } from "react-icons/tb";
-import Swal from 'sweetalert2';
 import apiAdmin from '@/axios/api';
-import { Terminal } from 'lucide-react';
+import { ShieldAlert ,CircleCheckBig , Trash2, Trash} from 'lucide-react';
 import seatsApi from '@/axios/seatsaApi';
-import screenimg from '../../../assets/screen.png'
+import screenimg from '../../../assets/screen.png';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 function ShowScreen() {
     const { id } = useParams();
@@ -55,7 +48,8 @@ function ShowScreen() {
     const [ showDetails , setShowDetails ] = useState([]);
     const [ message , setMessage ] = useState('')
     const [ seats , setSeats ] = useState({})
-    const {toast} = useToast();
+    const [isExpanded, setIsExpanded] = useState(false);
+
     const navigate = useNavigate();
     useEffect(() => {
         fetchData();
@@ -142,9 +136,9 @@ function ShowScreen() {
     
     const handleAddShowTime = async() => {
         if (!selectedMovie || !selectedScreen || !showDate || !selectedShowTime ) {
-            toast({
-                title : 'please fill up all fields',
-                variant:"destructive"
+            toast(
+                'please fill up all fields',{
+                icon: <ShieldAlert size={20} className='text-red-500'/>
             })
             return;
         }
@@ -159,10 +153,14 @@ function ShowScreen() {
                 
             })
             console.log(res.data)
-            toast({
-                title: "Showtime added successfully!",
+            toast(
+                "Showtime added successfully!",{
+                icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
                 description: `Movie: ${selectedMovie.title} - Screen: ${selectedScreen.screen_number}`,
-                variant: "success",
+                style: {
+                    backgroundColor: '#f0f9ff',
+                    color: '#0369a1',
+                }
             });
             setSelectedMovie(null)
             setSelectedScreen(null)
@@ -174,9 +172,13 @@ function ShowScreen() {
             console.log(e.response.data.Error || 'something went wrong')
             console.log('went to the catch session')
             console.log(e)
-            toast({title : e.response.data?.Error ,
-                variant : "destructive",
-                action: <ToastAction className='flex border border-light font-semibold rounded py-1 pl-1 pr-1' altText="Try again">Try again</ToastAction>,
+            toast( e.response.data?.Error ,{
+                icon: <ShieldAlert size={20} className='text-red-500'/>,
+                style: {
+                    backgroundColor: '#684F4F',
+                    color: '#ffffff',
+                }
+            
             });
 
             }
@@ -245,6 +247,16 @@ function ShowScreen() {
     }
     console.log(screens)
 
+    const handleScreenDelete = async(screenId) => {
+        try {
+            const res = await TheatreApi.delete(`/remove-screen/${screenId}/`)
+            fetchShowtime()
+            toast(res.data.message );
+        }catch(error){
+            console.log('errror while screen delete' , error)
+        }
+    }
+
     return (
         <div className='p-10 m-10'>
 
@@ -270,10 +282,10 @@ function ShowScreen() {
                                     <th className='p-3 text-left'>Screen Number</th>
                                     <th className='p-3 text-left'>Capacity</th>
                                     <th className='p-3 text-left'>Screen Type</th>
-                                    <th className='p-3 text-left' >Status</th>
+                                    <th className={`p-6 text-left`} >Status</th>
                                 
 
-                                    <th className='p-3 text-end'>Action</th>
+                                    <th className='p-6 text-end'>Action</th>
     
                                 </tr>
                             </thead>
@@ -378,11 +390,7 @@ function ShowScreen() {
                                                     </div>
                                                     </div>
 
-                                                    
                                                 </div>
-
-
-
 
                                                     </div>
 
@@ -542,96 +550,50 @@ function ShowScreen() {
                                                     </Dialog>
                                               
 
-                                                {sortedShowDetails.length > 0 ? (
-                                                    <Dialog>
-                                                        <DialogTrigger>
-                                                            <Button variant="outline" size="icon" 
-                                                            
-                                                            >
-                                                                <Eye className='h-4 w-2' />
-                                                            </Button>
-
-                                                        </DialogTrigger>
-                                                        
-                                                            <DialogContent className="sm:max-w-xl max-h-screen overflow-y-auto mb-1 bg-white" >
-
-                                                            {message &&(
-
-                                                                <Alert className='cursor-pointer hover:bg-gray-100 hover:border-1 mt-3' onClick={() => setMessage('')} >
-                                                                <Terminal className="h-4 w-4" />
-                                                                <AlertTitle>alert</AlertTitle>
-                                                                <AlertDescription>
-                                                                    {message}
-                                                                </AlertDescription>
-                                                                </Alert>
-                                                                )
-                                                            }
-                                                            <div className="p-4">
-                                                                <DialogTitle className="text-xl font-bold mb-4 text-center">
-
-                                                                showtime of Movie (Screen {screen.screen_number})
-                                                                </DialogTitle>
-                                                                        <ul className="list-disc pl-5">
-                                                                        {sortedShowDetails.map((show) => {
-                                                        
-                                                                            if (show.screen_number == screen.screen_number ) { 
-
-                                                                                return (
-                                                                                    <div key={show.id} className="grid grid-cols-3 items-center gap-4 p-4 border rounded my-2">
-                                                                                    
-                                                                                    <div className="flex">
-                                                                                        <img className="w-44 h-32 object-cover" src={show.poster} alt="Poster" />
-                                                                                    </div>
-
-                                                                                    <div className="flex flex-col text-sm w-52">
-                                                                                        <p><strong>Movie name:</strong> {show.movie_name}</p>
-                                                                                        <p><strong>Show Date:</strong> {show.show_date}</p>
-                                                                                        <span>showTime : </span>
-                                                                                        <div className='flex'>
-
-
-                                                                                            {
-                                                                                                show.showtimes.map((time) => (
-
-                                                                                                    <p>{`${formatTime(time.start_time)} ,`}</p>
-                                                                                                ))
-                                                                                            }
-
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    
-                                                                                    <div className="flex justify-center ml-5 mt-[60%]">
-                                                                                        <Button
-                                                                                        onClick={() => handleCancel(show.id)}
-                                                                                        className="border text-white px-2 py-2 rounded"
-                                                                                        >
-                                                                                        <X className='h-4 w-2' /> Cancel Show
-                                                                                        </Button>
-                                                                                    </div>
-
-                                                                                    </div>
-
-                                                                                );
-                                                                            }
-                                                                            return null  
-                                                                            
-                                                                        })}
-                                                                        </ul>   
-                                                            </div>
-                                                        
-                                                            </DialogContent>
-                                                    </Dialog>
-                                                    ) : null
-                                                }   
+                                                <ShowDetailsDialog
+                                                
+                                                        sortedShowDetails={sortedShowDetails}
+                                                        screen={screen}
+                                                        message={message}
+                                                        setMessage={setMessage}
+                                                        handleCancel={handleCancel}
+                                                        formatTime={formatTime}
+                                                />
                                                
                                                 </div> 
                                             </td>
-                                            <td>
+                                            <td className='p-3'>
+
+                                                <div className='flex space-x-2 ' >
+
+
                                                 <button className='outline outline-1 py-2 px-2 rounded outline-gray-300'
                                                     onClick={() => navigate(`/theatre-owner/add-showtime/${id}/${screen.id}`)}
                                                 >
                                                     <TbClockPlus size={20}  />
                                                 </button>
+                                                
+                                                </div>
+
+                                            </td>
+                                            
+                                            <td>
+
+                                                <ConfirmDialog 
+                                                    title='deleting screen?'
+                                                    description='this action cant be restore'
+                                                    onConfirm={() => handleScreenDelete(screen.id)}
+                                                >
+
+                                                    <button className='outline outline-1 py-2 px-2 rounded outline-gray-300'
+                                                    >
+                                                        < Trash size={20} className='text-red-500' />
+                                                    </button>
+
+
+                                                </ConfirmDialog>
+
+
                                             </td>
                                         </tr>
                                         ):(
@@ -733,27 +695,23 @@ function ShowScreen() {
 
                                                     
                                                 </div>
-
-
-
-
-                                                    </div>
-
-
+                                            </div>
                                                 </DialogContent>
                                             </Dialog>
 
                                             </td>
-                                            <td className='p-2' >
+                                            <td className='p-4' >
+
+                                                    <button className='outline outline-1 py-2 px-2 rounded outline-gray-300'
+                                                        onClick={() => navigate(`/theatre-owner/add-showtime/${id}/${screen.id}`)}
+                                                    >
+                                                        <TbClockPlus size={20}  />
+                                                    </button>
 
 
-                                                <button className='outline outline-1 py-2 px-2 rounded outline-gray-300'
-                                                    onClick={() => navigate(`/theatre-owner/add-showtime/${id}/${screen.id}`)}
-                                                >
-                                                    <TbClockPlus size={20}  />
-                                                </button>
 
                                             </td>
+
                                             </tr>
                                         )
                                     ))

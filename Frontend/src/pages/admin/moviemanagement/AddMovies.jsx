@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import apiAdmin from '../../../axios/api';
-import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import {toast} from 'sonner';
 function AddMovies() {
     
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const {toast} = useToast()
     const initialValues = {
         title: '',
         language: '',
@@ -58,10 +57,12 @@ function AddMovies() {
                 }
             );
             console.log(response.data)
-            toast({
-                title : 'movie added successfully',
-                variant : 'success'
-            })
+            toast(
+                'movie added successfully',
+                {
+                    icon: <span className='text-green-500'>✔️</span>,
+                }
+            )
             resetForm();
             navigate('/admin/movies/')
 

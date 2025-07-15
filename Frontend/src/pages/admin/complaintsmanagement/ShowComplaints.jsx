@@ -59,7 +59,7 @@ const ShowComplaints = () => {
 
   const getFilteredComplaints = () => {
     if (!Array.isArray(complaints)) return [];
-    
+  
     return complaints.filter(complaint => {
       if (filter === 'all') return true;
       if (filter === 'resolved') return complaint.is_resolved;
@@ -68,13 +68,15 @@ const ShowComplaints = () => {
     });
   };
 
+
+  console.log(filter)
   const getComplaintStats = () => {
     if (!Array.isArray(complaints)) return { open: 0, inProgress: 0, resolved: 0, total: 0 };
     
     return {
       open: complaints.filter(c => c.status === 'open' && !c.is_resolved).length,
       inProgress: complaints.filter(c => c.status === 'in_progress').length,
-      resolved: complaints.filter(c => c.is_resolved).length,
+      resolved: complaints.filter(c => c.status ==='resolved').length,
       total: complaints.length
     };
   };
@@ -103,7 +105,7 @@ const ShowComplaints = () => {
   const closeModal = () => {
     setSelectedImage(null);
   };
-
+  console.log(complaints)
   const ComplaintCard = ({ complaint , index }) => (
     <div 
       className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"

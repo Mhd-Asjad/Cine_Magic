@@ -67,7 +67,7 @@ class Booking(models.Model):
             buffer.seek(0)
 
             file_name = f"qr-{self.booking_id}.png"
-            self.qr_code.save(file_name, ContentFile(buffer.read()), save=False)
+            self.qr_code.save(file_name, ContentFile(buffer.read()), save=True)
             return True
 
         return False

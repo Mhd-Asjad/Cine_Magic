@@ -1,7 +1,8 @@
 import React from 'react'
 import { PayPalButtons , usePayPalScriptReducer } from '@paypal/react-paypal-js'
-import axios from 'axios';
 import apiBooking from '@/axios/Bookingapi';
+import {toast} from 'sonner';
+
 function Paypalcomponet({ amount , onPaymentSuccess }) {
     const styles = {
         color : 'blue'
@@ -31,7 +32,11 @@ function Paypalcomponet({ amount , onPaymentSuccess }) {
                     }
                 })
                 .catch(error=>{
-                    alert('payment verification failed' , JSON.stringify(error?.response?.data ));
+                    console.error('JSON.stringify(error?.response?.data )', JSON.stringify(error?.response?.data));
+                    toast('payment verification failed' , {
+                        icon: '🚫',
+                        description: error?.response?.data?.error || 'Payment verification failed'
+                    });
                 })
             })
         }}

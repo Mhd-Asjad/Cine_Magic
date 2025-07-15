@@ -25,6 +25,7 @@ import ResetPassword from "./pages/userauth/ResetPassword";
 import FAQPage from "./pages/usercomplaints/FAQPage";
 import UpcomingMovieDetails from "./pages/moviedetails/UpcomingMovieDetails";
 import UserNotificationPage from "./pages/notification/UserNotifications"
+import UserReview from "./pages/moviedetails/UserReview";
 function App() {
 
     
@@ -58,10 +59,11 @@ function App() {
                     <Route path='verify-ticket/:id' element={<VerifiedTicket/>} />
                     <Route path='/blogs' element={<BlogPosts/>} />
                     <Route path='/blogs/add' element={<AddBlog/>} />
-                    <Route path="/posts/details/:id" element={<BlogInfo/>}/>
+                    <Route path="/posts/details/:id" element={<BlogInfo/>}/>s
                     <Route path="/reset-password" element={<ResetPassword/>} />
                     <Route path="/complaint/assistant" element={<FAQPage/>} />
                     <Route path="/notifications" element={<UserNotificationPage/>} />
+                    <Route path="/movie/reviews/:id" element={<UserReview/>} />
 
                     {/* adminpages */}
                     <Route path="/admin/login" element={<AdminLogin />} />

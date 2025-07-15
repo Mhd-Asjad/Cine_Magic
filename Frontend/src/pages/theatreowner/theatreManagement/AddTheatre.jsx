@@ -1,22 +1,18 @@
-import axios from 'axios';
 import React , {useEffect, useState} from 'react'
 import 'toastr/build/toastr.min.css';
 import toastr from 'toastr';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
-import { ToastAction } from '@radix-ui/react-toast';
 import TheatreApi from '@/axios/theatreapi';
 import { useNavigate } from 'react-router-dom';
 import apiMovies from '@/axios/Moviesapi';
-
+import { ShieldAlert , CircleCheckBig } from 'lucide-react';
+import InputField from '@/components/InputField'; 
 function AddTheatre( ) {
     const [theatreName , setTheatreName] = useState('');
     const [ address , setAddress ] = useState('');
     const [cities , setCities ] = useState([])
     const [cityId, setCityId] = useState("");
-    const {toast} = useToast();
     const navigate = useNavigate()
     const owner_id = useSelector((state) => state.theatreOwner.theatreId)
     console.log(owner_id)
@@ -49,13 +45,15 @@ function AddTheatre( ) {
     const handleAddTheatre = async (e) => {
         e.preventDefault()
         if (!theatreName || !address) {
-            toast({title : 'name and address is requiredd' , variant:"destructive"})
+            toast('name and address is requiredd' ,{
+                icon: <ShieldAlert size={20} className='text-red-500'/>
+            })
             return;
         }
         if (!cityId){
-            toast({description:'choose a city',
-                variant :'destructive'
-        })
+            toast('choose a city',{
+                icon: <ShieldAlert size={20} className='text-red-500'/>
+            })
         return
         }
 
@@ -66,10 +64,14 @@ function AddTheatre( ) {
         }
         try {
             const res = await TheatreApi.post(`/theatre/${cityId}/add/`,theatreData)
-            toast({
-                title : res.data.message,
-                variant : 'success'
-            })
+            toast(res.data.message,{
+                icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+                style: {
+                    backgroundColor: '#f0f9ff',
+                    color: '#0369a1',
+                }
+            }
+            )
             setTheatreName('')
             setAddress('')
             setCityId("")
@@ -78,60 +80,63 @@ function AddTheatre( ) {
             console.log(e.response)
             console.log('error creating theatre' , e.response)
             
-            toast({title : e.response?.data?.error ,
-                variant : "destructive",
-                action: <ToastAction className='flex border border-light font-semibold rounded py-1 pl-1 pr-1' altText="Try again">Try again</ToastAction>,
+            toast( e.response?.data?.error ,{
+                icon: <ShieldAlert size={20} className='text-red-500'/>,
+                style: {
+                    backgroundColor: '#fef2f2',
+                    color: '#b91c1c',
+                }
             }); 
         }
     }
 
   return (
-    <div className='flex border shadow-md mt-10 py-4 bg-gray-100' >
-        <div className='p-10 py-8' >
-    <h2 className='flex justify-center p-2 font-semibold text-xl' >add Theater</h2>
-        <div className='flex flex-col space-y-2'>
-            <form onSubmit={handleAddTheatre} >
-            <label > theatre name</label>
-            <input 
-            type="text"
-            placeholder='Add Theatre name'
-            onChange={(e) => setTheatreName(e.target.value) }
-            className="mt-1 mb-7 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            />
+    <div className="flex justify-center items-start mt-16">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md border">
+        <h2 className="text-center text-2xl font-semibold text-gray-700 mb-6">Add Theatre</h2>
+        <form onSubmit={handleAddTheatre} className="space-y-4">
+          <InputField
+            label="Theatre Name"
+            value={theatreName}
+            onChange={(e) => setTheatreName(e.target.value)}
+            placeholder="Enter theatre name"
+          />
 
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
             <select
-                className="w-full px-3 py-2 text-dark border border-gray-300 rounded-md"
-                value={cityId}
-                onChange={(e) => setCityId(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              value={cityId}
+              onChange={(e) => setCityId(e.target.value)}
             >
-                <option value="">Select City</option>
-                {cities.map((city) => (
-                    <option key={city.id} value={city.id}>
-                        {city.name}
-                    </option>
-                ))}
+              <option value="">Select City</option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.id}>
+                  {city.name}
+                </option>
+              ))}
             </select>
+          </div>
 
-            <br />
+          <InputField
+            label="Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Enter valid address"
+          />
 
-            <input
-            type="text"
-            placeholder='Add valid address'
-            onChange={(e) => setAddress(e.target.value) }
-            className="mt-8 mb-6 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-
-            />
-
+          <div className="text-center">
             <button
-            type='submit'
-             className='flex mt-4 mx-auto justify-center items-center w-[25%] py-1 px-2 bg-blue-500 text-white font-bold rounded-md' >
+              type="submit"
+              className="w-32 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition"
+            >
               Save
             </button>
-            </form>
-        </div>
-        </div>
+          </div>
+        </form>
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export default AddTheatre

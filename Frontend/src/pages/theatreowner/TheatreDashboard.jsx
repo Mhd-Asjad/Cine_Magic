@@ -6,15 +6,14 @@ import { Film, Users, MapPin, Tickets, Theater } from "lucide-react";
 import { IoIosAddCircleOutline } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 import TheatreApi from '@/axios/theatreapi';
-import { useToast } from '@/hooks/use-toast';
-import { TicketSlash , DollarSign , TheaterIcon , Coins } from 'lucide-react';
+import { toast } from 'sonner';
+import { TicketSlash , DollarSign , ShieldAlert , Coins } from 'lucide-react';
 import EditProfile from './EditProfile';
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 function TheatreDashboard() {
   
   const theatreOwner = useSelector((state) => state.theatreOwner);
   const user = useSelector((state) => state.user )
-  const {toast} = useToast();
   const navigate = useNavigate()
   const [theatres , setTheatres ] = useState([])
   
@@ -26,9 +25,8 @@ function TheatreDashboard() {
         navigate('/theatre-owner/add-theatre');
       }
     }catch(e) {
-      toast({title : e.response.data.error,
-          variant :'destructive'
-
+      toast(e?.response.data.error,{
+        icon: <ShieldAlert size={20} className='text-red-500'/>
       })
     }
 

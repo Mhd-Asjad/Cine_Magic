@@ -101,7 +101,7 @@ function TicketView() {
 
       pdf.addImage(qrDataUrl, 'PNG', 10, yOffset + 50, 80, 80);
       const linkText = 'click this to show ticket validation'
-      const validationUrl = `http://localhost:5173/verify-ticket/${id}`
+      const validationUrl = `https://cine-magic.fun/verify-ticket/${id}`
 
       pdf.textWithLink(linkText , 60 , yOffset + 20 , { url : validationUrl })
       pdf.save('ticket-screenshot.pdf')

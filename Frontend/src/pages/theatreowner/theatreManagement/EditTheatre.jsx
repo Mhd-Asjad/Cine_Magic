@@ -1,13 +1,10 @@
 import React ,{useEffect, useState} from 'react'
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import Sidebar from '../../../components/admin/Sidebar';
-import Navbar from '../../../components/admin/Navbar';
-import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom';
 import TheatreApi from '@/axios/theatreapi';
-
-
+import { toast } from 'sonner';
+import { CircleCheckBig } from 'lucide-react';
 function EditTheatre( ) {
     const navigate = useNavigate();
     const {id} = useParams()
@@ -51,6 +48,14 @@ function EditTheatre( ) {
         try {
             const res = await TheatreApi.put(`/theatre/${id}/edit/`, 
                 formData )
+
+            toast('Theatre updated successfully', {
+                icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+                style: {
+                    backgroundColor: '#f0f9ff',
+                    color: '#0369a1',
+                },
+            })
             navigate(`/theatre-owner/list-theatre`)
         }catch(e){
             console.log('error Theatre editing onsubmit',e.response )
@@ -60,7 +65,7 @@ function EditTheatre( ) {
 
   return (
 
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex justify-center min-h-screen bg-gray-100">
         
             <div className="p-8 py-10">
                 <h2 className="text-center mb-7 pt-12 px-3 font-semibold text-3xl text-gray-500">

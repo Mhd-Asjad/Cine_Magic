@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TheatreApi from '@/axios/theatreapi';
-import { useToast } from '@/hooks/use-toast';
-
+import { toast } from 'sonner';
+import { CircleCheckBig , CircleAlert } from 'lucide-react';
 function EditShow() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -53,10 +52,9 @@ function EditShow() {
         
       } catch (error) {
         console.error('Show fetching error:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch show details',
-          variant: 'destructive',
+        toast(
+          "Failed to fetch show details",{
+          icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
         });
       } finally {
         setLoading(false);
@@ -79,29 +77,35 @@ function EditShow() {
     const { startDate, endDate, startTime, endTime } = formData;
     
     if (!startDate || !endDate || !startTime) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please fill in all required fields',
-        variant: 'destructive',
+      toast(
+       'Please fill in all required fields',{
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd', 
+        }
       });
       return false;
     }
     
     if (new Date(endDate) < new Date(startDate)) {
-      toast({
-        title: 'Validation Error',
-        description: 'End date cannot be before start date',
-        variant: 'destructive',
-      });
+      toast(
+       'End date cannot be before start date',{
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd',
+        },
+       });
       return false;
     }
     
     if (endTime && startTime >= endTime) {
-      toast({
-        title: 'Validation Error',
-        description: 'End time must be after start time',
-        variant: 'destructive',
-      });
+      toast(
+        'End time must be after start time',{
+        icon: <CircleAlert className="w-6 h-6 text-yellow-500" />,
+        style: {
+          backgroundColor: '#fff3cd',
+        },
+        });
       return false;
     }
     
@@ -131,11 +135,14 @@ function EditShow() {
       const res = await TheatreApi.put(`/edit-show/${id}/`, payload);
 
       if (res.status === 200) {
-        toast({
-          title: 'Success',
-          description: 'Show details updated successfully',
-          variant: 'default',
-        });
+        toast(
+          'Show details updated successfully',{
+            icon: <CircleCheckBig className="w-6 h-6 text-green-500" />,
+            style: {
+              backgroundColor: '#f0f9ff',
+              color: '#0369a1',
+            },
+          });
         
         // Optional: Navigate back or to show list
         // navigate('/shows');
@@ -143,15 +150,17 @@ function EditShow() {
     } catch (err) {
       console.error('Backend error:', err?.response?.data);
       
-      const errorMessage = err?.response?.data?.Error || 
-                          err?.response?.data?.error || 
-                          'Failed to update show details';
+      const errorMessage = err?.response?.data?.Error || err?.response?.data?.error || 'Failed to update show details';
       
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      toast(
+        errorMessage,
+        {
+          icon: <CircleAlert className="w-6 h-6 text-red-500" />,
+          style: {
+            backgroundColor: '#fef2f2',
+            color: '#b91c1c',
+          },
+        });
     } finally {
       setSubmitting(false);
     }

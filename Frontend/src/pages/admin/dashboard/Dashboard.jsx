@@ -7,7 +7,7 @@ import {
   CardTitle, 
 } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer , Bar , BarChart } from 'recharts';
-import { Calendar, Film , User } from "lucide-react";
+import { Calendar, CloudDownload, Film , User } from "lucide-react";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { date } from 'zod';
 import { useNavigate } from 'react-router-dom';
@@ -150,7 +150,7 @@ function Dashboard() {
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors"
                   >
         
-                    download report
+                    report <CloudDownload className="inline h-4 w-4 ml-1" />
                   </button>
 
             </div>
@@ -176,32 +176,32 @@ function Dashboard() {
 
         {/* Users */}
         <Card className="w-full">
-          <CardContent className="pt-6 text-left ml-2">
+          <CardContent className="pt-6 text-center ml-2">
             <div className="text-sm text-gray-500 mb-1 flex items-center">
               Regular Users <span className="ml-2"><User size={16} /></span>
             </div>
-            <div className="text-2xl font-bold">+{theatreStats?.active_users.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{theatreStats?.active_users.toLocaleString()}+</div>
           </CardContent>
         </Card>
 
         {/* Ticket Sold */}
         <Card className="w-full">
-          <CardContent className="pt-6 text-left ml-2">
+          <CardContent className="pt-6 text-center ml-2">
             <div className="text-sm text-gray-500 mb-1 flex items-center">
               Total Tickets Sold <span className="ml-2">🎟️</span>
             </div>
-            <div className="text-2xl font-bold">+{theatreStats?.total_tickets}</div>
+            <div className="text-2xl font-bold">{theatreStats?.total_tickets}+</div>
             <div className="text-xs text-green-500 mt-1">{theatreStats?.ticket_change}% + from last month</div>
           </CardContent>
         </Card>
 
         {/* Active Now */}
         <Card className="w-full">
-          <CardContent className="pt-6 text-left ml-2">
+          <CardContent className="pt-6 text-center ml-2">
             <div className="text-sm text-gray-500 mb-1 flex items-center">
               Active Theaters<span className="ml-2">⚡</span>
             </div>
-            <div className="text-2xl font-bold">+{theatreStats?.active_theatres}</div>
+            <div className="text-2xl font-bold">{theatreStats?.active_theatres}+</div>
           </CardContent>
         </Card>
 

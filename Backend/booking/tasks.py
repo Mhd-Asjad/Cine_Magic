@@ -16,14 +16,25 @@ def send_booking_email_task(booking_id):
         booking = Booking.objects.get(booking_id=booking_id)
     except Booking.DoesNotExist:
         return f"No email found for booking {booking_id}"
-
-    if not booking.customer_email:
-        return
-
-    qr_base64 = (
-        get_base64_qr(booking.qr_code) if booking.status == "confirmed" else None
+    channel_layer = get_channel_layer()
+    if booking.status == "confirmed":
+        booking.generate_qrcode()   
+        booking.save(update_fields=["qr_code"])
+        
+    async_to_sync(channel_layer.group_send)(
+        f"user_{booking.user.id}",
+        {
+            "type": "send_notification",
+            "event_type": "booking_email",
+            "notification": {
+                "message" : f"mail has been sent to {booking.customer_email}",
+            },
+        },
     )
-
+    logger.info(f"created booking qr code : {booking.qr_code.url}")
+    logger.debug(f"qr code generated on file path :  {booking.qr_code.path if booking.qr_code else 'None'}")
+    qr_code = booking.qr_code.url if booking.qr_code else None
+    logger.debug(f"QR Code URL: {qr_code}")
     # context
     context = {
         "booking_id": booking.booking_id,
@@ -32,9 +43,9 @@ def send_booking_email_task(booking_id):
         "theatre": booking.show.screen.theatre.name,
         "show_date": booking.show.show_date,
         "show_time": booking.slot.start_time,
-        "consumer_name": booking.customer_name,
+        "customer_name": booking.customer_name,
     }
-
+    
     subject = f"Booking {booking.status.title()} - {booking.booking_id}"
     plain_message = f"Your booking {booking.booking_id} is {booking.status}."
 
@@ -43,7 +54,7 @@ def send_booking_email_task(booking_id):
         subject=subject,
         plain_message=plain_message,
         context=context,
-        qr_code=qr_base64,
+        qr_code=qr_code,
     )
 
 

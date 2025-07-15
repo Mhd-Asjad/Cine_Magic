@@ -136,9 +136,7 @@ const UserNotificationsPage = () => {
             <div className="flex items-center gap-3">
                 {counts.unread_count > 0 && (
                 <div className="flex items-center gap-2">
-                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    {counts.unread_count} unread
-                    </span>
+                
                     <button
                     onClick={handleMarkAllAsRead}
                     className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium"
@@ -151,7 +149,7 @@ const UserNotificationsPage = () => {
                 
                 <button
                 onClick={fetchNotifications}
-                className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-4 sm:p-7 hover:bg-blue-50  rounded-lg transition-colors"
                 title="Refresh notifications"
                 >
                 <RefreshCw className="w-5 h-5 text-gray-600" />

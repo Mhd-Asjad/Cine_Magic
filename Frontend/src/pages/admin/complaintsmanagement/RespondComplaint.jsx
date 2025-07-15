@@ -14,7 +14,8 @@ const AdminResponsePage = ({ onBack }) => {
 
     const [formData, setFormData] = useState({
         status: '',
-        response_message: ''
+        response_message: '',
+        is_resolved : null,
     });
 
     const statusOptions = [
@@ -59,6 +60,8 @@ const AdminResponsePage = ({ onBack }) => {
             return;
         }
 
+        console.log(formData , 'sending backend')
+
         try {
             setSaving(true);
             setError(null);
@@ -77,13 +80,23 @@ const AdminResponsePage = ({ onBack }) => {
             setSaving(false);
         }
     };
-
     const handleInputChange = (field, value) => {
-        setFormData(prev => ({
+        setFormData(prev => {
+            let updated = {
             ...prev,
-            [field]: value
-        }));
+            [field]: value,
+            };
+
+            if (field === 'status') {
+            updated.is_resolved = value === 'resolved';
+            }
+
+            return updated;
+        });
     };
+
+    
+    console.log(formData)
 
     const goBack = () => {
         navigate(onBack)

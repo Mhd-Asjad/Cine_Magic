@@ -62,8 +62,9 @@ class ComplaintResponseSerializer(serializers.ModelSerializer):
             "is_resolved",
             "created_at",
             "screen_shot",
+            
         ]
-
+    
     def get_screen_shot(self, obj):
         request = self.context.get("request")
         if obj.screen_shot:

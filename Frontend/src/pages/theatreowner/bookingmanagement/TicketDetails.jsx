@@ -38,7 +38,7 @@ function TicketDetails() {
   }
 
   return (
-    <div className="max-w-7xl w-full mx-auto bg-white shadow-xl rounded-2xl p-10 mt-10 border border-gray-200">
+    <div className="max-w-2xl w-full mx-auto bg-white shadow-xl rounded-2xl p-5 mt-2 border border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800">🎟️ Movie Ticket</h2>
       <div className="flex items-center justify-between mb-6">
         <div>

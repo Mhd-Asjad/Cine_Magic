@@ -14,29 +14,16 @@ from django.http import StreamingHttpResponse
 import time
 from theatre_owner.tasks import send_response_mail
 
-
+# This view allows users to post reviews for movies they have booked.
 class PostReview(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, booking_id):
-        print(request.user)
-
-        try:
+        try: 
             booking = Booking.objects.get(user=request.user, id=booking_id)
-            print(booking)
         except Booking.DoesNotExist:
             return Response(
                 {"error": "booking is not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-        show_end = booking.show.end_time
-        show_date = booking.show.show_date
-        show_ends = datetime.combine(show_date, show_end)
-        show_ends = timezone.make_aware(show_ends)
-        print(type(show_ends))
-        if timezone.now() < show_ends:
-            return Response(
-                {"error": "You can review this movie only after the show ends ."},
-                status=status.HTTP_400_BAD_REQUEST,
             )
         try:
             data = request.data
@@ -48,9 +35,6 @@ class PostReview(APIView):
                     {"error": "Rating must be between 1 and 5 stars."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
-            print(booking.show.movie, "movie id on line :42")
-
             rating, created = Rating.objects.update_or_create(
                 user=request.user,
                 movie=booking.show.movie,
@@ -64,10 +48,10 @@ class PostReview(APIView):
                 {"message": "review submitted successfully"}, status=status.HTTP_200_OK
             )
         except Exception as e:
-            print("error:", str(e))
+            logger.info("error:", str(e))
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# This view retrieves all reviews for a specific movie.
 class MovieReviews(APIView):
     parser_classes = [permissions.AllowAny]
 
@@ -80,16 +64,16 @@ class MovieReviews(APIView):
             )
 
         serializer = ReviewSerilizer(reviews, many=True)
-        print(serializer.data)
+        logger.error(f'error on review serializer {serializer.data}')
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# list all FAQs
 class ListFAQ(ListAPIView):
     pagination_class = None
     queryset = FAQ.objects.all()
     serializer_class = FAQSerializer
 
-
+# match manual replies based on keywords in the user's message
 def match_manual_reply(message):
     message = message.lower()
 
@@ -111,7 +95,7 @@ def match_manual_reply(message):
         return "you can submit a form with rasing issues"
     return None
 
-
+# This view handles the chatbot functionality, allowing users to interact with a chatbot for support.
 class ChatBotView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -119,11 +103,8 @@ class ChatBotView(APIView):
 
         def stream_event():
             data = request.data
-            print(data, "values from input")
             user_msg = data.get("messages", [])[-1].get("content")
             user = request.user
-            print(user.id)
-            print(user_msg)
             ChatLog.objects.create(user=user, message=user_msg)
             booking_related = [
                 "ticket",
@@ -166,18 +147,18 @@ class ChatBotView(APIView):
                 yield f"{reply}\n\n"
 
             except Exception as e:
-                print("gemini error ", str(e))
+                logger.error("gemini error ", str(e))
                 reply = "chatbot is currently unavailable"
 
             chatlog = ChatLog.objects.create(
                 user=user, is_bot=True, reply=reply, message=user_msg
             )
 
-            print(reply, "assistant replyyy")
+            logger.info(reply, "assistant replyyy")
 
         return StreamingHttpResponse(stream_event(), content_type="text/plain")
 
-
+# This view retrieves the chat history for the authenticated user.
 class ChatHistoryView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -214,11 +195,12 @@ class ChatHistoryView(APIView):
                 return Response(data, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print(f"Error fetching chat history: {str(e)}")
+            logger.error(f"Error fetching chat history: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
 
-
+# This view checks if the user has a chat log before raising a complaint.
 class check_chatlog(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         try:
             user = request.user
@@ -237,14 +219,14 @@ class check_chatlog(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
+# raise a complaint form if the user has a chat log
 class Raisecomplaint_form(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
 
         data = request.data.copy()
-        print(data)
+        logger.info(data)
         user_id = data.get("user")
         chat = data.get("chat")
         if chat == "null" or any(char.isalpha() for char in chat):
@@ -266,11 +248,12 @@ class Raisecomplaint_form(APIView):
                 status=status.HTTP_201_CREATED,
             )
         else:
-            print(serializer.errors)
+            logger.error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# This view retrieves all complaints submitted by users.
 class ShowComplaints(APIView):
+    permission_classes = [permissions.IsAdminUser]
     def get(self, request):
         try:
             complaints = Complaints.objects.all().order_by("-created_at")
@@ -280,13 +263,14 @@ class ShowComplaints(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print(str(e))
+            logger.error(str(e))
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
+# This view retrieves the details of a specific complaint.
 class Complaint_details(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request, complaint_id):
         try:
             complaint = Complaints.objects.get(id=complaint_id)
@@ -302,10 +286,11 @@ class Complaint_details(APIView):
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# This view allows the admin to respond to a complaint.
 class ComplaintResponseView(APIView):
+    permission_classes = [permissions.IsAdminUser]
     def patch(self, request, pk):
-
+        print(request.data)
         try:
             complaint = Complaints.objects.get(pk=pk)
         except Complaints.DoesNotExist:
@@ -336,5 +321,5 @@ class ComplaintResponseView(APIView):
 
             send_response_mail.delay(user_email, subject, message)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        print(serializer.errors)
+        logger.error(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

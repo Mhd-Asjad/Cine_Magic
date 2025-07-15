@@ -8,9 +8,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN mkdir -p /app/media/qrcodes && \
-    chown -R appuser:appuser /app/media && \
+    chown -R appuser:appuser /app/media /app/staticfiles && \
     chmod -R 755 /app/media
-
+    
 # Copy application code
 COPY --chown=appuser:appuser . .
 
