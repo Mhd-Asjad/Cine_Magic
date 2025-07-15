@@ -304,10 +304,9 @@ function TicketView() {
             <div className="p-8 flex flex-col items-center">
               <h1>{ticketData.qrcode_img}</h1>
               <div className="p-3 bg-white rounded-lg shadow-md">
-                <img 
+                <img
                   src={ticketData.qrcode_img}
                   alt="Ticket QR Code"
-                  crossOrigin="anonymous"
                   className="w-48 h-48 object-contain"
                 />
               </div>
