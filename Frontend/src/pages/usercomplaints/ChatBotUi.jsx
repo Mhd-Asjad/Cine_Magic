@@ -12,7 +12,6 @@ export function ChatBotUi({ setLastMessageId}) {
     const current_user = localStorage.getItem('current_user_type');
     const token = localStorage.getItem(`${current_user}_token`);
 
-
     const [historyLoaded , setHistoryLoaded ] = useState(false)
     const { messages, input, handleInputChange, append , setMessages ,  handleSubmit, isLoading, stop } = useChat({
         api : 'https://api.cine-magic.fun/review/chatbot/',

@@ -7,7 +7,8 @@ import RaiseComplaint from './RaiseComplaint';
 import { useSelector } from 'react-redux';
 import { IoMdArrowDropdown , IoMdArrowDropup } from "react-icons/io";
 import BlurText from '../reactbits/BlurText';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { BotMessageSquare } from 'lucide-react';
 
 function FAQPage() {
 
@@ -17,7 +18,6 @@ function FAQPage() {
     const [ chatLogId , setChatLogId ] = useState(null)
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
-    const {toast} = useToast();
 
     const user = useSelector((state) => state.user)
     const userQueries = [
@@ -54,7 +54,9 @@ function FAQPage() {
             if (msg.includes('tried')) {
                 setRaiseComplaintForm(state => (!state))
             }else{
-                toast({title : msg })
+                toast(msg ,{
+                    icon : <BotMessageSquare size={20} />
+                })
             }
         }catch(e) {
             console.log(e , 'error while checking chat logs')

@@ -26,13 +26,11 @@ function Seats() {
   const [priceCategories , setPriceCategories ] = useState([])
   const [searchparams]  = useSearchParams()
   const slotId = searchparams.get('slot_id') || null;
-  console.log(slotId , 'slot id from search params')
   const navigate = useNavigate();
   useEffect(() =>{
     const fetchSeats = async() => {
       try{
         const res = await seatsApi.get(`screens/${screenId}/seats/?show_id=${showId}`)
-        console.log(res.data ,'values')
 
         const organizedData = organizeByRow(res.data) 
         setSeats(organizedData)
@@ -88,44 +86,54 @@ function Seats() {
   }
   
   const organizeByRow = (seats) => {
-    if (!Array.isArray(seats)) return {}; // 🚨 guard clause
+    if (!seats || !Array.isArray(seats)) {
+      return {};
 
+    }
+      
     const rowMap = {};
     const priceRange = {}
     seats.forEach(seat => {
+      if (!seat || !seat.row) {
+        console.warn('Invalid seat data:', seat);
+        return;
+      }
       if (!rowMap[seat.row]) {
         rowMap[seat.row] = [];
       }
       rowMap[seat.row].push(seat)
     });
-    
-    for (const [row , seatsInRow] of Object.entries(rowMap)) {
-      
-      if (seatsInRow.length > 0 ) {
-        const key = `${seatsInRow[0].category_name}-₹${seatsInRow[0].price}`
-        if (!priceRange[key] ){
-          priceRange[key] = []
+    try {
+      for (const [row , seatsInRow] of Object.entries(rowMap)) {
+        
+        if (seatsInRow.length > 0 ) {
+          const key = `${seatsInRow[0].category_name}-₹${seatsInRow[0].price}`
+          if (!priceRange[key] ){
+            priceRange[key] = []
+          }
           priceRange[key].push({
             row
           })
         }
+
       }
 
-    }
+      const convertData = Object.entries(priceRange || {}).map(([key , row])=> ({
+        category : key , 
+        rows : row
+      }))
+      setPriceCategories(convertData)
+      return rowMap;
+    }catch(error){
+      console.error('Error in organizeByRow:', error);
+      setPriceCategories([]);
+      return {};
 
-    const convertData = Object.entries(priceRange).map(([key , row])=> ({
-      category : key , 
-      rows : row
-    }))
-    setPriceCategories(convertData)
-    return rowMap;
+    }
   }
 
-  console.log(selectedSeats , 'seats' , showId , 'showid')
-
   useEffect(() => {
-    const price = selectedSeats.reduce((sum , seat) => sum + seat.price,0);
-
+  const price = selectedSeats.reduce((sum , seat) => sum + (seat?.price || 0), 0);
     setTotalPrice(price);
 
   },[selectedSeats])
@@ -141,8 +149,7 @@ function Seats() {
       return;
 
     }
-    const selectedSeatsIds = selectedSeats.map(seat => seat.id)
-    console.log(selectedSeatsIds , 'selected seats ids')
+    const selectedSeatsIds = selectedSeats.map(seat => seat.id).filter(id => id !== undefined) 
     const payload = {
       'show_id': showId,
       'seats_ids': selectedSeatsIds
@@ -188,13 +195,13 @@ function Seats() {
     )
   }
   const formatTime = (timeString) => {
+    if (!timeString) return '';
     const [hours , minutes] = timeString?.split(':');
     const date = new Date();
     date.setHours(hours , minutes)
     return date.toLocaleTimeString([] , {hour : '2-digit' , minute : '2-digit' , hour12:true});
   }
 
-  console.log(seats , 'show_details')
   return (
     <div className='min-h-screen w-full bg-gray-50'>
       <div className='bg-blue-50 w-full shadow-md p-8 '>

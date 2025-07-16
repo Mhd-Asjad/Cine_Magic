@@ -10,7 +10,6 @@ import MovieReviews from './MovieReviews'
 import { BookCheck } from 'lucide-react'
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w780';
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-console.log('TMDB API Key:', TMDB_API_KEY);
 function MovieSpecification( ) {
   const {id} = useParams()
   const [movie , setMovies] = useState(null);
@@ -77,9 +76,6 @@ function MovieSpecification( ) {
     navigate(`/available-show-details/${id}`)
   }
 
-  console.log(movie)
-
-  console.log(movie , 'movie details')
 
   if (!movie) {
     return(

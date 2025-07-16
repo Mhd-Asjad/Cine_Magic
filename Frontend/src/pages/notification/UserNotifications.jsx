@@ -195,7 +195,7 @@ const UserNotificationsPage = () => {
             </div>
         </div>
 
-    \      <div className="px-6 py-4">
+        <div className="px-6 py-4">
             {getFilteredNotifications().length === 0 ? (
             <div className="text-center py-16">
                 <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">

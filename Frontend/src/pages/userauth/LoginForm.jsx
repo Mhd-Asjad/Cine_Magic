@@ -12,7 +12,6 @@ import userApi from "@/axios/userApi";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import { toast } from 'sonner'
-import { icon } from "leaflet";
 import { CircleCheckBig } from "lucide-react";
 export default function LoginForm({ isModalClose }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,8 +19,11 @@ export default function LoginForm({ isModalClose }) {
 
   const schema = Yup.object().shape({
     username: Yup.string().required("* username is required"),
-    password: Yup.string().required("* password is required"),
+    password: Yup.string()
+    .required("* password is required")
   });
+
+    
   print('hello world')
   const userapi = import.meta.env.VITE_USER_API
 
