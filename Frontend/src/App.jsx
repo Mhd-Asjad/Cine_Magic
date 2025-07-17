@@ -26,14 +26,15 @@ import FAQPage from "./pages/usercomplaints/FAQPage";
 import UpcomingMovieDetails from "./pages/moviedetails/UpcomingMovieDetails";
 import UserNotificationPage from "./pages/notification/UserNotifications"
 import UserReview from "./pages/moviedetails/UserReview";
+import PageNotFound from "./pages/PageNotFound";
+
 function App() {
-
     
-
     return (
         <>
             <Router>
                 <Routes>
+                    <Route path="*" element={<PageNotFound/>} />
                     <Route path="/" element={<Landingpage/>}/>
                     <Route path="/movie/:id/details" element={<MovieSpecification/>} />
                     <Route path="/movie/:movieId" element={<UpcomingMovieDetails/>} />
@@ -59,10 +60,10 @@ function App() {
                     <Route path='verify-ticket/:id' element={<VerifiedTicket/>} />
                     <Route path='/blogs' element={<BlogPosts/>} />
                     <Route path='/blogs/add' element={<AddBlog/>} />
-                    <Route path="/posts/details/:id" element={<BlogInfo/>}/>s
+                    <Route path="/posts/details/:id" element={<BlogInfo/>}/>
                     <Route path="/reset-password" element={<ResetPassword/>} />
                     <Route path="/complaint/assistant" element={<FAQPage/>} />
-                    <Route path="/notifications" element={<UserNotificationPage/>} />
+                    <Route path="/notifications" element={<UserNotificationPage />} />
                     <Route path="/movie/reviews/:id" element={<UserReview/>} />
 
                     {/* adminpages */}

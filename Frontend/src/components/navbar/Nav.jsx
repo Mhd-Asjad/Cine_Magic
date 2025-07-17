@@ -160,12 +160,16 @@ function Nav() {
         <div className="flex items-center justify-between h-16">
           
           {/* Logo Section - Hidden on mobile to save space */}
-          <div className="hidden lg:flex items-center justify-start">
-            <div className="w-36 h-20 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src={navlogo} alt="Logo" className="w-full h-full object-contain" />
-            </div>
-            <span className="ml-3 text-2xl font-bold text-gray-900">cineMagic</span>
-          </div>
+        <div className="hidden lg:flex items-center">
+        {/* <div className="w-36 md:w-44 lg:w-56 h-16 md:h-20 p-2">
+          <img
+            src={navlogo}
+            alt="Cinemagic Logo"
+            className="w-full h-full object-contain"
+          />
+        </div> */}
+      </div>
+
 
 
           {/* Desktop Navigation Links */}
@@ -181,9 +185,7 @@ function Nav() {
             </a>
           </div>
 
-          {/* Desktop Right Actions */}
           <div className="hidden md:flex items-center gap-4">
-            {/* Select City */}
             <button
               className="flex items-center gap-1 px-2 py-1 border border-gray-400 rounded-md text-gray-700 hover:bg-gray-100 transition text-sm"
               onClick={() => setIsCityModalOpen(true)}
@@ -193,7 +195,6 @@ function Nav() {
               <span className="lg:hidden">LOC</span>
             </button>
 
-            {/* Notifications */}
             <button className="relative p-2 rounded-full hover:bg-gray-100 transition"
               onClick={() => navigate('/notifications')}
 
@@ -256,12 +257,11 @@ function Nav() {
           </div>
 
           <div className="md:hidden flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+            {/* <div className="flex items-center">
+              <div className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden">
                 <img src={navlogo} alt="Logo" className="w-full h-full object-contain" />
               </div>
-              <span className="ml-2 text-lg font-bold text-gray-900">cineMagic</span>
-            </div>
+            </div> */}
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

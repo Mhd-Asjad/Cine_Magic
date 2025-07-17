@@ -150,7 +150,7 @@ class Create_Booking(APIView):
     # this accepts the booking details from the user and creates a booking.
     def post(self, request):
         data = request.data
-
+        tax = 5
         user = User.objects.get(id=data["user_id"])
         show_id = data["show_id"]
         slot_id = data["booking_slot"]
@@ -158,7 +158,7 @@ class Create_Booking(APIView):
         total_amount = data["total_amount"]
         paymentdet = data["payment_details"]
         price = total_amount // len(seat_ids)
-        tax_amount = total_amount // 10
+        tax_amount = total_amount // tax
         grant_total = tax_amount + total_amount
         logger.info(f"data type {type(data)}")
         try:
@@ -187,6 +187,7 @@ class Create_Booking(APIView):
                 payment_id=paymentdet["id"],
                 amount=grant_total,
             )
+            
             for seat_id in seat_ids:
                 seat = seats.objects.get(id=seat_id)
                 BookingSeat.objects.create(booking=booking, seat=seat, price=price)

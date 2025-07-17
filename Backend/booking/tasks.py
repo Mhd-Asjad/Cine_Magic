@@ -9,7 +9,6 @@ from useracc.models import User
 from .utils import get_base64_qr, send_response_mail
 from .models import Booking
 
-
 @shared_task
 def send_booking_email_task(booking_id):
     try:
@@ -31,6 +30,7 @@ def send_booking_email_task(booking_id):
             },
         },
     )
+    
     logger.info(f"created booking qr code : {booking.qr_code.url}")
     logger.debug(f"qr code generated on file path :  {booking.qr_code.path if booking.qr_code else 'None'}")
     qr_code = booking.qr_code.url if booking.qr_code else None

@@ -5,7 +5,6 @@ import Footer from '../../components/footer/Footer'
 import MovieGrid from '../../components/moviecards/MovieList'
 function Landingpage() {
 
-
   return (
     <div className='bg-gray-50' >
       <Nav />

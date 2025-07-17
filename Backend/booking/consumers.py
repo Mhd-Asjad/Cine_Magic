@@ -39,7 +39,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     #             logger.debug(f"Received ping from {self.user_id}")
     #     except json.JSONDecodeError:
     #         logger.error(f"Invalid JSON received from {self.user_id}")
-
+    
     async def send_notification(self, event):
         logger.info(f"Websocker Consumer received: {event}")
         await self.send(
