@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Play } from 'lucide-react';
 
-function Upcoming_Carousel() {
+function Upcoming_Carousel({ handleCardClick }) {
   const [movies, setMovies] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
     useEffect(() => {
@@ -34,6 +35,10 @@ function Upcoming_Carousel() {
   const goToSlide = (index) => {
     setCurrentIndex(index);
   };
+  const handleClickEvent = (movieId) => {
+    handleCardClick(movieId)
+  }
+
   return (
     
     <div className="w-full flex justify-center py-10 bg-gray-100">
@@ -54,15 +59,26 @@ function Upcoming_Carousel() {
         )}
 
         {movies.length > 0 && (
-          <div className="flex-grow px-2 md:px-4">
-            <img
-              src={`https://image.tmdb.org/t/p/original${movies[currentIndex].backdrop_path}`}
-              alt={movies[currentIndex].title}
-              className="w-full h-full object-cover rounded-xl shadow-xl aspect-video"
-            />
-            <div className="mt-2 text-center font-semibold text-gray-800 text-sm md:text-lg">
-              {movies[currentIndex].title}
+          <div className="relative flex-grow px-2 md:px-4">
+            <div className='relative'>
+              <img
+                src={`https://image.tmdb.org/t/p/original${movies[currentIndex].backdrop_path}`}
+                alt={movies[currentIndex].title}
+                className="w-full h-full object-cover rounded-xl shadow-xl aspect-video"
+              />
+
+              <button 
+                className="absolute rounded-lg bottom-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm py-1 px-4 "
+                onClick={() => handleClickEvent(movies[currentIndex].id)}
+              >
+                watch trailers <Play className='inline' size={11} />
+              </button>
             </div>
+
+              <div className="mt-2 text-center font-semibold text-gray-800 text-sm md:text-lg">
+                {movies[currentIndex].title}
+
+              </div>
           </div>
         )}
 

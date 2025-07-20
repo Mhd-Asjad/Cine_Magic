@@ -60,7 +60,6 @@ function Upcomingmovies() {
         }
       };
     
-    console.log(upcomingMovies , 'movies latest ')
 
     return (
         <div className="w-full max-w-6xl mx-auto mb-7 mt-7 py-4 px-3 bg-white rounded-lg">
@@ -101,7 +100,7 @@ function Upcomingmovies() {
                 ))}
               </div>
             </div>
-            
+
             {isRightVisible && (
               <button 
                 onClick={() => scroll('right')}

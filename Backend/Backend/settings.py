@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from decouple import config
 from corsheaders.defaults import default_headers
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger import json
 import os
 import environ
 from datetime import timedelta
@@ -34,7 +34,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "json": {
-            "()": jsonlogger.JsonFormatter,
+            "()": json.JsonFormatter,
             "format": "%(asctime)s %(name)s %(levelname)s %(message)s",
         }
     },
@@ -184,8 +184,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DB_NAME", "movie_ticket"),
         "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
+        "PASSWORD": os.getenv("DB_PASSWORD" , "postgres"),
+        "HOST": os.getenv("DB_HOST" , "localhost"),
         "PORT": os.getenv("DB_PORT"),
     }
 }

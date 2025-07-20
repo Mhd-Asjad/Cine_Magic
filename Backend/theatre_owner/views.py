@@ -70,8 +70,8 @@ class CreateOwnershipProfile(APIView):
                 serializer.save()
 
                 return Response(
-                    {"message": "request has been made soon update via mail"},
-                    status=status.HTTP_200_OK,
+                    {'data' : serializer.data , "message": "request has been made soon update via mail"},
+                    status=status.HTTP_201_CREATED,
                 )
             logger.error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -107,7 +107,7 @@ class Update_theatreowner(APIView):
 
 class ConfirmTheatreOwner(APIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  
     def get(self, request):
       
         try:

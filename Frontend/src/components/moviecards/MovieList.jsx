@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import SearchBar from '../search/SearchBar';
-import { Label } from "@/components/ui/label"
-import { Play, Calendar, Filter, Heart, Clock, Eye, X , Globe , BookOpen , Check } from 'lucide-react';
+import { Play, Calendar, Filter , Clock, Eye, X , Globe , BookOpen } from 'lucide-react';
 import Upcomingmovies from './Upcomingmovies';
 function MovieList({ movie }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -40,8 +38,6 @@ function MovieList({ movie }) {
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         
-        
-        {/* Hover Overlay with Actions */}
         <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
           <div className="flex space-x-3">
             <button 
@@ -95,12 +91,6 @@ function MovieList({ movie }) {
           <div className="w-8 h-1 bg-gradient-to-r from-blue-500 to-gray-500 rounded-full"></div>
         </div>
       </div>
-      
-      {/* <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div className="absolute -top-2 -left-2 w-4 h-4 bg-white/20 rounded-full blur-xl animate-ping"></div>
-        <div className="absolute top-1/2 right-4 w-2 h-2 bg-purple-400/50 rounded-full blur-sm animate-pulse delay-300"></div>
-        <div className="absolute bottom-4 left-1/3 w-3 h-3 bg-pink-400/30 rounded-full blur-sm animate-pulse delay-700"></div>
-      </div> */}
     </div>
   );
 }
@@ -164,31 +154,6 @@ const MovieFilterModal = ({
     </div>
   );
 
-  const SortOption = ({ value, label, selectedValue, onChange }) => (
-    <div 
-      className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 cursor-pointer hover:bg-slate-50 ${
-        selectedValue === value ? 'bg-slate-100 ring-2 ring-slate-300' : ''
-      }`}
-      onClick={() => onChange(value)}
-    >
-      <div 
-        className={`relative flex items-center justify-center w-5 h-5 rounded-full border-2 transition-all duration-200 ${
-          selectedValue === value 
-            ? 'border-slate-500 bg-slate-500 shadow-lg shadow-slate-500/25' 
-            : 'border-gray-300 hover:border-slate-400 bg-white'
-        }`}
-      >
-        {selectedValue === value && <Check className="w-3 h-3 text-white" />}
-      </div>
-      <label 
-        className={`cursor-pointer transition-colors duration-200 ${
-          selectedValue === value ? 'text-slate-700 font-medium' : 'text-gray-700'
-        }`}
-      >
-        {label}
-      </label>
-    </div>
-  );
 
   const FilterSection = ({ title, icon: Icon, children }) => (
     <div className="space-y-3">
@@ -361,7 +326,6 @@ const MovieGrid = () => {
         />
       </div>
 
-      {/* Movies Grid */}
       <div className="bg-slate-100/50 backdrop-blur-sm rounded-3xl p-6 border shadow-md">
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-slate-800">Movies in {selectedCity}</h1>
